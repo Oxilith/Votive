@@ -16,7 +16,7 @@ import {
   ARRAY_FIELDS,
   NUMBER_FIELDS,
   STRING_FIELDS,
-} from '@shared/index';
+} from 'shared/index';
 
 export const exportToJson = (
   data: AssessmentResponses,

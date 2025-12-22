@@ -12,10 +12,10 @@
  */
 
 import type { AssessmentResponses, AIAnalysisResult } from '@/types/assessment.types';
-import type { AnalysisLanguage } from '@shared/index';
+import type { AnalysisLanguage } from 'shared/index';
 
 // Re-export for backward compatibility
-export type { AnalysisLanguage } from '@shared/index';
+export type { AnalysisLanguage } from 'shared/index';
 
 export interface AnalysisRequest {
   responses: AssessmentResponses;

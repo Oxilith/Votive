@@ -24,8 +24,8 @@ router.get('/', liveness);
  * GET /health/ready
  * Readiness check - verifies all dependencies are available
  */
-router.get('/ready', (req, res) => {
-  readiness(req, res);
+router.get('/ready', (req, res, next) => {
+  readiness(req, res).catch(next);
 });
 
 export default router;

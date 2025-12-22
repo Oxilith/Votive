@@ -37,15 +37,18 @@ npm run test:coverage # Coverage report
 
 ### Docker
 ```bash
-docker-compose up     # Start full stack (frontend:80, backend:3001)
+docker compose up --build   # Build and run full stack (frontend:80, backend:3001)
+docker compose up           # Run existing images
+docker compose down         # Stop containers
 ```
+Requires `ANTHROPIC_API_KEY` environment variable (export or .env file).
 
 ## Code Standards
 
 ### TypeScript
 - **No `any` types** - use specific types or `unknown`
 - **Path aliases** - always use `@/` imports, never relative paths
-- **Shared types** - use `@shared/` for types shared between frontend/backend
+- **Shared types** - use `shared/` for types shared between frontend/backend (not `@shared/`)
 - **Strict mode** - `noUnusedLocals`, `noUnusedParameters` enforced
 - Use `React.ComponentRef` (not deprecated `React.ElementRef`)
 
@@ -81,7 +84,7 @@ Single source of truth for types, validation, and utilities used by both fronten
 - `prompts.ts` - AI prompt templates (IDENTITY_ANALYSIS_PROMPT)
 - `index.ts` - Barrel exports
 
-Import via `@shared/index` in both frontend and backend.
+Import via `shared/index` in both frontend and backend (e.g., `import { ... } from 'shared/index'`).
 
 ### Frontend (`/app/src`)
 
@@ -101,15 +104,15 @@ Import via `@shared/index` in both frontend and backend.
 - `components/shared/` - Header, theme toggle
 - `styles/theme.ts` - Shared Tailwind utilities (cardStyles, textStyles)
 - `i18n/resources/` - Translations (en/, pl/)
-- `config/prompts.ts` - AI prompt configurations (imports prompt from @shared)
+- `config/prompts.ts` - AI prompt configurations (imports prompt from shared)
 
 ### Backend (`/backend/src`)
 
 **API Proxy** - Protects Anthropic API key from browser exposure:
-- `services/claude.service.ts` - Claude API integration with retry logic (uses prompt and formatter from @shared)
+- `services/claude.service.ts` - Claude API integration with retry logic (uses prompt and formatter from shared)
 - `controllers/claude.controller.ts` - Request handler for analysis endpoint
 - `routes/api/v1/` - API route definitions (`/api/v1/claude/analyze`)
-- `validators/claude.validator.ts` - Zod request validation using enum arrays from @shared
+- `validators/claude.validator.ts` - Zod request validation using enum arrays from shared
 - `types/claude.types.ts` - Re-exports shared types, defines API request/response types
 - `middleware/` - CORS, rate limiting, error handling, helmet
 - `config/index.ts` - Zod-validated environment configuration
@@ -160,6 +163,21 @@ VITE_API_URL=http://localhost:3001
 - `leveragePoints` - High-ROI areas for change
 - `risks` - Why change attempts might fail
 - `identitySynthesis` - Core identity, hidden strengths, next steps
+
+## Docker Architecture
+
+### Shared Package in Docker
+
+The shared package uses `file:../shared` dependency. In Docker:
+- TypeScript compiles shared code to `dist/shared/src/`
+- Dockerfile copies compiled shared to `node_modules/shared/` at runtime
+- Backend imports resolve to `node_modules/shared/` in production
+
+### Container Setup
+- Frontend: Nginx Alpine serving Vite build on port 80
+- Backend: Node.js 22 Alpine running Express on port 3001
+- Backend health check (`/health`) required before frontend starts
+- Non-root user (expressjs) in backend container for security
 
 ## Test Data
 

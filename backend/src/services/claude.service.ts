@@ -18,8 +18,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import type { AssessmentResponses, AIAnalysisResult } from '../types/claude.types.js';
-import type { AnalysisLanguage } from '@shared/index.js';
-import { IDENTITY_ANALYSIS_PROMPT, formatResponsesForPrompt } from '@shared/index.js';
+import type { AnalysisLanguage } from 'shared/index.js';
+import { IDENTITY_ANALYSIS_PROMPT, formatResponsesForPrompt } from 'shared/index.js';
 
 const anthropic = new Anthropic({
   apiKey: config.anthropicApiKey,

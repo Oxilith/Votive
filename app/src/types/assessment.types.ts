@@ -23,10 +23,10 @@ export type {
   AnalysisRisk,
   IdentitySynthesis,
   AIAnalysisResult,
-} from '@shared/index';
+} from 'shared/index';
 
 // Re-import for use in local interfaces
-import type { AssessmentResponses } from '@shared/index';
+import type { AssessmentResponses } from 'shared/index';
 
 // Component props
 export interface AssessmentProps {

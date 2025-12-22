@@ -30,10 +30,20 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
+# Install wget for health checks
+RUN apk add --no-cache wget
+
 # Copy built files and production dependencies
 COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/node_modules ./node_modules
 COPY --from=builder /app/backend/package.json ./
+
+# Make shared package resolvable at runtime (compiled code is in dist/shared/src/)
+# Remove the broken symlink created by npm during install, then create the real package
+RUN rm -rf node_modules/shared && \
+    mkdir -p node_modules/shared && \
+    echo '{"name":"shared","type":"module","exports":{"./*":"./src/*"}}' > node_modules/shared/package.json && \
+    cp -r dist/shared/src node_modules/shared/
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
@@ -50,4 +60,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
 # Start server
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/backend/src/index.js"]

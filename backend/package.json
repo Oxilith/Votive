@@ -14,6 +14,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "shared": "file:../shared",
     "@anthropic-ai/sdk": "^0.30.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",

@@ -12,7 +12,7 @@
  */
 
 import { ClaudeModel, type PromptConfig, type ThinkingParams } from '@/types/prompt.types';
-import { IDENTITY_ANALYSIS_PROMPT } from '@shared/index';
+import { IDENTITY_ANALYSIS_PROMPT } from 'shared/index';
 
 const thinking_params: ThinkingParams = {
   type: 'enabled',
