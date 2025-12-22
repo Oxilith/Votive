@@ -10,30 +10,13 @@
  * @dependencies
  * - zustand (create, persist, createJSONStorage)
  * - @/types/assessment.types (AssessmentResponses)
+ * - @shared/index (REQUIRED_FIELDS)
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AssessmentResponses } from '@/types/assessment.types';
-
-const REQUIRED_FIELDS: (keyof AssessmentResponses)[] = [
-  'peak_energy_times',
-  'low_energy_times',
-  'energy_consistency',
-  'energy_drains',
-  'energy_restores',
-  'mood_triggers_negative',
-  'motivation_reliability',
-  'willpower_pattern',
-  'identity_statements',
-  'others_describe',
-  'automatic_behaviors',
-  'keystone_behaviors',
-  'core_values',
-  'natural_strengths',
-  'resistance_patterns',
-  'identity_clarity',
-];
+import { REQUIRED_FIELDS } from '@shared/index';
 
 interface AssessmentState {
   // State

@@ -7,28 +7,16 @@
  * - Validates response structure against AssessmentResponses type
  * @dependencies
  * - @/types/assessment.types (AssessmentResponses)
+ * - @shared/index (REQUIRED_FIELDS, ARRAY_FIELDS, NUMBER_FIELDS, STRING_FIELDS)
  */
 
 import type { AssessmentResponses } from '@/types/assessment.types';
-
-const REQUIRED_FIELDS: (keyof AssessmentResponses)[] = [
-  'peak_energy_times',
-  'low_energy_times',
-  'energy_consistency',
-  'energy_drains',
-  'energy_restores',
-  'mood_triggers_negative',
-  'motivation_reliability',
-  'willpower_pattern',
-  'identity_statements',
-  'others_describe',
-  'automatic_behaviors',
-  'keystone_behaviors',
-  'core_values',
-  'natural_strengths',
-  'resistance_patterns',
-  'identity_clarity',
-];
+import {
+  REQUIRED_FIELDS,
+  ARRAY_FIELDS,
+  NUMBER_FIELDS,
+  STRING_FIELDS,
+} from '@shared/index';
 
 export const exportToJson = (
   data: AssessmentResponses,
@@ -81,34 +69,21 @@ export const validateResponses = (data: unknown): data is AssessmentResponses =>
   }
 
   // Validate array fields
-  const arrayFields = ['peak_energy_times', 'low_energy_times', 'mood_triggers_negative', 'core_values'];
-  for (const field of arrayFields) {
+  for (const field of ARRAY_FIELDS) {
     if (!Array.isArray(record[field])) {
       return false;
     }
   }
 
   // Validate number fields (scales)
-  const numberFields = ['energy_consistency', 'motivation_reliability', 'identity_clarity'];
-  for (const field of numberFields) {
+  for (const field of NUMBER_FIELDS) {
     if (typeof record[field] !== 'number') {
       return false;
     }
   }
 
   // Validate string fields
-  const stringFields = [
-    'energy_drains',
-    'energy_restores',
-    'willpower_pattern',
-    'identity_statements',
-    'others_describe',
-    'automatic_behaviors',
-    'keystone_behaviors',
-    'natural_strengths',
-    'resistance_patterns',
-  ];
-  for (const field of stringFields) {
+  for (const field of STRING_FIELDS) {
     if (typeof record[field] !== 'string') {
       return false;
     }

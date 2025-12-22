@@ -11,20 +11,15 @@
  * - @/config for API key
  * - @/utils/logger for logging
  * - @/types/claude.types for type definitions
- * - @shared/index for shared prompt and labels
+ * - @shared/index for shared prompt and response formatter
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import type { AssessmentResponses, AIAnalysisResult } from '../types/claude.types.js';
-import {
-  timeLabels,
-  triggerLabels,
-  willpowerLabels,
-  valueLabels,
-  IDENTITY_ANALYSIS_PROMPT,
-} from '@shared/index.js';
+import type { AnalysisLanguage } from '@shared/index.js';
+import { IDENTITY_ANALYSIS_PROMPT, formatResponsesForPrompt } from '@shared/index.js';
 
 const anthropic = new Anthropic({
   apiKey: config.anthropicApiKey,
@@ -40,47 +35,16 @@ function buildPrompt(): string {
   return IDENTITY_ANALYSIS_PROMPT;
 }
 
-function formatResponses(
-  responses: AssessmentResponses,
-  language: 'english' | 'polish'
-): string {
-  return `
-**Language:** ${language}
-
-## State Awareness
-
-**Peak Energy Times:** ${responses.peak_energy_times.map((t) => timeLabels[t]).join(', ')}
-**Low Energy Times:** ${responses.low_energy_times.map((t) => timeLabels[t]).join(', ')}
-**Energy Consistency (1-5):** ${responses.energy_consistency}
-**What drains energy:** ${responses.energy_drains}
-**What restores energy:** ${responses.energy_restores}
-**Negative Mood Triggers:** ${responses.mood_triggers_negative.map((t) => triggerLabels[t]).join(', ')}
-**Motivation Reliability (1-5):** ${responses.motivation_reliability}
-**Willpower Pattern:** ${willpowerLabels[responses.willpower_pattern]}
-
-## Identity Mapping
-
-**Identity Statements:** ${responses.identity_statements}
-**How Others Describe Me:** ${responses.others_describe}
-**Automatic Behaviors:** ${responses.automatic_behaviors}
-**Keystone Behaviors:** ${responses.keystone_behaviors}
-**Core Values:** ${responses.core_values.map((v) => valueLabels[v]).join(', ')}
-**Natural Strengths:** ${responses.natural_strengths}
-**Resistance Patterns:** ${responses.resistance_patterns}
-**Identity Clarity (1-5):** ${responses.identity_clarity}
-`;
-}
-
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function analyzeAssessment(
   responses: AssessmentResponses,
-  language: 'english' | 'polish'
+  language: AnalysisLanguage
 ): Promise<{ analysis: AIAnalysisResult; rawResponse: string }> {
   const prompt = buildPrompt();
-  const formattedResponses = formatResponses(responses, language);
+  const formattedResponses = formatResponsesForPrompt(responses, language);
   const fullPrompt = prompt + formattedResponses;
 
   let lastError: Error | undefined;

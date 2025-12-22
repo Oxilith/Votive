@@ -16,13 +16,13 @@ import { IDENTITY_ANALYSIS_PROMPT } from '@shared/index';
 
 const thinking_params: ThinkingParams = {
   type: 'enabled',
-  budget_tokens: 10000,
+  budget_tokens: 6000,
 };
 
 export const IDENTITY_ANALYSIS_CONFIG: PromptConfig = {
   model: ClaudeModel.SONNET_4_5,
   temperature: 0.6,
-  max_tokens: 8000,
+  max_tokens: 10000,
   thinking_params: thinking_params,
   prompt: IDENTITY_ANALYSIS_PROMPT,
 };

@@ -3,9 +3,10 @@
  * @purpose Type definitions for Claude API integration
  * @functionality
  * - Re-exports shared assessment and analysis types for use in backend
+ * - Re-exports AnalysisLanguage type for language handling
  * - Defines request/response types for Claude analysis endpoint
  * @dependencies
- * - @shared/index for shared types (assessment, analysis)
+ * - @shared/index for shared types (assessment, analysis, api)
  */
 
 // Re-export shared types
@@ -22,15 +23,16 @@ export type {
   AnalysisRisk,
   IdentitySynthesis,
   AIAnalysisResult,
+  AnalysisLanguage,
 } from '@shared/index.js';
 
 // Import for local use
-import type { AssessmentResponses, AIAnalysisResult } from '@shared/index.js';
+import type { AssessmentResponses, AIAnalysisResult, AnalysisLanguage } from '@shared/index.js';
 
 // Analysis request
 export interface AnalyzeRequest {
   responses: AssessmentResponses;
-  language: 'english' | 'polish';
+  language: AnalysisLanguage;
 }
 
 // API response wrapper

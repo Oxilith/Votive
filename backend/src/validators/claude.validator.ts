@@ -3,67 +3,27 @@
  * @purpose Request validation schemas for Claude API endpoints
  * @functionality
  * - Defines Zod schemas for request body validation
- * - Validates assessment responses structure
+ * - Validates assessment responses structure using shared enum arrays
  * - Ensures language parameter is valid
  * - Provides type-safe validation errors
  * @dependencies
  * - zod for schema validation
+ * - @shared/index for enum value arrays and supported languages
  */
 
 import { z } from 'zod';
+import {
+  TIME_OF_DAY_VALUES,
+  MOOD_TRIGGER_VALUES,
+  WILLPOWER_PATTERN_VALUES,
+  CORE_VALUE_VALUES,
+  SUPPORTED_LANGUAGES,
+} from '@shared/index.js';
 
-const timeOfDaySchema = z.enum([
-  'early_morning',
-  'mid_morning',
-  'midday',
-  'afternoon',
-  'evening',
-  'night',
-  'late_night',
-]);
-
-const moodTriggerSchema = z.enum([
-  'lack_of_progress',
-  'conflict',
-  'uncertainty',
-  'overwhelm',
-  'lack_of_control',
-  'poor_sleep',
-  'physical',
-  'isolation',
-  'overstimulation',
-  'criticism',
-  'comparison',
-  'boredom',
-]);
-
-const willpowerPatternSchema = z.enum([
-  'never_start',
-  'start_stop',
-  'distraction',
-  'perfectionism',
-  'energy',
-  'forget',
-]);
-
-const coreValueSchema = z.enum([
-  'growth',
-  'autonomy',
-  'mastery',
-  'impact',
-  'connection',
-  'integrity',
-  'creativity',
-  'security',
-  'adventure',
-  'balance',
-  'recognition',
-  'service',
-  'wisdom',
-  'efficiency',
-  'authenticity',
-  'leadership',
-]);
+const timeOfDaySchema = z.enum(TIME_OF_DAY_VALUES);
+const moodTriggerSchema = z.enum(MOOD_TRIGGER_VALUES);
+const willpowerPatternSchema = z.enum(WILLPOWER_PATTERN_VALUES);
+const coreValueSchema = z.enum(CORE_VALUE_VALUES);
 
 const assessmentResponsesSchema = z.object({
   // Phase 1: State Awareness
@@ -89,7 +49,7 @@ const assessmentResponsesSchema = z.object({
 
 export const analyzeRequestSchema = z.object({
   responses: assessmentResponsesSchema,
-  language: z.enum(['english', 'polish']).default('english'),
+  language: z.enum(SUPPORTED_LANGUAGES).default('english'),
 });
 
 export type ValidatedAnalyzeRequest = z.infer<typeof analyzeRequestSchema>;

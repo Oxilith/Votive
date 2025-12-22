@@ -8,11 +8,14 @@
  * - Facilitates mocking in unit tests
  * @dependencies
  * - @/types/assessment.types (AssessmentResponses, AIAnalysisResult)
+ * - @shared/index (AnalysisLanguage)
  */
 
 import type { AssessmentResponses, AIAnalysisResult } from '@/types/assessment.types';
+import type { AnalysisLanguage } from '@shared/index';
 
-export type AnalysisLanguage = 'english' | 'polish';
+// Re-export for backward compatibility
+export type { AnalysisLanguage } from '@shared/index';
 
 export interface AnalysisRequest {
   responses: AssessmentResponses;

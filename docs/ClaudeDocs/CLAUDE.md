@@ -71,10 +71,13 @@ Every component/service requires JSDoc header:
 
 ### Shared Package (`/shared/src`)
 
-Single source of truth for types and prompts used by both frontend and backend:
+Single source of truth for types, validation, and utilities used by both frontend and backend:
 - `assessment.types.ts` - Core domain types (TimeOfDay, MoodTrigger, CoreValue, WillpowerPattern, AssessmentResponses)
 - `analysis.types.ts` - AI analysis result types (AnalysisPattern, AnalysisContradiction, AnalysisBlindSpot, AnalysisLeveragePoint, AnalysisRisk, IdentitySynthesis, AIAnalysisResult)
+- `api.types.ts` - API types (AnalysisLanguage, SUPPORTED_LANGUAGES)
 - `labels.ts` - Human-readable label mappings for enum values
+- `validation.ts` - Enum value arrays for Zod schemas, REQUIRED_FIELDS, field categorization (ARRAY_FIELDS, NUMBER_FIELDS, STRING_FIELDS)
+- `responseFormatter.ts` - Shared `formatResponsesForPrompt()` function for AI analysis
 - `prompts.ts` - AI prompt templates (IDENTITY_ANALYSIS_PROMPT)
 - `index.ts` - Barrel exports
 
@@ -103,10 +106,10 @@ Import via `@shared/index` in both frontend and backend.
 ### Backend (`/backend/src`)
 
 **API Proxy** - Protects Anthropic API key from browser exposure:
-- `services/claude.service.ts` - Claude API integration with retry logic (uses prompt from @shared)
+- `services/claude.service.ts` - Claude API integration with retry logic (uses prompt and formatter from @shared)
 - `controllers/claude.controller.ts` - Request handler for analysis endpoint
 - `routes/api/v1/` - API route definitions (`/api/v1/claude/analyze`)
-- `validators/claude.validator.ts` - Zod request validation schemas
+- `validators/claude.validator.ts` - Zod request validation using enum arrays from @shared
 - `types/claude.types.ts` - Re-exports shared types, defines API request/response types
 - `middleware/` - CORS, rate limiting, error handling, helmet
 - `config/index.ts` - Zod-validated environment configuration
