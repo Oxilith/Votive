@@ -251,7 +251,14 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
 
     switch (currentStepData.type) {
       case 'intro':
-        return <IntroStep content={currentStepData.content} onNext={goNext} />;
+        return (
+          <IntroStep
+            content={currentStepData.content}
+            onNext={goNext}
+            onBack={goBack}
+            isFirstStep={isFirstStep}
+          />
+        );
 
       case 'multiSelect':
         return (

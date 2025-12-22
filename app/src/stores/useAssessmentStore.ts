@@ -7,16 +7,19 @@
  * - Supports hydration from imported data
  * - Computes completion status and percentage
  * - Persists to localStorage for session recovery
+ * - Clears analysis results when responses change (invalidates stale analysis)
  * @dependencies
  * - zustand (create, persist, createJSONStorage)
  * - @/types/assessment.types (AssessmentResponses)
  * - @shared/index (REQUIRED_FIELDS)
+ * - @/stores/useAnalysisStore (clearAnalysis)
  */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AssessmentResponses } from '@/types/assessment.types';
 import { REQUIRED_FIELDS } from '@shared/index';
+import { useAnalysisStore } from '@/stores/useAnalysisStore';
 
 interface AssessmentState {
   // State
@@ -46,6 +49,8 @@ export const useAssessmentStore = create<AssessmentState>()(
 
       // Actions
       updateResponse: (key, value) => {
+        // Clear analysis when responses change (stale data)
+        useAnalysisStore.getState().clearAnalysis();
         set((state) => ({
           responses: {
             ...state.responses,
@@ -56,6 +61,8 @@ export const useAssessmentStore = create<AssessmentState>()(
       },
 
       setResponses: (responses) => {
+        // Clear analysis when responses change (stale data)
+        useAnalysisStore.getState().clearAnalysis();
         set({
           responses,
           lastUpdated: new Date().toISOString(),
