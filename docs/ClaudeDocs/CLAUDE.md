@@ -35,13 +35,46 @@ npm run test          # Vitest
 npm run test:coverage # Coverage report
 ```
 
-### Docker
+### Docker (Local Development)
 ```bash
 docker compose up --build   # Build and run full stack (frontend:443 HTTPS, backend:3001)
 docker compose up           # Run existing images
 docker compose down         # Stop containers
 ```
 Requires `ANTHROPIC_API_KEY` environment variable (export or .env file).
+
+### Docker (OCI Deployment)
+
+**Run from Docker Hub OCI:**
+```bash
+ANTHROPIC_API_KEY=<key> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+```
+
+**Build and publish multi-arch images:**
+```bash
+# Remove old images and clear cache (clean rebuild)
+docker rmi oxilith/identity-assessment-frontend:latest
+docker rmi oxilith/identity-assessment:latest
+docker buildx prune -f
+
+# Build for linux/amd64 + linux/arm64 and push to Docker Hub
+docker buildx bake --push --no-cache
+
+# Publish OCI compose artifact
+docker compose publish --with-env oxilith/identity-assessment-comb:latest
+```
+
+**Clear OCI cache (when images updated):**
+```bash
+# macOS
+rm -rf "$HOME/Library/Caches/docker-compose/"
+# Then re-run the OCI compose command
+```
+
+**Docker Hub repositories:**
+- `oxilith/identity-assessment` - Backend (multi-arch)
+- `oxilith/identity-assessment-frontend` - Frontend (multi-arch)
+- `oxilith/identity-assessment-comb` - OCI compose artifact
 
 ### HTTPS Setup (Local Development)
 ```bash
@@ -194,6 +227,27 @@ The `PromptConfigResolver` in shared package selects the appropriate prompt conf
 
 ## Docker Architecture
 
+### Network Architecture
+```
+Browser → nginx (HTTPS :443) → backend (HTTP :3001)
+                ↑
+         SSL termination
+```
+- Frontend serves on HTTPS via nginx with SSL termination
+- Backend runs HTTP only (no SSL needed - nginx handles it)
+- API requests proxied: `/api/*` → `http://backend:3001`
+
+### Build-time Configuration
+- `VITE_API_URL` is a **build-time** variable (baked into JS bundle)
+- For Docker: leave empty (`VITE_API_URL=`) so requests go through nginx proxy
+- For local dev: set to `https://localhost:3001` in `.env.local`
+- `.dockerignore` excludes `.env` files to prevent override
+
+### Multi-Architecture Support
+Images built for both `linux/amd64` and `linux/arm64`:
+- Works on Intel/AMD x64 machines (Linux, Windows, older Macs)
+- Works on ARM64 machines (Apple Silicon, AWS Graviton, Raspberry Pi)
+
 ### Shared Package in Docker
 
 The shared package uses `file:../shared` dependency. In Docker:
@@ -206,7 +260,8 @@ The shared package uses `file:../shared` dependency. In Docker:
 - Backend: Node.js 22 Alpine running Express on port 3001
 - Backend health check (`/health`) required before frontend starts
 - Non-root user (expressjs) in backend container for security
-- Certificates volume mount required for HTTPS (`./certs/`)
+- Certificates volume mount: `${PWD}/certs:/etc/nginx/ssl`
+- Self-signed certs auto-generated if not provided (browser warning)
 
 ## Test Data
 

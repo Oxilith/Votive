@@ -263,7 +263,7 @@
     },
     "ready": {
       "title": "Ready to Analyze",
-      "description": "Click below to send your assessment data to Claude for deep pattern analysis. This typically takes 10-20 seconds.",
+      "description": "Click below to send your assessment data to Claude for deep pattern analysis. This typically takes a few minutes.",
       "button": "Analyze My Responses"
     },
     "loading": {

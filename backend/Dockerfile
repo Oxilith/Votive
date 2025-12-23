@@ -8,6 +8,12 @@ COPY shared/package.json ./shared/
 COPY shared/src ./shared/src
 COPY shared/tsconfig.json ./shared/
 
+# Install shared package dependencies
+WORKDIR /app/shared
+RUN npm install
+
+WORKDIR /app
+
 # Copy backend package files
 COPY backend/package*.json ./backend/
 

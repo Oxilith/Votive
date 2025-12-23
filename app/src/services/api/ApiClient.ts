@@ -193,5 +193,6 @@ export class ApiClient implements IApiClient {
 }
 
 // Default API client instance
-const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:3001';
+// Use empty string for Docker (nginx proxy) or explicit URL for local dev
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 export const apiClient = new ApiClient(API_URL);

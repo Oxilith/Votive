@@ -11,7 +11,7 @@
  * - ./prompts for IDENTITY_ANALYSIS_PROMPT
  */
 
-import {ClaudeModel, type PromptConfig, PromptConfigDefinition} from './prompt.types.js';
+import {ClaudeModel, type PromptConfig, type PromptConfigDefinition} from './prompt.types.js';
 
 import type { ThinkingConfigDisabled, ThinkingConfigEnabled } from '@anthropic-ai/sdk/resources/messages';
 import { IDENTITY_ANALYSIS_PROMPT } from './prompts.js';

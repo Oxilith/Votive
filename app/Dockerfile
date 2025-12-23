@@ -11,6 +11,12 @@ COPY shared/package.json ./shared/
 COPY shared/src ./shared/src
 COPY shared/tsconfig.json ./shared/
 
+# Install shared package dependencies
+WORKDIR /app/shared
+RUN npm install
+
+WORKDIR /app
+
 # Copy frontend package files
 COPY app/package*.json ./app/
 
@@ -34,8 +40,15 @@ RUN npm run build
 # Stage 2: Production with Nginx
 FROM nginx:alpine AS runner
 
-# Create SSL directory for certificates (mounted via docker-compose)
+# Install openssl for certificate generation
+RUN apk add --no-cache openssl
+
+# Create SSL directory for certificates
 RUN mkdir -p /etc/nginx/ssl
+
+# Copy entrypoint script
+COPY app/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 # Copy built files to nginx
 COPY --from=builder /app/app/dist /usr/share/nginx/html
@@ -50,5 +63,6 @@ EXPOSE 80 443
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider --no-check-certificate https://localhost:443/ || exit 1
 
-# Start nginx
+# Use custom entrypoint for certificate generation
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

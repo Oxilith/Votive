@@ -133,17 +133,69 @@ npm run test          # Run tests
 
 ### Docker
 
-Pull and run the pre-built images from Docker Hub:
+#### Quick Start (OCI from Docker Hub)
+
+Pull and run the pre-built multi-arch images:
 
 ```bash
 ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
 ```
 
-This starts the full stack:
-- Frontend: https://localhost (port 443)
+This starts:
+- Frontend: https://localhost (port 443, HTTPS)
 - Backend: http://localhost:3001 (internal, proxied through nginx)
 
-**Note**: For local Docker with HTTPS, ensure certificates exist in `./certs/` directory.
+#### Local Build & Run
+
+```bash
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose up --build
+```
+
+#### Trusted HTTPS (No Browser Warning)
+
+By default, Docker generates self-signed certificates (browser shows warning). For trusted HTTPS:
+
+```bash
+# Install mkcert and set up local CA (one-time)
+brew install mkcert nss
+mkcert -install
+
+# Generate trusted certificates
+mkdir -p certs && cd certs
+mkcert localhost 127.0.0.1 ::1
+cd ..
+
+# Run Docker (certificates auto-detected)
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+```
+
+#### Build & Publish (Maintainers)
+
+```bash
+# Clean rebuild for multi-arch (linux/amd64 + linux/arm64)
+docker rmi oxilith/identity-assessment-frontend:latest
+docker rmi oxilith/identity-assessment:latest
+docker buildx prune -f
+docker buildx bake --push --no-cache
+
+# Publish OCI compose artifact
+docker compose publish --with-env oxilith/identity-assessment-comb:latest
+```
+
+#### Clear OCI Cache (After Image Updates)
+
+```bash
+# macOS
+rm -rf "$HOME/Library/Caches/docker-compose/"
+
+# Then re-run
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+```
+
+**Docker Hub Repositories:**
+- `oxilith/identity-assessment` - Backend API
+- `oxilith/identity-assessment-frontend` - Nginx + React
+- `oxilith/identity-assessment-comb` - OCI compose artifact
 
 ## Framework Documentation
 
