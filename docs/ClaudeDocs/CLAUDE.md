@@ -15,7 +15,7 @@ Identity Foundations Assessment - a full-stack behavioral psychology assessment 
 
 ### Frontend (`/app`)
 ```bash
-npm run dev           # Vite dev server (localhost:5174)
+npm run dev           # Vite dev server (https://localhost:3000)
 npm run build         # TypeScript + Vite production build
 npm run lint          # ESLint
 npm run type-check    # TypeScript only
@@ -26,7 +26,7 @@ npm run test:coverage # Coverage report (80% threshold)
 
 ### Backend (`/backend`)
 ```bash
-npm run dev           # tsx watch (localhost:3001)
+npm run dev           # tsx watch (https://localhost:3001)
 npm run build         # TypeScript compile
 npm run start         # Run compiled dist/
 npm run lint          # ESLint
@@ -37,11 +37,24 @@ npm run test:coverage # Coverage report
 
 ### Docker
 ```bash
-docker compose up --build   # Build and run full stack (frontend:80, backend:3001)
+docker compose up --build   # Build and run full stack (frontend:443 HTTPS, backend:3001)
 docker compose up           # Run existing images
 docker compose down         # Stop containers
 ```
 Requires `ANTHROPIC_API_KEY` environment variable (export or .env file).
+
+### HTTPS Setup (Local Development)
+```bash
+# Install mkcert (macOS)
+brew install mkcert
+mkcert -install
+
+# Generate certificates in project root
+mkdir -p certs && cd certs
+mkcert localhost 127.0.0.1 ::1
+cd ..
+```
+Both frontend and backend use HTTPS by default in development.
 
 ## Code Standards
 
@@ -51,6 +64,7 @@ Requires `ANTHROPIC_API_KEY` environment variable (export or .env file).
 - **Shared types** - use `shared/` for types shared between frontend/backend (not `@shared/`)
 - **Strict mode** - `noUnusedLocals`, `noUnusedParameters` enforced
 - Use `React.ComponentRef` (not deprecated `React.ElementRef`)
+- **Anthropic SDK types** - use `ThinkingConfigParam` from `@anthropic-ai/sdk/resources/messages` (not custom types)
 
 ### Documentation Headers
 Every component/service requires JSDoc header:
@@ -82,6 +96,8 @@ Single source of truth for types, validation, and utilities used by both fronten
 - `validation.ts` - Enum value arrays for Zod schemas, REQUIRED_FIELDS, field categorization (ARRAY_FIELDS, NUMBER_FIELDS, STRING_FIELDS)
 - `responseFormatter.ts` - Shared `formatResponsesForPrompt()` function for AI analysis
 - `prompts.ts` - AI prompt templates (IDENTITY_ANALYSIS_PROMPT)
+- `prompt.types.ts` - Prompt config types (ClaudeModel, PromptConfig, ThinkingVariant, PromptConfigDefinition)
+- `promptConfigResolver.ts` - Strategy-based prompt config resolver with thinking mode variants
 - `index.ts` - Barrel exports
 
 Import via `shared/index` in both frontend and backend (e.g., `import { ... } from 'shared/index'`).
@@ -104,12 +120,12 @@ Import via `shared/index` in both frontend and backend (e.g., `import { ... } fr
 - `components/shared/` - Header, theme toggle
 - `styles/theme.ts` - Shared Tailwind utilities (cardStyles, textStyles)
 - `i18n/resources/` - Translations (en/, pl/)
-- `config/prompts.ts` - AI prompt configurations (imports prompt from shared)
+- `config/` - Application configuration
 
 ### Backend (`/backend/src`)
 
 **API Proxy** - Protects Anthropic API key from browser exposure:
-- `services/claude.service.ts` - Claude API integration with retry logic (uses prompt and formatter from shared)
+- `services/claude.service.ts` - Claude API integration with retry logic, uses `PromptConfigResolver` from shared
 - `controllers/claude.controller.ts` - Request handler for analysis endpoint
 - `routes/api/v1/` - API route definitions (`/api/v1/claude/analyze`)
 - `validators/claude.validator.ts` - Zod request validation using enum arrays from shared
@@ -132,13 +148,25 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
 ANTHROPIC_API_KEY=sk-ant-...  # Required
 PORT=3001
 NODE_ENV=development
-CORS_ORIGIN=http://localhost:5174
+HTTPS_ENABLED=true
+HTTPS_KEY_PATH=../certs/localhost+2-key.pem
+HTTPS_CERT_PATH=../certs/localhost+2.pem
+CORS_ORIGIN=https://localhost:3000
+THINKING_ENABLED=true         # Feature flag for Claude extended thinking mode
 ```
 
 ### Frontend (`/app/.env`)
 ```
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=https://localhost:3001
 ```
+
+### Feature Flags
+
+**`THINKING_ENABLED`** (backend) - Controls Claude's extended thinking mode:
+- `true` (default): Uses extended thinking with 8000 token budget, temperature=1, max_tokens=16000
+- `false`: Standard mode with temperature=0.6, max_tokens=8000
+
+The `PromptConfigResolver` in shared package selects the appropriate prompt configuration variant based on this flag.
 
 ## Testing
 
@@ -174,10 +202,11 @@ The shared package uses `file:../shared` dependency. In Docker:
 - Backend imports resolve to `node_modules/shared/` in production
 
 ### Container Setup
-- Frontend: Nginx Alpine serving Vite build on port 80
+- Frontend: Nginx Alpine serving Vite build on port 443 (HTTPS)
 - Backend: Node.js 22 Alpine running Express on port 3001
 - Backend health check (`/health`) required before frontend starts
 - Non-root user (expressjs) in backend container for security
+- Certificates volume mount required for HTTPS (`./certs/`)
 
 ## Test Data
 

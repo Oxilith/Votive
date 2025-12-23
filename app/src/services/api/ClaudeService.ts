@@ -11,9 +11,9 @@
  * - @/services/api/ApiClient (apiClient)
  */
 
-import type { IClaudeService, AnalysisRequest, AnalysisResponse } from '../interfaces';
-import { apiClient, ApiClientError } from './ApiClient';
-import type { IApiClient } from '../interfaces';
+import type { IClaudeService, AnalysisRequest, AnalysisResponse } from '@/services';
+import { apiClient, ApiClientError } from '@/services';
+import type { IApiClient } from '@/services';
 
 interface BackendAnalyzeResponse {
   success: boolean;
@@ -42,7 +42,7 @@ export class ClaudeService implements IClaudeService {
         language: request.language,
       },
       {
-        timeout: 60000, // 60 seconds for AI analysis
+        timeout: 60000 * 10, // 10 minutes for AI analysis with extended thinking
         retries: 2, // Limited retries for expensive API calls
       }
     );

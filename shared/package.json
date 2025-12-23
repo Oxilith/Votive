@@ -12,5 +12,8 @@
       "types": "./src/*.ts",
       "import": "./src/*.ts"
     }
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2"
   }
 }

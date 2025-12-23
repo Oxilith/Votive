@@ -2,6 +2,7 @@ name: identity-assessment
 
 services:
   backend:
+    image: oxilith/identity-assessment
     build:
       context: .
       dockerfile: backend/Dockerfile
@@ -11,8 +12,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - HTTPS_ENABLED=false
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - CORS_ORIGIN=http://localhost
+      - CORS_ORIGIN=https://localhost
       - RATE_LIMIT_WINDOW_MS=60000
       - RATE_LIMIT_MAX_REQUESTS=10
       - LOG_LEVEL=info
@@ -27,12 +29,16 @@ services:
       - app-network
 
   frontend:
+    image: oxilith/identity-assessment-frontend
     build:
       context: .
       dockerfile: app/Dockerfile
     container_name: identity-assessment-frontend
     ports:
+      - "443:443"
       - "80:80"
+    volumes:
+      - ./certs:/etc/nginx/ssl:ro
     depends_on:
       backend:
         condition: service_healthy

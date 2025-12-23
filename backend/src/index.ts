@@ -3,7 +3,7 @@
  * @purpose Express server entry point
  * @functionality
  * - Runs startup health checks before starting server
- * - Starts HTTP server on configured port
+ * - Starts HTTP or HTTPS server on configured port
  * - Handles graceful shutdown
  * - Logs server startup information
  * @dependencies
@@ -11,8 +11,14 @@
  * - @/config for server configuration
  * - @/utils/logger for logging
  * - @/health for health service
+ * - https for HTTPS server
+ * - fs for reading certificates
+ * - path for resolving certificate paths
  */
 
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 import app from './app.js';
 import { config } from './config/index.js';
 import { logger } from './utils/logger.js';
@@ -45,17 +51,61 @@ async function startServer(): Promise<void> {
 
   logger.info('All startup health checks passed');
 
-  // Start the server
-  const server = app.listen(config.port, () => {
-    logger.info(
-      {
-        port: config.port,
-        env: config.nodeEnv,
-        corsOrigin: config.corsOrigin,
-      },
-      `Server started on port ${config.port}`
-    );
-  });
+  // Create HTTP or HTTPS server based on config
+  let server;
+  const protocol = config.httpsEnabled ? 'https' : 'http';
+
+  if (config.httpsEnabled) {
+    const keyPath = path.resolve(process.cwd(), config.httpsKeyPath);
+    const certPath = path.resolve(process.cwd(), config.httpsCertPath);
+
+    if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
+      logger.warn(
+        { keyPath, certPath },
+        'HTTPS certificates not found, falling back to HTTP. Run mkcert to generate certificates.'
+      );
+      server = app.listen(config.port, () => {
+        logger.info(
+          {
+            port: config.port,
+            env: config.nodeEnv,
+            corsOrigin: config.corsOrigin,
+            protocol: 'http',
+          },
+          `Server started on http://localhost:${config.port}`
+        );
+      });
+    } else {
+      const httpsOptions = {
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      };
+
+      server = https.createServer(httpsOptions, app).listen(config.port, () => {
+        logger.info(
+          {
+            port: config.port,
+            env: config.nodeEnv,
+            corsOrigin: config.corsOrigin,
+            protocol: 'https',
+          },
+          `Server started on https://localhost:${config.port}`
+        );
+      });
+    }
+  } else {
+    server = app.listen(config.port, () => {
+      logger.info(
+        {
+          port: config.port,
+          env: config.nodeEnv,
+          corsOrigin: config.corsOrigin,
+          protocol,
+        },
+        `Server started on ${protocol}://localhost:${config.port}`
+      );
+    });
+  }
 
   // Graceful shutdown
   const shutdown = (signal: string) => {

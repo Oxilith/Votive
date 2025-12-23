@@ -33,6 +33,23 @@ This application implements a 5-phase framework for identity-based habit formati
 ### Prerequisites
 - Node.js >= 20.0.0
 - Anthropic API key
+- mkcert (for local HTTPS)
+
+### HTTPS Setup (Local Development)
+
+Generate locally-trusted certificates using mkcert:
+
+```bash
+# Install mkcert (macOS)
+brew install mkcert
+mkcert -install
+
+# Generate certificates
+mkdir -p certs
+cd certs
+mkcert localhost 127.0.0.1 ::1
+cd ..
+```
 
 ### Quick Start
 
@@ -41,12 +58,12 @@ This application implements a 5-phase framework for identity-based habit formati
 cd backend
 npm install
 cp .env.example .env  # Add your ANTHROPIC_API_KEY
-npm run dev           # Starts on localhost:3001
+npm run dev           # Starts on https://localhost:3001
 
 # Frontend setup (new terminal)
 cd app
 npm install
-npm run dev           # Starts on localhost:5174
+npm run dev           # Starts on https://localhost:3000
 ```
 
 ### Environment Setup
@@ -56,12 +73,14 @@ npm run dev           # Starts on localhost:5174
 ANTHROPIC_API_KEY=sk-ant-...  # Required
 PORT=3001
 NODE_ENV=development
-CORS_ORIGIN=http://localhost:5174
+HTTPS_ENABLED=true
+CORS_ORIGIN=https://localhost:3000
+THINKING_ENABLED=true         # Enable/disable Claude extended thinking mode
 ```
 
 **Frontend** (`/app/.env`):
 ```
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=https://localhost:3001
 ```
 
 ## Project Structure
@@ -113,9 +132,18 @@ npm run test          # Run tests
 ```
 
 ### Docker
+
+Pull and run the pre-built images from Docker Hub:
+
 ```bash
-docker-compose up     # Start full stack
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
 ```
+
+This starts the full stack:
+- Frontend: https://localhost (port 443)
+- Backend: http://localhost:3001 (internal, proxied through nginx)
+
+**Note**: For local Docker with HTTPS, ensure certificates exist in `./certs/` directory.
 
 ## Framework Documentation
 

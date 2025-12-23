@@ -63,8 +63,13 @@ export {
   STRING_FIELDS,
 } from './validation.js';
 
+// Prompt Types
+export { ClaudeModel } from './prompt.types.js';
+export type { ClaudeModel as ClaudeModelType, ThinkingConfigParam, PromptConfig } from './prompt.types.js';
+
 // Prompts
-export { IDENTITY_ANALYSIS_PROMPT } from './prompts.js';
+export type { PromptConfigKey } from './promptConfigResolver.js';
+export { PromptConfigResolver } from './promptConfigResolver.js';
 
 // Response Formatter
 export { formatResponsesForPrompt } from './responseFormatter.js';

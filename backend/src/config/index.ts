@@ -14,7 +14,6 @@
 import { config as dotenvConfig } from 'dotenv';
 import { z } from 'zod';
 
-// Load environment variables
 dotenvConfig();
 
 const configSchema = z.object({
@@ -22,11 +21,19 @@ const configSchema = z.object({
   port: z.coerce.number().default(3001),
   nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
 
+  // HTTPS
+  httpsEnabled: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('true'),
+  httpsKeyPath: z.string().default('../certs/localhost+2-key.pem'),
+  httpsCertPath: z.string().default('../certs/localhost+2.pem'),
+
   // Anthropic API
   anthropicApiKey: z.string().min(1, 'ANTHROPIC_API_KEY is required'),
 
   // CORS
-  corsOrigin: z.string().default('http://localhost:5174'),
+  corsOrigin: z.string().default('https://localhost:3000'),
 
   // Rate Limiting
   rateLimitWindowMs: z.coerce.number().default(60000),
@@ -34,6 +41,12 @@ const configSchema = z.object({
 
   // Logging
   logLevel: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+
+  // Feature Flags
+  thinkingEnabled: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('true'),
 });
 
 type Config = z.infer<typeof configSchema>;
@@ -42,11 +55,15 @@ function loadConfig(): Config {
   const result = configSchema.safeParse({
     port: process.env['PORT'],
     nodeEnv: process.env['NODE_ENV'],
+    httpsEnabled: process.env['HTTPS_ENABLED'],
+    httpsKeyPath: process.env['HTTPS_KEY_PATH'],
+    httpsCertPath: process.env['HTTPS_CERT_PATH'],
     anthropicApiKey: process.env['ANTHROPIC_API_KEY'],
     corsOrigin: process.env['CORS_ORIGIN'],
     rateLimitWindowMs: process.env['RATE_LIMIT_WINDOW_MS'],
     rateLimitMaxRequests: process.env['RATE_LIMIT_MAX_REQUESTS'],
     logLevel: process.env['LOG_LEVEL'],
+    thinkingEnabled: process.env['THINKING_ENABLED'],
   });
 
   if (!result.success) {

@@ -1,12 +1,10 @@
 /**
  * @file shared/src/prompts.ts
- * @purpose Single source of truth for AI analysis prompts used by both frontend and backend
+ * @purpose Single source of truth for AI analysis prompts
  * @functionality
- * - Defines IDENTITY_ANALYSIS_PROMPT for behavioral psychology analysis
- * - Provides consistent prompt structure for AI responses
- * - Enforces JSON output format matching AIAnalysisResult interface
+ * - Defines IDENTITY_ANALYSIS_PROMPT
  * @dependencies
- * - None (pure TypeScript string constant)
+ * - none
  */
 
 export const IDENTITY_ANALYSIS_PROMPT = `You are an expert behavioral psychologist and identity coach analyzing someone's self-assessment results. Your job is to find patterns, contradictions, and insights that the person themselves might not see.

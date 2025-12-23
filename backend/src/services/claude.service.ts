@@ -3,37 +3,32 @@
  * @purpose Secure server-side Claude API integration
  * @functionality
  * - Sends prompts to Claude API using official SDK
+ * - Uses prompt configuration from shared package
  * - Handles response parsing and error handling
  * - Implements retry logic with exponential backoff
- * - Provides type-safe responses
+ * - Supports extended thinking when configured
  * @dependencies
  * - @anthropic-ai/sdk for Claude API
  * - @/config for API key
  * - @/utils/logger for logging
  * - @/types/claude.types for type definitions
- * - @shared/index for shared prompt and response formatter
+ * - shared/index for prompt config and response formatter
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import type { MessageCreateParamsNonStreaming } from '@anthropic-ai/sdk/resources/messages';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import type { AssessmentResponses, AIAnalysisResult } from '../types/claude.types.js';
 import type { AnalysisLanguage } from 'shared/index.js';
-import { IDENTITY_ANALYSIS_PROMPT, formatResponsesForPrompt } from 'shared/index.js';
+import { formatResponsesForPrompt, PromptConfigResolver } from 'shared/index.js';
 
 const anthropic = new Anthropic({
   apiKey: config.anthropicApiKey,
 });
 
-const CLAUDE_MODEL = 'claude-sonnet-4-20250514';
-const MAX_TOKENS = 8000;
-const TEMPERATURE = 0.6;
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
-
-function buildPrompt(): string {
-  return IDENTITY_ANALYSIS_PROMPT;
-}
 
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,27 +38,41 @@ export async function analyzeAssessment(
   responses: AssessmentResponses,
   language: AnalysisLanguage
 ): Promise<{ analysis: AIAnalysisResult; rawResponse: string }> {
-  const prompt = buildPrompt();
+  const promptConfig = PromptConfigResolver.fromFlag(config.thinkingEnabled).resolve('IDENTITY_ANALYSIS');
   const formattedResponses = formatResponsesForPrompt(responses, language);
-  const fullPrompt = prompt + formattedResponses;
+  const fullPrompt = promptConfig.prompt + formattedResponses;
 
   let lastError: Error | undefined;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      logger.info({ attempt, maxRetries: MAX_RETRIES }, 'Calling Claude API');
+      logger.info(
+        {
+          attempt,
+          maxRetries: MAX_RETRIES,
+          model: promptConfig.model,
+          thinkingEnabled: promptConfig.thinking?.type === 'enabled',
+        },
+        'Calling Claude API'
+      );
 
-      const message = await anthropic.messages.create({
-        model: CLAUDE_MODEL,
-        max_tokens: MAX_TOKENS,
-        temperature: TEMPERATURE,
+      // Build API request parameters
+      const requestParams: MessageCreateParamsNonStreaming = {
+        model: promptConfig.model,
+        max_tokens: promptConfig.max_tokens,
         messages: [
           {
             role: 'user',
             content: fullPrompt,
           },
         ],
-      });
+        // Extended thinking requires temperature=1
+        temperature: promptConfig.thinking?.type === 'enabled' ? 1 : promptConfig.temperature,
+        // Only include thinking if configured
+        ...(promptConfig.thinking && { thinking: promptConfig.thinking }),
+      };
+
+      const message = await anthropic.messages.create(requestParams);
 
       const textBlock = message.content.find((block) => block.type === 'text');
       if (!textBlock) {
