@@ -22,7 +22,7 @@ const baseOptions: pino.LoggerOptions = {
     level: (label) => ({ level: label }),
   },
   base: {
-    service: 'identity-assessment-api',
+    service: 'votive-api',
     env: config.nodeEnv,
   },
   timestamp: pino.stdTimeFunctions.isoTime,

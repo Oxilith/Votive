@@ -1,7 +1,7 @@
 {
-  "name": "identity-assessment-backend",
+  "name": "votive-backend",
   "version": "1.0.0",
-  "description": "Backend API proxy for Identity Foundations Assessment",
+  "description": "Backend API for Votive habit and identity formation app",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

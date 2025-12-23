@@ -1,6 +1,6 @@
 {
   "header": {
-    "title": "Fundamenty Tożsamości",
+    "title": "Votive",
     "buttons": {
       "import": "Importuj",
       "export": "Eksportuj",
@@ -22,7 +22,7 @@
   "assessment": {
     "welcome": {
       "title": "Witamy",
-      "subtitle": "Ocena Fundamentów Tożsamości",
+      "subtitle": "Ocena Votive",
       "heading": "Zanim zaprojektujesz kim chcesz zostać...",
       "subheading": "Musisz zrozumieć kim już jesteś.",
       "description": "Ta ocena prowadzi Cię przez dwie podstawowe fazy:\n\n**Faza 1: Świadomość Stanu** — Zrozumienie jak funkcjonujesz (Twoje wzorce energii, nastroju i motywacji)\n\n**Faza 2: Mapowanie Tożsamości** — Zrozumienie kim aktualnie jesteś (Twoja rzeczywista tożsamość ujawniona przez zachowanie)\n\nWiększość ludzi pomija te kroki i przechodzi od razu do wyznaczania celów. Dlatego większość celów nie udaje się osiągnąć. Zmiana tożsamości nie polega na stawaniu się kimś innym — chodzi o stawanie się bardziej sobą.\n\nZajmie to około 15-20 minut szczerej refleksji. Nie ma złych odpowiedzi.",

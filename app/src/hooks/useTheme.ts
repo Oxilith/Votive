@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-const THEME_STORAGE_KEY = 'identity-app-theme';
+const THEME_STORAGE_KEY = 'votive-theme';
 
 const getInitialTheme = (): Theme => {
   // Check localStorage first

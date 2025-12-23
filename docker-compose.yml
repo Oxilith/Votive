@@ -1,15 +1,15 @@
-name: identity-assessment
+name: votive
 
 services:
   backend:
-    image: oxilith/identity-assessment
+    image: oxilith/votive
     build:
       context: .
       dockerfile: backend/Dockerfile
       platforms:
         - linux/amd64
         - linux/arm64
-    container_name: identity-assessment-backend
+    container_name: votive-backend
     ports:
       - "3001:3001"
     environment:
@@ -33,14 +33,14 @@ services:
       - app-network
 
   frontend:
-    image: oxilith/identity-assessment-frontend
+    image: oxilith/votive-frontend
     build:
       context: .
       dockerfile: app/Dockerfile
       platforms:
         - linux/amd64
         - linux/arm64
-    container_name: identity-assessment-frontend
+    container_name: votive-frontend
     ports:
       - "443:443"
       - "80:80"

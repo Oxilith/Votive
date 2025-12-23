@@ -46,7 +46,7 @@ i18n
     },
     detection: {
       order: ['localStorage', 'navigator'],
-      lookupLocalStorage: 'identity-app-language',
+      lookupLocalStorage: 'votive-language',
       caches: ['localStorage'],
     },
   });

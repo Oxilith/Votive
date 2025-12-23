@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Identity Foundations Assessment - a full-stack behavioral psychology assessment application with AI-powered analysis.
+Votive - a full-stack behavioral psychology assessment application with AI-powered analysis.
 
 **Architecture**: Monorepo with three packages:
 - `/app` - React frontend
@@ -47,21 +47,21 @@ Requires `ANTHROPIC_API_KEY` environment variable (export or .env file).
 
 **Run from Docker Hub OCI:**
 ```bash
-ANTHROPIC_API_KEY=<key> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+ANTHROPIC_API_KEY=<key> docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 **Build and publish multi-arch images:**
 ```bash
 # Remove old images and clear cache (clean rebuild)
-docker rmi oxilith/identity-assessment-frontend:latest
-docker rmi oxilith/identity-assessment:latest
+docker rmi oxilith/votive-frontend:latest
+docker rmi oxilith/votive:latest
 docker buildx prune -f
 
 # Build for linux/amd64 + linux/arm64 and push to Docker Hub
 docker buildx bake --push --no-cache
 
 # Publish OCI compose artifact
-docker compose publish --with-env oxilith/identity-assessment-comb:latest
+docker compose publish --with-env oxilith/votive-oci:latest
 ```
 
 **Clear OCI cache (when images updated):**
@@ -72,9 +72,9 @@ rm -rf "$HOME/Library/Caches/docker-compose/"
 ```
 
 **Docker Hub repositories:**
-- `oxilith/identity-assessment` - Backend (multi-arch)
-- `oxilith/identity-assessment-frontend` - Frontend (multi-arch)
-- `oxilith/identity-assessment-comb` - OCI compose artifact
+- `oxilith/votive` - Backend (multi-arch)
+- `oxilith/votive-frontend` - Frontend (multi-arch)
+- `oxilith/votive-oci` - OCI compose artifact
 
 ### HTTPS Setup (Local Development)
 ```bash

@@ -1,23 +1,29 @@
-# Identity Foundations Assessment
+# Votive
 
-A full-stack behavioral psychology and habit formation application that guides users through self-discovery and provides AI-powered pattern analysis for sustainable personal change.
+> *Every action is a vote for who you're becoming.*
 
-## Overview
+Self-discovery before goal-setting. Most habit apps fail because they skip the foundation—understanding who you already are.
 
-This application implements a 5-phase framework for identity-based habit formation:
+Votive guides you through a behavioral psychology assessment, then uses AI to find patterns, contradictions, and blind spots you can't see yourself.
 
-1. **State Awareness** - Understanding fluctuating states (mood, energy, motivation patterns)
-2. **Identity Mapping** - Discovering current self-identity through behaviors and values
-3. **Identity Design** - Defining aspirational identity with achievable stepping-stones
-4. **System Implementation** - Building habit loops and environment design
-5. **Feedback & Integration** - Tracking progress and reinforcing identity through behavioral evidence
+## The Framework
 
-## Key Concepts
+A 5-phase identity-based approach to sustainable change:
 
-- **Habit Loop**: Cue → Craving → Response → Reward
-- **Keystone Behaviors**: Actions with cascading positive effects across life domains
-- **Identity-Based Goals**: "I am someone who..." rather than "I want to..."
-- **Identity Bridge**: Intermediate identities connecting current self to aspirational self
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 1. State Awareness | Energy, mood, motivation patterns | ✅ Implemented |
+| 2. Identity Mapping | Current self through behaviors & values | ✅ Implemented |
+| 3. Identity Design | Aspirational identity with stepping-stones | 🔜 Planned |
+| 4. System Implementation | Habit loops & environment design | 🔜 Planned |
+| 5. Feedback & Integration | Progress tracking & reinforcement | 🔜 Planned |
+
+## Core Principles
+
+- **Identity over outcomes** — "I am someone who..." beats "I want to..."
+- **Keystone behaviors** — Small actions with cascading effects across life
+- **Identity bridges** — Believable stepping-stones between current and aspirational self
+- **Systems over motivation** — Habits bypass the unreliable need for willpower
 
 ## Tech Stack
 
@@ -138,7 +144,7 @@ npm run test          # Run tests
 Pull and run the pre-built multi-arch images:
 
 ```bash
-ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 This starts:
@@ -166,20 +172,20 @@ mkcert localhost 127.0.0.1 ::1
 cd ..
 
 # Run Docker (certificates auto-detected)
-ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 #### Build & Publish (Maintainers)
 
 ```bash
 # Clean rebuild for multi-arch (linux/amd64 + linux/arm64)
-docker rmi oxilith/identity-assessment-frontend:latest
-docker rmi oxilith/identity-assessment:latest
+docker rmi oxilith/votive-frontend:latest
+docker rmi oxilith/votive:latest
 docker buildx prune -f
 docker buildx bake --push --no-cache
 
 # Publish OCI compose artifact
-docker compose publish --with-env oxilith/identity-assessment-comb:latest
+docker compose publish --with-env oxilith/votive-oci:latest
 ```
 
 #### Clear OCI Cache (After Image Updates)
@@ -189,13 +195,13 @@ docker compose publish --with-env oxilith/identity-assessment-comb:latest
 rm -rf "$HOME/Library/Caches/docker-compose/"
 
 # Then re-run
-ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/identity-assessment-comb:latest up
+ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 **Docker Hub Repositories:**
-- `oxilith/identity-assessment` - Backend API
-- `oxilith/identity-assessment-frontend` - Nginx + React
-- `oxilith/identity-assessment-comb` - OCI compose artifact
+- `oxilith/votive` - Backend API
+- `oxilith/votive-frontend` - Nginx + React
+- `oxilith/votive-oci` - OCI compose artifact
 
 ## Framework Documentation
 

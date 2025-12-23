@@ -20,7 +20,7 @@ import {
 
 export const exportToJson = (
   data: AssessmentResponses,
-  filename: string = 'identity-assessment-responses.json'
+  filename: string = 'votive-responses.json'
 ): void => {
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: 'application/json' });
