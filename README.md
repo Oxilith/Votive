@@ -144,7 +144,11 @@ npm run test          # Run tests
 Pull and run the pre-built multi-arch images:
 
 ```bash
+# macOS/Linux
 ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest up
+
+# Windows (PowerShell)
+$env:ANTHROPIC_API_KEY="<YOUR_KEY>"; docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 This starts:
