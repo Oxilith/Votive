@@ -7,20 +7,23 @@
  * - Coordinates navigation via useAssessmentNavigation hook
  * - Manages response state for all questions
  * - Handles completion callback when user finishes assessment
+ * - Tracks when user reaches synthesis phase for navigation state
  * - Supports dark mode and internationalization
  * @dependencies
- * - React (useState)
+ * - React (useState, useEffect)
  * - react-i18next (useTranslation)
  * - @/types/assessment.types (AssessmentResponses, AssessmentProps)
+ * - @/stores (useUIStore)
  * - @/components/assessment/steps (IntroStep, MultiSelectStep, etc.)
  * - @/components/assessment/navigation (AssessmentProgress, NavigationControls)
  * - @/components/assessment/hooks (useAssessmentNavigation)
  * - @/components/assessment/types (Phase, Step)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AssessmentResponses, AssessmentProps } from '@/types/assessment.types';
+import { useUIStore } from '@/stores';
 import {
   IntroStep,
   MultiSelectStep,
@@ -231,6 +234,16 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
     goBack,
   } = useAssessmentNavigation({ phases, startAtSynthesis });
 
+  // UI Store for tracking synthesis reached
+  const setHasReachedSynthesis = useUIStore((state) => state.setHasReachedSynthesis);
+
+  // Set hasReachedSynthesis when user reaches synthesis phase
+  useEffect(() => {
+    if (currentPhaseData.id === 'synthesis') {
+      setHasReachedSynthesis(true);
+    }
+  }, [currentPhaseData.id, setHasReachedSynthesis]);
+
   // Update response handler
   const updateResponse = (key: string, value: string | number | string[]) => {
     setResponses((prev) => ({ ...prev, [key]: value }));
@@ -312,7 +325,7 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-[var(--bg-secondary)]">
       {/* Progress Header */}
       <AssessmentProgress
         phaseTitle={currentPhaseData.title}

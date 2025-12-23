@@ -30,25 +30,25 @@ export const AssessmentProgress: React.FC<AssessmentProgressProps> = ({
   const progressPercent = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900 z-10">
+    <div className="border-b border-[var(--border-subtle)] sticky top-0 bg-[var(--bg-secondary)] z-10">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-sm font-medium text-[var(--text-muted)]">
               {phaseTitle}
             </span>
-            <span className="text-sm text-gray-400 dark:text-gray-500 mx-2">·</span>
-            <span className="text-sm text-gray-600 dark:text-gray-300">
+            <span className="text-sm text-[var(--text-muted)] mx-2">·</span>
+            <span className="text-sm text-[var(--text-secondary)]">
               {phaseSubtitle}
             </span>
           </div>
-          <span className="text-sm text-gray-400 dark:text-gray-500">
+          <span className="text-sm text-[var(--text-muted)]">
             {t('common.progress.stepOf', { current: currentStep, total: totalSteps })}
           </span>
         </div>
-        <div className="h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-[var(--bg-card)] overflow-hidden">
           <div
-            className="h-full bg-gray-900 dark:bg-white transition-all duration-300"
+            className="h-full tech-gradient transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>

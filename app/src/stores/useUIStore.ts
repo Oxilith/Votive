@@ -2,7 +2,7 @@
  * @file stores/useUIStore.ts
  * @purpose Zustand store for UI state management
  * @functionality
- * - Manages current view (assessment/insights)
+ * - Manages current view (landing/assessment/insights)
  * - Tracks current phase and step in assessment
  * - Controls loading and error states
  * - Manages navigation history for back/forward
@@ -22,6 +22,7 @@ interface UIState {
   currentStep: number;
   startAtSynthesis: boolean;
   assessmentKey: number;
+  hasReachedSynthesis: boolean;
 
   // Loading/Error state
   isLoading: boolean;
@@ -36,6 +37,7 @@ interface UIState {
   resetAssessment: () => void;
   incrementAssessmentKey: () => void;
   setStartAtSynthesis: (value: boolean) => void;
+  setHasReachedSynthesis: (value: boolean) => void;
 
   // Loading/Error actions
   setLoading: (loading: boolean) => void;
@@ -49,11 +51,12 @@ const SYNTHESIS_STEP = 0;
 
 export const useUIStore = create<UIState>()((set) => ({
   // Initial state
-  currentView: 'assessment',
+  currentView: 'landing',
   currentPhase: 0,
   currentStep: 0,
   startAtSynthesis: false,
   assessmentKey: 0,
+  hasReachedSynthesis: false,
   isLoading: false,
   error: null,
 
@@ -74,10 +77,11 @@ export const useUIStore = create<UIState>()((set) => ({
 
   resetAssessment: () =>
     set({
-      currentView: 'assessment',
+      currentView: 'landing',
       currentPhase: 0,
       currentStep: 0,
       startAtSynthesis: false,
+      hasReachedSynthesis: false,
     }),
 
   incrementAssessmentKey: () =>
@@ -86,6 +90,8 @@ export const useUIStore = create<UIState>()((set) => ({
     })),
 
   setStartAtSynthesis: (value) => set({ startAtSynthesis: value }),
+
+  setHasReachedSynthesis: (value) => set({ hasReachedSynthesis: value }),
 
   // Loading/Error actions
   setLoading: (loading) => set({ isLoading: loading }),

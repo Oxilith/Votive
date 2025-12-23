@@ -8,7 +8,6 @@
  * - Shows identity synthesis with hidden strengths and next steps
  * - Provides re-analyze functionality for additional insights
  * - Includes loading states and error handling
- * - Provides back navigation to assessment
  * - Supports dark mode theme switching
  * - Supports internationalization (English/Polish)
  * @dependencies
@@ -59,7 +58,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item, type }) => {
         </div>
         {'severity' in item && item.severity && (
           <span
-            className={`text-xs px-2 py-0.5 rounded-full ${
+            className={`text-xs px-2 py-0.5  ${
               item.severity === 'high' ? badgeStyles.emphasis : badgeStyles.default
             }`}
           >
@@ -97,9 +96,9 @@ const InsightCard: React.FC<InsightCardProps> = ({ item, type }) => {
         <div className="space-y-1">
           <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>{t('insights.cards.theTension')}</p>
           <div className={`flex items-center gap-3 text-sm ${textStyles.secondary}`}>
-            <span className="px-3 py-1.5 bg-white/50 dark:bg-black/20 rounded-lg">{contradictionItem.sides[0]}</span>
+            <span className="px-3 py-1.5 bg-[var(--bg-secondary)] ">{contradictionItem.sides[0]}</span>
             <span className="opacity-50">{t('insights.cards.vs')}</span>
-            <span className="px-3 py-1.5 bg-white/50 dark:bg-black/20 rounded-lg">{contradictionItem.sides[1]}</span>
+            <span className="px-3 py-1.5 bg-[var(--bg-secondary)] ">{contradictionItem.sides[1]}</span>
           </div>
         </div>
       )}
@@ -135,7 +134,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item, type }) => {
       {'insight' in item && item.insight && <p className={`${textStyles.primary} opacity-90`}>{leverageItem.insight}</p>}
 
       {'question' in item && item.question && (
-        <div className="mt-3 p-3 bg-white/50 dark:bg-black/20 rounded-lg">
+        <div className="mt-3 p-3 bg-[var(--bg-secondary)] ">
           <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70 mb-1`}>{t('insights.cards.reflectionQuestion')}</p>
           <p className={`text-sm italic ${textStyles.secondary}`}>{contradictionItem.question}</p>
         </div>
@@ -151,7 +150,7 @@ interface Tab {
   icon: string;
 }
 
-const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
+const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses }) => {
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('patterns');
 
@@ -182,42 +181,18 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
     : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white text-xl">🧠</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('insights.header.title')}</h1>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">{t('insights.header.subtitle')}</p>
-              </div>
-            </div>
-            {onBack && (
-              <button onClick={onBack} className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-1.5">
-                <span>←</span>
-                {t('insights.buttons.backToAssessment')}
-              </button>
-            )}
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 mt-3">{t('insights.header.description')}</p>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <div className="max-w-6xl mx-auto px-6 py-8">
         {!analysis && !loading && (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-[var(--color-violet)]/10 flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🔮</span>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('insights.ready.title')}</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">{t('insights.ready.description')}</p>
+            <h2 className="font-serif text-xl font-semibold text-[var(--text-primary)] mb-2">{t('insights.ready.title')}</h2>
+            <p className="text-[var(--text-secondary)] mb-6 max-w-md mx-auto">{t('insights.ready.description')}</p>
             <button
               onClick={analyzeWithClaude}
-              className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
+              className="cta-button px-6 py-3 tech-gradient text-white font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-2"
             >
               <span>{t('insights.ready.button')}</span>
               <span>→</span>
@@ -227,14 +202,14 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
 
         {loading && (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <div className="w-20 h-20 bg-[var(--color-violet)]/10 flex items-center justify-center mx-auto mb-6 animate-pulse">
               <span className="text-4xl">🧠</span>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('insights.loading.title')}</h2>
-            <p className="text-gray-600 dark:text-gray-400">{t('insights.loading.description')}</p>
+            <h2 className="font-serif text-xl font-semibold text-[var(--text-primary)] mb-2">{t('insights.loading.title')}</h2>
+            <p className="text-[var(--text-secondary)]">{t('insights.loading.description')}</p>
             <div className="mt-6 flex justify-center gap-1">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                <div key={i} className="w-2 h-2 bg-[var(--color-violet)]  animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
               ))}
             </div>
           </div>
@@ -242,23 +217,23 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
 
         {error && (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-red-500/10 flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">⚠️</span>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('insights.error.title')}</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+            <h2 className="font-serif text-xl font-semibold text-[var(--text-primary)] mb-2">{t('insights.error.title')}</h2>
+            <p className="text-[var(--text-secondary)] mb-4">{error}</p>
             <div className="flex items-center justify-center gap-3">
               {rawResponse && (
                 <button
                   onClick={downloadRawResponse}
-                  className="px-4 py-2.5 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl font-medium transition-colors"
+                  className="px-4 py-2.5 text-amber-600 hover:bg-amber-500/10 border border-amber-500/30 font-medium transition-colors"
                 >
                   {t('insights.error.downloadRaw')}
                 </button>
               )}
               <button
                 onClick={analyzeWithClaude}
-                className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                className="cta-button px-6 py-3 tech-gradient text-white font-medium hover:opacity-90 transition-opacity"
               >
                 {t('insights.error.tryAgain')}
               </button>
@@ -269,7 +244,7 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
         {analysis && (
           <>
             {/* Tabs */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 overflow-hidden">
+            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] mb-6 overflow-hidden">
               <div className="flex overflow-x-auto">
                 {tabs.map((tab) => (
                   <button
@@ -277,16 +252,16 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors flex-1 ${
                       activeTab === tab.id
-                        ? 'border-violet-600 text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/20'
-                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        ? 'border-[var(--color-violet)] text-[var(--color-violet)] bg-[var(--color-violet)]/10'
+                        : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'
                     }`}
                   >
                     <span className="mr-1.5">{tab.icon}</span>
                     {tab.label}
                     {tab.count !== null && (
                       <span
-                        className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
-                          activeTab === tab.id ? 'bg-violet-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                        className={`ml-2 px-1.5 py-0.5 text-xs ${
+                          activeTab === tab.id ? 'bg-[var(--color-violet)] text-white' : 'bg-[var(--bg-secondary)] text-[var(--text-muted)]'
                         }`}
                       >
                         {tab.count}
@@ -361,12 +336,12 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses, onBack }) => {
             <div className="mt-8 text-center">
               <button
                 onClick={analyzeWithClaude}
-                className="px-5 py-2.5 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors inline-flex items-center gap-2"
+                className="px-5 py-2.5 bg-[var(--bg-card)] text-[var(--text-secondary)]  font-medium hover:bg-[var(--bg-secondary)] border border-[var(--border-subtle)] transition-colors inline-flex items-center gap-2"
               >
                 <span>🔄</span>
                 <span>{t('insights.reanalyze.button')}</span>
               </button>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">{t('insights.reanalyze.description')}</p>
+              <p className="text-[var(--text-muted)] text-sm mt-2">{t('insights.reanalyze.description')}</p>
             </div>
           </>
         )}

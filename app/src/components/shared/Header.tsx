@@ -2,10 +2,10 @@
  * @file src/components/shared/Header.tsx
  * @purpose Persistent header component with navigation, data management, theme, and language controls
  * @functionality
- * - Displays application branding/title
- * - Provides import JSON file button with file input
- * - Provides export responses to JSON button
- * - Provides load sample data button for development/testing
+ * - Displays application branding with Votive logo
+ * - Provides navigation links to landing page sections (Philosophy, Journey, AI Insights)
+ * - Shows Assessment and Analysis view indicators with active states
+ * - Provides more menu with import/export functionality
  * - Shows error messages for invalid imports
  * - Displays theme toggle (sun/moon icons) for dark/light mode switching
  * - Displays language selector (EN/PL) for internationalization
@@ -15,6 +15,7 @@
  * - @/types/assessment.types (AssessmentResponses, AppView)
  * - @/utils/fileUtils (importFromJson)
  * - @/hooks/useThemeContext (useThemeContext)
+ * - @/components/landing/shared/VotiveLogo
  */
 
 import { useRef, useState, useEffect } from 'react';
@@ -22,25 +23,42 @@ import { useTranslation } from 'react-i18next';
 import type { AssessmentResponses, AppView } from '@/types/assessment.types';
 import { importFromJson } from '@/utils/fileUtils';
 import { useThemeContext } from '@/hooks/useThemeContext';
+import VotiveLogo from '@/components/landing/shared/VotiveLogo';
 
 interface HeaderProps {
   currentView: AppView;
   hasResponses: boolean;
+  hasReachedSynthesis: boolean;
   onImport: (data: AssessmentResponses) => void;
   onExport: () => void;
   onExportAnalysis?: () => void;
   hasAnalysis?: boolean;
+  onNavigateToLanding: (hash?: string) => void;
+  onNavigateToAssessment: () => void;
+  onNavigateToInsights: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, onExport, onExportAnalysis, hasAnalysis }) => {
+const Header: React.FC<HeaderProps> = ({
+  currentView,
+  hasResponses,
+  hasReachedSynthesis,
+  onImport,
+  onExport,
+  onExportAnalysis,
+  hasAnalysis,
+  onNavigateToLanding,
+  onNavigateToAssessment,
+  onNavigateToInsights,
+}) => {
   const { t, i18n } = useTranslation();
   const { isDark, toggleTheme } = useThemeContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [showAnalysisTooltip, setShowAnalysisTooltip] = useState(false);
   const langMenuRef = useRef<HTMLDivElement>(null);
-  const exportMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -48,8 +66,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, on
       if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
         setLangMenuOpen(false);
       }
-      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
-        setExportMenuOpen(false);
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setMoreMenuOpen(false);
       }
     };
 
@@ -73,10 +91,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, on
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setMoreMenuOpen(false);
   };
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
+    setMoreMenuOpen(false);
   };
 
   const changeLanguage = (lng: string) => {
@@ -86,103 +106,102 @@ const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, on
 
   const handleExportResponses = () => {
     onExport();
-    setExportMenuOpen(false);
+    setMoreMenuOpen(false);
   };
 
   const handleExportAnalysis = () => {
     onExportAnalysis?.();
-    setExportMenuOpen(false);
+    setMoreMenuOpen(false);
   };
 
+  const handleAnalysisClick = () => {
+    if (hasReachedSynthesis) {
+      onNavigateToInsights();
+    } else {
+      setShowAnalysisTooltip(true);
+      setTimeout(() => setShowAnalysisTooltip(false), 3000);
+    }
+  };
+
+  const navLinkClass = 'nav-link text-sm tracking-wide text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer';
+  const activeNavClass = 'nav-link text-sm tracking-wide text-[var(--text-primary)] transition-colors cursor-pointer';
+  const disabledNavClass = 'nav-link text-sm tracking-wide text-[var(--text-muted)] cursor-not-allowed opacity-50';
+
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20">
+    <div className="bg-[var(--bg-secondary)] border-b border-[var(--border-subtle)] sticky top-0 z-20">
       <div className="max-w-6xl mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-200 dark:to-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-white dark:text-gray-900 text-sm">🎯</span>
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{t('header.title')}</h1>
-            </div>
-          </div>
+          {/* Logo and Brand */}
+          <button
+            onClick={() => onNavigateToLanding()}
+            className="flex items-center gap-3 cursor-pointer"
+          >
+            <VotiveLogo size="sm" />
+            <span className="font-serif text-xl font-semibold text-[var(--text-primary)]">
+              {t('header.title')}
+            </span>
+          </button>
 
-          <div className="flex items-center gap-2">
-            {currentView === 'assessment' && (
-              <>
-                {/* Hidden file input */}
-                <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileSelect} className="hidden" />
-
-                {/* Import button */}
-                <button
-                  onClick={handleImportClick}
-                  className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-1.5"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  {t('header.buttons.import')}
-                </button>
-              </>
-            )}
-
-            {/* Export button - simple on assessment, dropdown on insights */}
-            {hasResponses && currentView === 'assessment' && (
+          <div className="flex items-center gap-6">
+            {/* Navigation Links */}
+            <nav className="hidden md:flex items-center gap-6">
               <button
-                onClick={onExport}
-                className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-1.5"
+                onClick={() => onNavigateToLanding('philosophy')}
+                className={navLinkClass}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                {t('header.buttons.export')}
+                {t('header.nav.philosophy')}
               </button>
-            )}
+              <button
+                onClick={() => onNavigateToLanding('journey')}
+                className={navLinkClass}
+              >
+                {t('header.nav.journey')}
+              </button>
+              <button
+                onClick={() => onNavigateToLanding('insights')}
+                className={navLinkClass}
+              >
+                {t('header.nav.insights')}
+              </button>
 
-            {/* Export dropdown on insights view */}
-            {hasResponses && currentView === 'insights' && (
-              <div className="relative" ref={exportMenuRef}>
+              {/* Assessment Link */}
+              <button
+                onClick={onNavigateToAssessment}
+                className={currentView === 'assessment' ? activeNavClass : navLinkClass}
+              >
+                {t('header.nav.assessment')}
+              </button>
+
+              {/* Analysis Link */}
+              <div className="relative">
                 <button
-                  onClick={() => setExportMenuOpen(!exportMenuOpen)}
-                  className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-1.5"
+                  onClick={handleAnalysisClick}
+                  className={
+                    currentView === 'insights'
+                      ? activeNavClass
+                      : hasReachedSynthesis
+                        ? navLinkClass
+                        : disabledNavClass
+                  }
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  {t('header.buttons.export')}
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  {t('header.nav.analysis')}
                 </button>
-                {exportMenuOpen && (
-                  <div className="absolute right-0 mt-1 py-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                    <button
-                      onClick={handleExportResponses}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      {t('header.buttons.exportResponses')}
-                    </button>
-                    {hasAnalysis && (
-                      <button
-                        onClick={handleExportAnalysis}
-                        className="w-full px-3 py-2 text-left text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      >
-                        {t('header.buttons.exportAnalysis')}
-                      </button>
-                    )}
+                {showAnalysisTooltip && !hasReachedSynthesis && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-lg text-xs text-[var(--text-secondary)] whitespace-nowrap z-50">
+                    {t('header.nav.completeAssessment')}
                   </div>
                 )}
               </div>
-            )}
+            </nav>
 
             {/* Separator */}
-            <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+            <div className="h-6 w-px bg-[var(--border-subtle)]" />
 
             {/* Language Selector */}
             <div className="relative" ref={langMenuRef}>
               <button
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-1.5"
+                className="px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-card)] font-medium transition-colors flex items-center gap-1.5"
               >
                 <span>{i18n.language === 'pl' ? 'PL' : 'EN'}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,19 +209,19 @@ const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, on
                 </svg>
               </button>
               {langMenuOpen && (
-                <div className="absolute right-0 mt-1 py-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div className="absolute right-0 mt-1 py-1 w-32 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-lg z-50">
                   <button
                     onClick={() => changeLanguage('en')}
-                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      i18n.language === 'en' ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400'
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--bg-secondary)] ${
+                      i18n.language === 'en' ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)]'
                     }`}
                   >
                     {t('header.language.en')}
                   </button>
                   <button
                     onClick={() => changeLanguage('pl')}
-                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                      i18n.language === 'pl' ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-400'
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--bg-secondary)] ${
+                      i18n.language === 'pl' ? 'text-[var(--text-primary)] font-medium' : 'text-[var(--text-secondary)]'
                     }`}
                   >
                     {t('header.language.pl')}
@@ -214,7 +233,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, on
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-card)] transition-colors"
               aria-label={isDark ? t('header.theme.toggleLight') : t('header.theme.toggleDark')}
             >
               {isDark ? (
@@ -237,12 +256,65 @@ const Header: React.FC<HeaderProps> = ({ currentView, hasResponses, onImport, on
                 </svg>
               )}
             </button>
+
+            {/* More Menu */}
+            <div className="relative" ref={moreMenuRef}>
+              <button
+                onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                className="p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-card)] transition-colors"
+                aria-label={t('header.menu.more')}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+              {moreMenuOpen && (
+                <div className="absolute right-0 mt-1 py-1 w-48 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-lg z-50">
+                  {/* Hidden file input */}
+                  <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileSelect} className="hidden" />
+
+                  <button
+                    onClick={handleImportClick}
+                    className="w-full px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {t('header.buttons.import')}
+                  </button>
+
+                  {hasResponses && (
+                    <button
+                      onClick={handleExportResponses}
+                      className="w-full px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      {t('header.buttons.exportResponses')}
+                    </button>
+                  )}
+
+                  {hasAnalysis && currentView === 'insights' && (
+                    <button
+                      onClick={handleExportAnalysis}
+                      className="w-full px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      {t('header.buttons.exportAnalysis')}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Import error message */}
         {importError && (
-          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
+          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm flex items-center gap-2">
             <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"

@@ -37,9 +37,8 @@ export interface AssessmentProps {
 
 export interface InsightsProps {
   responses: AssessmentResponses;
-  onBack?: () => void;
   onExport?: () => void;
 }
 
 // App state
-export type AppView = 'assessment' | 'insights';
+export type AppView = 'landing' | 'assessment' | 'insights';

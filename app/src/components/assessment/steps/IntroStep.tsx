@@ -32,33 +32,33 @@ export const IntroStep: React.FC<IntroStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+      <div className="opacity-0 animate-rise" style={{ animationFillMode: 'forwards' }}>
+        <h2 className="font-serif text-3xl md:text-4xl font-medium text-[var(--text-primary)] mb-2">
           {content.heading}
         </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400">
+        <p className="text-lg text-[var(--text-secondary)]">
           {content.subheading}
         </p>
       </div>
-      <div className="prose prose-gray dark:prose-invert max-w-none">
+      <div className="prose max-w-none opacity-0 animate-rise delay-200" style={{ animationFillMode: 'forwards' }}>
         {content.description.split('\n\n').map((para, i) => (
-          <p key={i} className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+          <p key={i} className="text-[var(--text-secondary)] whitespace-pre-line leading-relaxed">
             {para}
           </p>
         ))}
       </div>
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between mt-4 opacity-0 animate-rise delay-400" style={{ animationFillMode: 'forwards' }}>
         {!isFirstStep && onBack && (
           <button
             onClick={onBack}
-            className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="px-6 py-3 text-[var(--text-secondary)] hover:bg-[var(--bg-card)] transition-colors"
           >
             {t('assessment.navigation.back')}
           </button>
         )}
         <button
           onClick={onNext}
-          className="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+          className="cta-button px-6 py-3 tech-gradient text-white font-medium hover:opacity-90 transition-opacity"
         >
           {content.buttonText}
         </button>

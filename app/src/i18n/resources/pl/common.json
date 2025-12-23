@@ -1,11 +1,124 @@
 {
+  "landing": {
+    "nav": {
+      "brand": "Votive",
+      "philosophy": "Filozofia",
+      "journey": "Podróż",
+      "insights": "Analizy AI",
+      "beginDiscovery": "Rozpocznij odkrywanie",
+      "begin": "Rozpocznij",
+      "language": {
+        "en": "English",
+        "pl": "Polski"
+      }
+    },
+    "hero": {
+      "tagline1": "Każde działanie to",
+      "tagline2Prefix": "",
+      "tagline2Highlight": "głos za tym, kim",
+      "tagline3": "się stajesz",
+      "subtitle": "Większość aplikacji do nawyków zawodzi, bo pomija fundament: zrozumienie kim już jesteś. Votive prowadzi Cię przez samopoznanie wspierane AI, zanim przejdziesz do celów.",
+      "cta": "Rozpocznij odkrywanie",
+      "learnMore": "Poznaj filozofię",
+      "votesLabel": "Głosów oddanych ku lepszym wersjom siebie"
+    },
+    "philosophy": {
+      "label": "Problem",
+      "title": "Cele zawodzą gdy pomijają jaźń",
+      "p1": "Próbowałeś aplikacji do nawyków. Porannych rutyn. 21-dniowych wyzwań. Działają przez chwilę, potem się rozpadają. Nie dlatego, że brakuje Ci dyscypliny, ale dlatego, że zacząłeś w złym miejscu.",
+      "p2": "Prawdziwa zmiana nie zaczyna się od celów. Zaczyna się od zrozumienia kim już jesteś: Twoich wzorców energii, ukrytych motywacji, nieświadomych zachowań kształtujących Twoje dni.",
+      "quote": "Ciekawym paradoksem jest to, że kiedy akceptuję siebie takim, jakim jestem, wtedy mogę się zmienić.",
+      "quoteAuthor": "Carl Rogers"
+    },
+    "journey": {
+      "label": "Podróż",
+      "title": "Pięć faz transformacji",
+      "subtitle": "Votive prowadzi Cię przez świadomą progresję: od zrozumienia kim jesteś do stawania się tym, kim chcesz być.",
+      "comingSoon": "Wkrótce",
+      "phases": {
+        "1": {
+          "name": "Świadomość Stanu",
+          "title": "Poznaj swoje rytmy",
+          "description": "Zmapuj cykle energii, wyzwalacze nastroju i wzorce siły woli. Odkryj co Cię wyczerpuje i co Cię regeneruje.",
+          "features": ["Szczyty energii", "Wyzwalacze emocji", "Wzorce siły woli"]
+        },
+        "2": {
+          "name": "Mapowanie Tożsamości",
+          "title": "Zobacz siebie wyraźnie",
+          "description": "Zbadaj swoją obecną tożsamość, automatyczne zachowania i kluczowe nawyki. Odkryj swoje wartości i naturalne mocne strony.",
+          "features": ["Luki w samopostrzeganiu", "Zgodność z wartościami", "Kluczowe zachowania"]
+        },
+        "3": {
+          "name": "Projektowanie Tożsamości",
+          "title": "Wyobraź sobie przyszłego siebie",
+          "description": "Zdefiniuj swoją aspiracyjną tożsamość i stwórz wiarygodne kamienie milowe by zbudować most.",
+          "features": ["Aspiracyjna tożsamość", "Mosty tożsamości", "Mapowanie zachowań"]
+        },
+        "4": {
+          "name": "Projektowanie Systemu",
+          "title": "Zbuduj swoją architekturę",
+          "description": "Zaprojektuj pętle nawyków, zoptymalizuj środowisko i stwórz struktury odpowiedzialności.",
+          "features": ["Architektura nawyków", "Projektowanie środowiska", "Odpowiedzialność"]
+        },
+        "5": {
+          "name": "Integracja",
+          "title": "Ucieleśnij zmianę",
+          "description": "Śledź postępy, zbieraj dowody behawioralne i wzmacniaj swoją ewoluującą tożsamość.",
+          "features": ["Śledzenie postępów", "Wzmacnianie tożsamości", "Zbieranie dowodów"]
+        }
+      }
+    },
+    "insights": {
+      "label": "Analizy AI",
+      "title": "Inteligencja która Cię rozumie",
+      "subtitle": "Claude analizuje Twoje odpowiedzi by znaleźć wzorce, sprzeczności i punkty dźwigni, które systemy oparte na regułach by przeoczyły.",
+      "types": {
+        "patterns": "Ukryte wzorce behawioralne",
+        "contradictions": "Wewnętrzne sprzeczności",
+        "blindSpots": "Martwe punkty i założenia",
+        "leverage": "Możliwości wysokiej dźwigni"
+      },
+      "sampleCard": {
+        "label": "Przykładowa analiza",
+        "category": "Synteza tożsamości",
+        "quote": "\"Opisujesz siebie jako zdyscyplinowanego, ale spadki energii i wyzwalacze nastroju sugerują, że działasz wyłącznie na sile woli — ograniczonym zasobie. Twoje kluczowe zachowanie, poranne ćwiczenia, może stać się kotwicą, która regeneruje zamiast wyczerpywać, jeśli przejdziesz od wymuszania wydajności do szanowania rytmu.\"",
+        "analysis": "To nie hipokryzja, to luka między Twoją aspiracyjną a rzeczywistą tożsamością. Nawyk z telefonem może zaspokajać niezaspokojoną potrzebę kontaktu lub nowości. Zrozumienie tego napięcia to pierwszy krok do jego pokonania.",
+        "poweredBy": "Wspierane przez Claude AI"
+      }
+    },
+    "cta": {
+      "title": "Gotowy by zrozumieć siebie?",
+      "subtitle": "Ocena zajmuje około 15 minut. Bez kont, bez śledzenia, tylko szczera refleksja.",
+      "button": "Rozpocznij odkrywanie",
+      "timeEstimate": "~15 minut szczerej refleksji",
+      "openSource": "Darmowe · Bez rejestracji · Open source"
+    },
+    "footer": {
+      "brand": "Votive",
+      "copyright": "© {{year}} Votive. Każde działanie to głos.",
+      "github": "GitHub",
+      "license": "Licencja MIT",
+      "author": "Konrad Jagusiak"
+    }
+  },
   "header": {
     "title": "Votive",
+    "nav": {
+      "philosophy": "Filozofia",
+      "journey": "Podróż",
+      "insights": "Analizy AI",
+      "assessment": "Ocena",
+      "analysis": "Analiza",
+      "completeAssessment": "Ukończ ocenę aby odblokować Analizę"
+    },
     "buttons": {
       "import": "Importuj",
       "export": "Eksportuj",
       "exportResponses": "Eksportuj odpowiedzi",
       "exportAnalysis": "Eksportuj analizę"
+    },
+    "menu": {
+      "more": "Więcej opcji"
     },
     "errors": {
       "importFailed": "Nie udało się zaimportować pliku"

@@ -33,22 +33,22 @@ export const NavigationControls: React.FC<NavigationControlsProps> = ({
   }
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-900">
+    <div className="border-t border-[var(--border-subtle)] sticky bottom-0 bg-[var(--bg-secondary)]">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between">
         <button
           onClick={onBack}
           disabled={isFirstStep}
-          className={`px-5 py-2.5 rounded-lg font-medium transition-colors ${
+          className={`px-5 py-2.5 font-medium transition-colors ${
             isFirstStep
-              ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+              ? 'text-[var(--text-muted)] cursor-not-allowed opacity-50'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'
           }`}
         >
           {t('assessment.navigation.back')}
         </button>
         <button
           onClick={onNext}
-          className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+          className="cta-button px-5 py-2.5 tech-gradient text-white font-medium hover:opacity-90 transition-opacity"
         >
           {t('assessment.navigation.continue')}
         </button>
