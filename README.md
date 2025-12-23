@@ -194,19 +194,34 @@ ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest u
 ```bash
 # Clean rebuild for multi-arch (linux/amd64 + linux/arm64)
 docker rmi oxilith/votive-frontend:latest
-docker rmi oxilith/votive:latest
+docker rmi oxilith/votive-backend:latest
 docker buildx prune -f
 docker buildx bake --push --no-cache
 
-# Publish OCI compose artifact
-docker compose publish --with-env oxilith/votive-oci:latest
+# Publish OCI compose artifact (--resolve-image-digests ensures multi-arch support)
+docker compose publish --resolve-image-digests --with-env oxilith/votive-oci:latest
+```
+
+#### Platform Selection
+
+If Docker selects the wrong platform, set `DOCKER_DEFAULT_PLATFORM`:
+
+```bash
+# macOS/Linux
+DOCKER_DEFAULT_PLATFORM=linux/amd64 ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest up
+
+# Windows (PowerShell)
+$env:DOCKER_DEFAULT_PLATFORM="linux/amd64"; $env:ANTHROPIC_API_KEY="<YOUR_KEY>"; docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 #### Clear OCI Cache (After Image Updates)
 
 ```bash
-# macOS
+# macOS/Linux
 rm -rf "$HOME/Library/Caches/docker-compose/"
+
+# Windows (PowerShell)
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\docker-compose"
 
 # Then re-run
 ANTHROPIC_API_KEY=<YOUR_KEY> docker compose -f oci://oxilith/votive-oci:latest up
