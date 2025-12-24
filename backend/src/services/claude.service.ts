@@ -38,13 +38,21 @@ function buildRequestParams(
   prompt: string,
   promptConfig: ReturnType<InstanceType<typeof PromptConfigResolver>['resolve']>
 ): MessageCreateParamsNonStreaming {
-  return {
+  const thinking = promptConfig.thinking;
+  const isThinkingEnabled = thinking !== undefined && thinking.type === 'enabled';
+
+  const params: MessageCreateParamsNonStreaming = {
     model: promptConfig.model,
     max_tokens: promptConfig.max_tokens,
     messages: [{ role: 'user', content: prompt }],
-    temperature: promptConfig.thinking?.type === 'enabled' ? 1 : promptConfig.temperature,
-    ...(promptConfig.thinking && { thinking: promptConfig.thinking }),
+    temperature: isThinkingEnabled ? 1 : promptConfig.temperature,
   };
+
+  if (thinking !== undefined) {
+    params.thinking = thinking;
+  }
+
+  return params;
 }
 
 export async function analyzeAssessment(

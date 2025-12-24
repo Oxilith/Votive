@@ -102,7 +102,7 @@ describe('useUIStore', () => {
       resetAssessment();
 
       const state = useUIStore.getState();
-      expect(state.currentView).toBe('assessment');
+      expect(state.currentView).toBe('landing');
       expect(state.currentPhase).toBe(0);
       expect(state.currentStep).toBe(0);
       expect(state.startAtSynthesis).toBe(false);
