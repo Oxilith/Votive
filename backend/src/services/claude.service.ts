@@ -19,7 +19,7 @@ import type { MessageCreateParamsNonStreaming } from '@anthropic-ai/sdk/resource
 import { config } from '@/config/index.js';
 import { logger } from '@/utils/logger.js';
 import type { AssessmentResponses, AIAnalysisResult } from '@/types/claude.types.js';
-import type { AnalysisLanguage } from 'shared/index.js';
+import type { AnalysisLanguage, PromptConfig } from 'shared/index.js';
 import { formatResponsesForPrompt, PromptConfigResolver } from 'shared/index.js';
 import { extractTextFromMessage, parseAnalysisResponse } from '@/services/claude/response-parser.js';
 
@@ -36,10 +36,10 @@ async function sleep(ms: number): Promise<void> {
 
 function buildRequestParams(
   prompt: string,
-  promptConfig: ReturnType<InstanceType<typeof PromptConfigResolver>['resolve']>
+  promptConfig: PromptConfig
 ): MessageCreateParamsNonStreaming {
-  const thinking = promptConfig.thinking;
-  const isThinkingEnabled = thinking !== undefined && thinking.type === 'enabled';
+  const { thinking } = promptConfig;
+  const isThinkingEnabled = thinking?.type === 'enabled';
 
   const params: MessageCreateParamsNonStreaming = {
     model: promptConfig.model,
@@ -48,7 +48,7 @@ function buildRequestParams(
     temperature: isThinkingEnabled ? 1 : promptConfig.temperature,
   };
 
-  if (thinking !== undefined) {
+  if (thinking) {
     params.thinking = thinking;
   }
 
