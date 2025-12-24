@@ -1,0 +1,20 @@
+# CODEOWNERS - Define who must review changes to critical files
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @Oxilith
+
+# Critical configuration files require owner approval
+/.github/ @Oxilith
+/LICENSE* @Oxilith
+/SECURITY.md @Oxilith
+
+# Core framework files
+/app/ @Oxilith
+/backend/ @Oxilith
+/shared/ @Oxilith
+
+# Documentation can be reviewed by maintainers (add others as project grows)
+/docs/ @Oxilith
+/personas/ @Oxilith
+README.md @Oxilith
