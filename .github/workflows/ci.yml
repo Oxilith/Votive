@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: false  # Disabled temporarily
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./app/coverage/lcov.info
           flags: frontend
@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: false  # Disabled temporarily
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           files: ./backend/coverage/lcov.info
           flags: backend
