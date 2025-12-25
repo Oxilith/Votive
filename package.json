@@ -9,6 +9,7 @@
     "prompt-service"
   ],
   "scripts": {
+    "postinstall": "npm install --no-save @rollup/rollup-linux-x64-gnu --install-links || true",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
     "type-check": "npm run type-check --workspaces --if-present",
