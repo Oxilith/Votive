@@ -17,9 +17,11 @@
  * - @/config for configuration
  * - @/routes for API routes
  * - @/middleware/admin-auth.middleware for admin authentication
+ * - express-rate-limit for rate limiting static admin routes
  */
 
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -131,20 +133,29 @@ app.use('/api', apiRouter);
 // Serve admin UI static files
 const adminPath = path.join(__dirname, 'admin');
 
+// Rate limiter for admin static files
+const adminStaticRateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100, // 100 requests per 10 minutes
+  message: { error: 'Too many requests to admin UI, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 if (config.nodeEnv === 'production') {
-  // Protected admin UI in production
-  app.use('/admin', adminAuthMiddleware, express.static(adminPath));
+  // Protected admin UI in production with rate limiting
+  app.use('/admin', adminStaticRateLimiter, adminAuthMiddleware, express.static(adminPath));
 
   // SPA fallback for admin routes
-  app.get('/admin/*', adminAuthMiddleware, (_req, res) => {
+  app.get('/admin/*', adminStaticRateLimiter, adminAuthMiddleware, (_req, res) => {
     res.sendFile(path.join(adminPath, 'index.html'));
   });
 } else {
   // Development mode - serve without auth for easier testing
-  app.use('/admin', express.static(adminPath));
+  app.use('/admin', adminStaticRateLimiter, express.static(adminPath));
 
   // SPA fallback for admin routes
-  app.get('/admin/*', (_req, res) => {
+  app.get('/admin/*', adminStaticRateLimiter, (_req, res) => {
     res.sendFile(path.join(adminPath, 'index.html'));
   });
 }
