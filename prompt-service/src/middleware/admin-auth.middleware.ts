@@ -10,6 +10,7 @@
  * - Blocks access in production if admin key is not configured
  * @dependencies
  * - @/utils/crypto for timing-safe comparison
+ * - @/utils/auth for shared auth config validation
  * - express for Request, Response, NextFunction types
  * - @/config for configuration
  */
@@ -18,26 +19,26 @@ import type { Request, Response, NextFunction } from 'express';
 import { config } from '@/config/index.js';
 import { AUTH_CONSTANTS } from '@/constants/auth.js';
 import { timingSafeCompare } from '@/utils/crypto.js';
+import { validateAuthConfig } from '@/utils/auth.js';
 
 export function adminAuthMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ): void {
-  // Development mode without key configured - require explicit bypass
-  if (!config.adminApiKey) {
-    if (config.nodeEnv === 'production') {
-      res.status(503).json({ error: 'Admin access not configured' });
-      return;
-    }
-    // Only allow bypass in development if explicitly enabled
-    if (config.devAuthBypass) {
-      next();
-      return;
-    }
-    res.status(503).json({
-      error: 'Admin access not configured. Set ADMIN_API_KEY or DEV_AUTH_BYPASS=true',
+  // Validate auth configuration using shared utility
+  const authValidation = validateAuthConfig();
+
+  if (!authValidation.isValid && authValidation.errorResponse) {
+    res.status(authValidation.errorResponse.status).json({
+      error: authValidation.errorResponse.error,
     });
+    return;
+  }
+
+  // Development bypass enabled - skip authentication
+  if (authValidation.shouldBypass) {
+    next();
     return;
   }
 
@@ -50,7 +51,7 @@ export function adminAuthMiddleware(
 
   // Fall back to X-Admin-Key header for backward compatibility
   const apiKey = req.headers[AUTH_CONSTANTS.API_KEY_HEADER];
-  if (apiKey && typeof apiKey === 'string') {
+  if (apiKey && typeof apiKey === 'string' && config.adminApiKey) {
     if (timingSafeCompare(apiKey, config.adminApiKey)) {
       next();
       return;

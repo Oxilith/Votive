@@ -9,6 +9,7 @@
  * @dependencies
  * - express Router
  * - @/utils/crypto for timing-safe comparison
+ * - @/utils/auth for shared auth config validation
  * - @/config for configuration
  * - @/index for logger
  */
@@ -17,6 +18,7 @@ import { Router, type Request, type Response } from 'express';
 import { config } from '@/config/index.js';
 import { AUTH_CONSTANTS } from '@/constants/auth.js';
 import { timingSafeCompare } from '@/utils/crypto.js';
+import { validateAuthConfig } from '@/utils/auth.js';
 import { logger } from '@/index.js';
 
 const router = Router();
@@ -33,28 +35,26 @@ router.post('/login', (req: Request, res: Response): void => {
     return;
   }
 
-  // Check if admin authentication is configured
-  if (!config.adminApiKey) {
-    if (config.nodeEnv === 'production') {
-      res.status(503).json({ error: 'Admin access not configured' });
-      return;
-    }
-    // Only allow bypass in development if explicitly enabled
-    if (config.devAuthBypass) {
-      logger.warn('DEV_AUTH_BYPASS is enabled - allowing any API key');
-      setSessionCookie(res);
-      res.json({ success: true });
-      return;
-    }
-    // Development without bypass enabled
-    res.status(503).json({
-      error: 'Admin access not configured. Set ADMIN_API_KEY or DEV_AUTH_BYPASS=true',
+  // Validate auth configuration using shared utility
+  const authValidation = validateAuthConfig();
+
+  if (!authValidation.isValid && authValidation.errorResponse) {
+    res.status(authValidation.errorResponse.status).json({
+      error: authValidation.errorResponse.error,
     });
     return;
   }
 
+  // Development bypass enabled - allow any API key
+  if (authValidation.shouldBypass) {
+    logger.warn('DEV_AUTH_BYPASS is enabled - allowing any API key');
+    setSessionCookie(res);
+    res.json({ success: true });
+    return;
+  }
+
   // Validate API key using timing-safe comparison
-  if (!timingSafeCompare(apiKey, config.adminApiKey)) {
+  if (!config.adminApiKey || !timingSafeCompare(apiKey, config.adminApiKey)) {
     res.status(401).json({ error: 'Invalid API key' });
     return;
   }

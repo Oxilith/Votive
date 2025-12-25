@@ -5,8 +5,8 @@
  * - Provides a single shared Prisma client instance
  * - Supports SQLCipher encryption via libsql adapter when DATABASE_KEY is set
  * - Falls back to standard SQLite when no encryption key is provided
- * - Handles graceful shutdown on process termination
  * - Prevents multiple client instances in development with hot reload
+ * @note Graceful shutdown is handled in index.ts via SIGTERM/SIGINT handlers
  * @dependencies
  * - @prisma/client for database access
  * - @prisma/adapter-libsql for driver adapter
@@ -63,8 +63,3 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 // Cache instance globally to prevent connection leaks
 globalForPrisma.prisma = prisma;
-
-// Graceful shutdown
-process.on('beforeExit', () => {
-  void prisma.$disconnect();
-});

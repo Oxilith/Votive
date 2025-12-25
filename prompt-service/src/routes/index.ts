@@ -4,8 +4,9 @@
  * @functionality
  * - Combines auth, prompt, A/B test, and resolve routes
  * - Applies admin auth middleware to protected routes (prompts, ab-tests)
- * - Applies rate limiting to admin routes
- * - Keeps resolve and auth routes open for public access
+ * - Applies rate limiting to admin routes (100 req/15min)
+ * - Applies strict rate limiting to auth routes (5 req/min) to prevent brute-force attacks
+ * - Applies lenient rate limiting to resolve routes (1000 req/min) for service-to-service
  * - Provides a single router for mounting in Express app
  * @dependencies
  * - express Router
@@ -36,6 +37,15 @@ const adminRateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for auth endpoints (stricter to prevent brute-force attacks)
+const authRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // 5 attempts per minute
+  message: { error: 'Too many login attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Rate limiter for resolve endpoint (more lenient - service-to-service)
 const resolveRateLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -48,8 +58,8 @@ const resolveRateLimiter = rateLimit({
 // Public routes (used by backend service) - rate limited to prevent abuse
 router.use('/resolve', resolveRateLimiter, resolveRoutes);
 
-// Auth routes (public - for login/logout)
-router.use('/auth', authRoutes);
+// Auth routes (public - for login/logout) - rate limited to prevent brute-force attacks
+router.use('/auth', authRateLimiter, authRoutes);
 
 // Protected admin routes (require X-Admin-Key header + rate limiting)
 router.use('/prompts', adminRateLimiter, adminAuthMiddleware, promptRoutes);

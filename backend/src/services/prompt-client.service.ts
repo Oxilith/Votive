@@ -8,9 +8,11 @@
  * - Schedules background cache refresh with overall timeout (60s)
  * - Records A/B test conversions with circuit breaker protection
  * - Health checks with circuit breaker protection
+ * - Sanitizes error messages to prevent information disclosure
  * @dependencies
  * - @/config for prompt service URL configuration
  * - @/utils/logger for logging
+ * - @/utils/error-sanitizer for secure error handling
  * - @/services/circuit-breaker.service for circuit breaker wrapper
  * - @/services/prompt-cache.service for in-memory caching
  * - shared/prompt.types for PromptConfig type
@@ -19,6 +21,7 @@
 import type CircuitBreaker from 'opossum';
 import { config } from '@/config/index.js';
 import { logger } from '@/utils/logger.js';
+import { createClientError } from '@/utils/error-sanitizer.js';
 import { createCircuitBreaker } from '@/services/circuit-breaker.service.js';
 import { promptCacheService } from '@/services/prompt-cache.service.js';
 import type { PromptConfig } from 'shared/index.js';
@@ -178,9 +181,14 @@ export class PromptClientService {
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
-        // Truncate and sanitize error message to prevent information disclosure
-        const sanitizedError = errorText.slice(0, 200).replace(/[\r\n]/g, ' ');
-        throw new Error(`HTTP ${response.status}: ${sanitizedError}`);
+        // Use centralized error handling to prevent information disclosure
+        const { clientMessage, internalLog } = createClientError(
+          response.status,
+          errorText,
+          'prompt-resolve'
+        );
+        logger.error({ ...internalLog, key, thinkingEnabled }, 'Prompt resolution HTTP error');
+        throw new Error(clientMessage);
       }
 
       const data = await response.json() as ResolvePromptResponse;
