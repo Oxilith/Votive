@@ -1,0 +1,31 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 4d8208a..2b90c4e 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -24,7 +24,7 @@ jobs:
+           node-version: ${{ env.NODE_VERSION }}
+
+       - name: Install dependencies
+-        run: npm install --prefer-offline --no-audit
++        run: npm install --include=optional --no-audit
+
+       - name: Generate Prisma Client
+         run: npm run db:generate -w prompt-service
+@@ -49,7 +49,7 @@ jobs:
+           node-version: ${{ env.NODE_VERSION }}
+
+       - name: Install dependencies
+-        run: npm install --prefer-offline --no-audit
++        run: npm install --include=optional --no-audit
+
+       - name: Generate Prisma Client
+         run: npm run db:generate -w prompt-service
+@@ -82,7 +82,7 @@ jobs:
+           node-version: ${{ env.NODE_VERSION }}
+
+       - name: Install dependencies
+-        run: npm install --prefer-offline --no-audit
++        run: npm install --include=optional --no-audit
+
+       - name: Generate Prisma Client
+         run: npm run db:generate -w prompt-service
