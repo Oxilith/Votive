@@ -27,6 +27,7 @@ jobs:
       - name: Clean install dependencies
         run: |
           rm -rf node_modules shared/node_modules backend/node_modules app/node_modules prompt-service/node_modules
+          rm -f package-lock.json shared/package-lock.json backend/package-lock.json app/package-lock.json prompt-service/package-lock.json
           npm install
 
       - name: Run ESLint
@@ -52,6 +53,7 @@ jobs:
       - name: Clean install dependencies
         run: |
           rm -rf node_modules shared/node_modules backend/node_modules app/node_modules prompt-service/node_modules
+          rm -f package-lock.json shared/package-lock.json backend/package-lock.json app/package-lock.json prompt-service/package-lock.json
           npm install
 
       - name: Generate Prisma Client
@@ -88,6 +90,7 @@ jobs:
       - name: Clean install dependencies
         run: |
           rm -rf node_modules shared/node_modules backend/node_modules app/node_modules prompt-service/node_modules
+          rm -f package-lock.json shared/package-lock.json backend/package-lock.json app/package-lock.json prompt-service/package-lock.json
           npm install
 
       - name: Generate Prisma Client

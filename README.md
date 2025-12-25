@@ -204,6 +204,7 @@ See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation includi
 |----------|-------------|
 | [Architecture](docs/architecture.md) | System design, diagrams, and technical decisions |
 | [Docker Hub Workflow](docs/docker-hub.md) | Container deployment, publishing, and troubleshooting |
+| [Production Deployment](docs/ClaudeDocs/production-deployment.md) | Security, configuration, and deployment best practices |
 | [Motivation](docs/Motivation.md) | Theoretical framework and psychology principles |
 
 ## API Endpoints

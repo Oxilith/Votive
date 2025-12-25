@@ -7,9 +7,11 @@
  * - Checks for suspicious patterns like script tags and event handlers
  * @dependencies
  * - @/errors/index for ValidationError
+ * - @/validators/prompt.validator for MAX_PROMPT_CONTENT_LENGTH
  */
 
 import { ValidationError } from '@/errors/index.js';
+import { MAX_PROMPT_CONTENT_LENGTH } from '@/validators/prompt.validator.js';
 
 /**
  * Patterns that indicate potential script injection attempts
@@ -31,9 +33,16 @@ const SUSPICIOUS_PATTERNS = [
 /**
  * Validates prompt content for potential security issues
  * @param content - The prompt content to validate
- * @throws ValidationError if suspicious patterns are detected
+ * @throws ValidationError if content exceeds max length or contains suspicious patterns
  */
 export function validatePromptContent(content: string): void {
+  // Length check first for DoS prevention (before expensive regex operations)
+  if (content.length > MAX_PROMPT_CONTENT_LENGTH) {
+    throw new ValidationError(
+      `Prompt content exceeds maximum length of ${MAX_PROMPT_CONTENT_LENGTH} characters`
+    );
+  }
+
   for (const pattern of SUSPICIOUS_PATTERNS) {
     if (pattern.test(content)) {
       throw new ValidationError(

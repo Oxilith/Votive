@@ -30,6 +30,8 @@ const REQUEST_TIMEOUT_MS = 5000;
 const MAX_BACKGROUND_RETRY_ATTEMPTS = 5;
 const MAX_CONCURRENT_REFRESHES = 3;
 const MAX_REFRESH_DURATION_MS = 60000;
+const MAX_RETRY_DELAY_MS = 10000;
+const MAX_PENDING_REFRESH_QUEUE_SIZE = 100;
 
 /**
  * Prompts to refresh when circuit breaker closes (service recovers)
@@ -224,7 +226,14 @@ export class PromptClientService {
     if (this.activeRefreshCount < MAX_CONCURRENT_REFRESHES) {
       void this.executeRefresh(key, thinkingEnabled);
     } else {
-      // Queue for later processing
+      // Queue for later processing, with size limit to prevent memory issues
+      if (this.pendingRefreshQueue.length >= MAX_PENDING_REFRESH_QUEUE_SIZE) {
+        logger.warn(
+          { key, thinkingEnabled, queueLength: this.pendingRefreshQueue.length },
+          'Background refresh queue full - dropping oldest task'
+        );
+        this.pendingRefreshQueue.shift(); // Remove oldest
+      }
       this.pendingRefreshQueue.push({ key, thinkingEnabled });
       logger.debug(
         { key, thinkingEnabled, queueLength: this.pendingRefreshQueue.length },
@@ -276,8 +285,8 @@ export class PromptClientService {
       return;
     }
 
-    // Exponential backoff: 1s, 2s, 4s, 8s, 16s (capped at 30s)
-    const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+    // Exponential backoff: 1s, 2s, 4s, 8s (capped at 10s for faster recovery)
+    const delay = Math.min(1000 * Math.pow(2, attempt), MAX_RETRY_DELAY_MS);
     await new Promise((r) => setTimeout(r, delay));
 
     // If circuit is still open, stop retrying

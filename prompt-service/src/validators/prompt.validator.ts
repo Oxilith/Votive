@@ -12,6 +12,12 @@
 
 import { z } from 'zod';
 
+/**
+ * Maximum allowed length for prompt content (~50KB)
+ * Prevents memory exhaustion and ReDoS attacks from large inputs
+ */
+export const MAX_PROMPT_CONTENT_LENGTH = 50000;
+
 const thinkingVariantSchema = z.object({
   temperature: z.number().min(0).max(2),
   maxTokens: z.number().int().positive(),
@@ -31,7 +37,7 @@ export const createPromptSchema = z.object({
     .regex(/^[A-Z][A-Z0-9_]*$/, 'Key must be UPPER_SNAKE_CASE'),
   name: z.string().min(1).max(200),
   description: z.string().max(1000).optional(),
-  content: z.string().min(1),
+  content: z.string().min(1).max(MAX_PROMPT_CONTENT_LENGTH),
   model: z.string().min(1),
   variants: z.object({
     withThinking: thinkingVariantSchema,
@@ -42,7 +48,7 @@ export const createPromptSchema = z.object({
 export const updatePromptSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(1000).optional().nullable(),
-  content: z.string().min(1).optional(),
+  content: z.string().min(1).max(MAX_PROMPT_CONTENT_LENGTH).optional(),
   model: z.string().min(1).optional(),
   isActive: z.boolean().optional(),
   changedBy: z.string().max(100).optional(),

@@ -91,10 +91,36 @@ export class PromptCacheService {
   }
 
   /**
-   * Checks if a cache entry is fresh (within TTL)
+   * Internal method to get entry without updating metrics or LRU order.
+   * Used by isFresh() and has() to avoid double-counting accesses.
+   * Still performs stale TTL cleanup.
+   */
+  private getWithoutTracking(key: string, thinkingEnabled: boolean): CacheEntry | null {
+    const cacheKey = this.getCacheKey(key, thinkingEnabled);
+    const entry = this.cache.get(cacheKey);
+
+    if (!entry) {
+      return null;
+    }
+
+    const age = Date.now() - entry.timestamp;
+
+    // If beyond stale TTL, delete and return null (cleanup still needed)
+    if (age > STALE_TTL_MS) {
+      this.cache.delete(cacheKey);
+      this.removeFromAccessOrder(cacheKey);
+      return null;
+    }
+
+    return entry;
+  }
+
+  /**
+   * Checks if a cache entry is fresh (within TTL).
+   * Does NOT update LRU order or metrics - use after get() for freshness check.
    */
   isFresh(key: string, thinkingEnabled: boolean): boolean {
-    const entry = this.get(key, thinkingEnabled);
+    const entry = this.getWithoutTracking(key, thinkingEnabled);
     if (!entry) {
       return false;
     }
@@ -102,15 +128,21 @@ export class PromptCacheService {
   }
 
   /**
-   * Checks if a cache entry exists (even if stale)
+   * Checks if a cache entry exists (even if stale).
+   * Does NOT update LRU order or metrics.
    */
   has(key: string, thinkingEnabled: boolean): boolean {
-    return this.get(key, thinkingEnabled) !== null;
+    return this.getWithoutTracking(key, thinkingEnabled) !== null;
   }
 
   /**
-   * Sets a cache entry with current timestamp
-   * Evicts least recently used entries if cache exceeds max size
+   * Sets a cache entry with current timestamp.
+   * Evicts least recently used entries if cache exceeds max size.
+   *
+   * @note Thread Safety: In single-threaded Node.js, this is safe since set() is synchronous.
+   * The while loop for LRU eviction completes atomically before any other operation can run.
+   * If async operations are added in the future, consider adding a mutex to prevent
+   * concurrent eviction races.
    */
   set(
     key: string,
@@ -162,12 +194,14 @@ export class PromptCacheService {
   }
 
   /**
-   * Clears all cached entries (useful for testing)
+   * Clears all cached entries and resets metrics (useful for testing)
    */
   clear(): void {
     this.cache.clear();
     this.refreshInProgress.clear();
     this.accessOrder = [];
+    this.hits = 0;
+    this.misses = 0;
   }
 
   /**

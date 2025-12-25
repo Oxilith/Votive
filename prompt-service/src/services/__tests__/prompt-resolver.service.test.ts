@@ -1,12 +1,16 @@
 /**
  * @file prompt-service/src/services/__tests__/prompt-resolver.service.test.ts
- * @purpose Unit tests for PromptResolverService error handling
+ * @purpose Unit tests for custom error types used by PromptResolverService
  * @functionality
- * - Tests NotFoundError and ValidationError types
+ * - Tests NotFoundError, ValidationError, and ConflictError types
  * - Verifies error properties and toJSON serialization
+ * - Tests isAppError type guard function
  * @dependencies
  * - vitest for testing framework
  * - Error types from @/errors/index
+ *
+ * @note This file currently tests error types rather than the PromptResolverService itself.
+ * Consider renaming to errors.test.ts or expanding to include actual PromptResolverService tests.
  */
 
 import { describe, it, expect } from 'vitest';

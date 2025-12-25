@@ -40,6 +40,10 @@ const configSchema = z.object({
   rateLimitWindowMs: z.coerce.number().default(60000),
   rateLimitMaxRequests: z.coerce.number().default(10),
 
+  // Claude API Rate Limiting (stricter for expensive API calls)
+  claudeRateLimitWindowMs: z.coerce.number().default(60000),
+  claudeRateLimitMaxRequests: z.coerce.number().default(5),
+
   // Logging
   logLevel: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 
@@ -76,6 +80,8 @@ function loadConfig(): Config {
     corsOrigin: process.env['CORS_ORIGIN'],
     rateLimitWindowMs: process.env['RATE_LIMIT_WINDOW_MS'],
     rateLimitMaxRequests: process.env['RATE_LIMIT_MAX_REQUESTS'],
+    claudeRateLimitWindowMs: process.env['CLAUDE_RATE_LIMIT_WINDOW_MS'],
+    claudeRateLimitMaxRequests: process.env['CLAUDE_RATE_LIMIT_MAX_REQUESTS'],
     logLevel: process.env['LOG_LEVEL'],
     thinkingEnabled: process.env['THINKING_ENABLED'],
     promptServiceUrl: process.env['PROMPT_SERVICE_URL'],
