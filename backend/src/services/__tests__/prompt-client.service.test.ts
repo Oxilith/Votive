@@ -13,6 +13,8 @@
  * - Mock fetch for HTTP simulation
  */
 
+/* eslint-disable @typescript-eslint/unbound-method -- vitest mocks are safe to use unbound */
+
 import { describe, it, expect, beforeEach, vi, afterEach, type Mock } from 'vitest';
 import { PromptClientService, PromptServiceUnavailableError } from '@/services/prompt-client.service.js';
 import { promptCacheService } from '@/services/prompt-cache.service.js';
