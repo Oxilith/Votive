@@ -4,7 +4,7 @@
  * @functionality
  * - Caches prompt configs with configurable TTL
  * - Supports stale-while-revalidate pattern
- * - Implements LRU eviction when cache exceeds max entries (100)
+ * - Implements LRU eviction when cache exceeds max entries (100) using O(n) array-based tracking
  * - Tracks refresh operations to prevent duplicate requests
  * - Provides cache freshness checking
  * @dependencies
@@ -81,7 +81,17 @@ export class PromptCacheService {
   }
 
   /**
-   * Removes a cache key from the access order tracking
+   * Removes a cache key from the access order tracking.
+   *
+   * Implementation Note: Uses Array.indexOf() + splice() which is O(n).
+   * This is intentional and acceptable because:
+   * 1. MAX_CACHE_ENTRIES is capped at 100 - O(n) on 100 elements is ~microseconds
+   * 2. This method is only called on cache hits/sets, not in tight loops
+   * 3. A Map-based doubly-linked list (O(1) LRU) would add significant complexity
+   *    for negligible performance gain at this scale
+   *
+   * If MAX_CACHE_ENTRIES grows to 1000+, consider switching to a proper LRU
+   * implementation using a Map with a doubly-linked list.
    */
   private removeFromAccessOrder(cacheKey: string): void {
     const index = this.accessOrder.indexOf(cacheKey);

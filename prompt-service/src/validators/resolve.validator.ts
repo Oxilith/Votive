@@ -11,7 +11,11 @@
 import { z } from 'zod';
 
 export const resolvePromptSchema = z.object({
-  key: z.string().min(1),
+  key: z
+    .string()
+    .min(1)
+    .max(100)
+    .regex(/^[A-Z][A-Z0-9_]*$/, 'Key must be UPPER_SNAKE_CASE'),
   thinkingEnabled: z.boolean(),
 });
 

@@ -6,6 +6,7 @@
  * - Validates required configuration values
  * - Provides typed configuration object for application use
  * - Throws descriptive errors for missing required values
+ * - Displays prominent warning when DEV_AUTH_BYPASS is enabled at startup
  * @dependencies
  * - dotenv for environment variable loading
  * - zod for schema validation
@@ -110,6 +111,18 @@ function loadConfig(): Config {
 
   // Apply default database URL for non-production environments
   const databaseUrl = result.data.databaseUrl ?? 'file:./dev.db';
+
+  // Warn if DEV_AUTH_BYPASS is enabled - security-sensitive configuration
+  if (result.data.devAuthBypass && result.data.nodeEnv !== 'production') {
+    console.warn(
+      '\n' +
+        '╔════════════════════════════════════════════════════════════════════════════╗\n' +
+        '║  WARNING: DEV_AUTH_BYPASS is enabled                                       ║\n' +
+        '║  Authentication is bypassed - any API key will be accepted.                ║\n' +
+        '║  This should NEVER be used in production environments.                     ║\n' +
+        '╚════════════════════════════════════════════════════════════════════════════╝\n'
+    );
+  }
 
   return {
     ...result.data,

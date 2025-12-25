@@ -8,6 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Note: SQLite doesn't support native enums. The following types are used as strings:
+// - VariantType: "withThinking" | "withoutThinking"
+// - ThinkingType: "enabled" | "disabled"
+// TypeScript validation is enforced at the application layer via Zod schemas.
+// If migrating to PostgreSQL, consider converting these to native Prisma enums.
+
 /// Main prompt definition - stores the base prompt configuration
 model Prompt {
   id          String   @id @default(uuid())
@@ -32,10 +38,10 @@ model Prompt {
 model PromptVariant {
   id           String   @id @default(uuid())
   promptId     String
-  variantType  String // "withThinking" | "withoutThinking"
+  variantType  String   // "withThinking" | "withoutThinking"
   temperature  Float
   maxTokens    Int
-  thinkingType String // "enabled" | "disabled"
+  thinkingType String   // "enabled" | "disabled"
   budgetTokens Int?
   isDefault    Boolean  @default(false)
   createdAt    DateTime @default(now())
@@ -110,7 +116,7 @@ model ABVariantConfig {
   variantType  String // "withThinking" | "withoutThinking"
   temperature  Float
   maxTokens    Int
-  thinkingType String
+  thinkingType String // "enabled" | "disabled"
   budgetTokens Int?
 
   abVariant ABVariant @relation(fields: [abVariantId], references: [id], onDelete: Cascade)
