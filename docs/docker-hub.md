@@ -52,6 +52,11 @@ This starts:
 | `ADMIN_API_KEY` | 32+ character admin authentication key |
 | `SESSION_SECRET` | 32+ character cookie signing secret (must differ from ADMIN_API_KEY) |
 
+Generate secure secrets with:
+```bash
+openssl rand -hex 32
+```
+
 For the complete environment variable reference, see [Production Deployment > Environment Variables](production-deployment.md#environment-variables).
 
 ## Local Build & Run

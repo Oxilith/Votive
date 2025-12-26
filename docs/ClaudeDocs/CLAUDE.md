@@ -291,6 +291,15 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
 
 See [Production Deployment > Environment Variables](../production-deployment.md#environment-variables) for the complete environment variable reference.
 
+### Frontend
+
+Frontend uses build-time environment variables (baked into the JS bundle):
+```
+VITE_API_URL=https://localhost:3001
+```
+
+For Docker deployments, leave `VITE_API_URL` empty so requests go through the nginx proxy.
+
 ### Docker Deployment
 
 Docker requires these environment variables:
