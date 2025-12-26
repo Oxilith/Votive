@@ -127,13 +127,17 @@ docker compose up --build   # Build and run full stack
 docker compose up           # Run existing images
 docker compose down         # Stop containers
 ```
-Requires `ANTHROPIC_API_KEY` and `DATABASE_KEY` environment variables.
+Requires `ANTHROPIC_API_KEY`, `DATABASE_KEY`, `ADMIN_API_KEY`, and `SESSION_SECRET` environment variables.
 
 ### Docker (OCI Deployment)
 
 **Run from Docker Hub OCI:**
 ```bash
-ANTHROPIC_API_KEY=<key> DATABASE_KEY=<32+chars> docker compose -f oci://oxilith/votive-oci:latest up
+ANTHROPIC_API_KEY=<key> \
+DATABASE_KEY=<32+chars> \
+ADMIN_API_KEY=<32+chars> \
+SESSION_SECRET=<32+chars> \
+  docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
 **Build and publish multi-arch images:**
@@ -285,35 +289,24 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
 
 ## Environment Variables
 
-### Backend (`/backend/.env`)
-```
-ANTHROPIC_API_KEY=sk-ant-...  # Required
-PORT=3001
-NODE_ENV=development
-HTTPS_ENABLED=true
-HTTPS_KEY_PATH=../certs/localhost+2-key.pem
-HTTPS_CERT_PATH=../certs/localhost+2.pem
-CORS_ORIGIN=https://localhost:3000
-THINKING_ENABLED=true         # Feature flag for Claude extended thinking mode
-```
+See [Production Deployment > Environment Variables](../production-deployment.md#environment-variables) for the complete environment variable reference.
 
-### Frontend (`/app/.env`)
+### Frontend
+
+Frontend uses build-time environment variables (baked into the JS bundle):
 ```
 VITE_API_URL=https://localhost:3001
 ```
 
-### Prompt Service (`/prompt-service/.env`)
-```
-DATABASE_URL=file:./data/prompts.db          # Required in production (no fallback)
-DATABASE_KEY=<32+ character encryption key>  # Required
-ADMIN_API_KEY=<admin authentication key>     # Required in production
-SESSION_SECRET=<32+ char cookie signing>     # Required in production (separate from ADMIN_API_KEY for security)
-PORT=3002
-NODE_ENV=development
-CORS_ORIGINS=http://localhost:3000,http://localhost:3001
-```
+For Docker deployments, leave `VITE_API_URL` empty so requests go through the nginx proxy.
 
-**Production Requirements**: In production, `DATABASE_URL`, `ADMIN_API_KEY`, and `SESSION_SECRET` are all required. `SESSION_SECRET` must be separate from `ADMIN_API_KEY` to prevent session forgery if the API key is compromised.
+### Docker Deployment
+
+Docker requires these environment variables:
+- `ANTHROPIC_API_KEY` - Claude API key
+- `DATABASE_KEY` - 32+ char encryption key
+- `ADMIN_API_KEY` - 32+ char admin auth key
+- `SESSION_SECRET` - 32+ char cookie signing secret (must differ from ADMIN_API_KEY)
 
 ### Feature Flags
 
@@ -399,3 +392,57 @@ Sample personas in `/personas/`:
 - `persona-1-burned-out-achiever-{en,pl}.json`
 - `persona-2-scattered-creative-{en,pl}.json`
 - `persona-3-careful-planner-{en,pl}.json`
+
+<frontend_aesthetics>
+You tend to converge toward generic, "on distribution" outputs. In frontend design, this creates what users call the "AI slop" aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight. Focus on:
+
+Typography: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics.
+
+Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes. Draw from IDE themes and cultural aesthetics for inspiration.
+
+Motion: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions.
+
+Backgrounds: Create atmosphere and depth rather than defaulting to solid colors. Layer CSS gradients, use geometric patterns, or add contextual effects that match the overall aesthetic.
+
+Avoid generic AI-generated aesthetics:
+- Overused font families (Inter, Roboto, Arial, system fonts)
+- Clichéd color schemes (particularly purple gradients on white backgrounds)
+- Predictable layouts and component patterns
+- Cookie-cutter design that lacks context-specific character
+
+Interpret creatively and make unexpected choices that feel genuinely designed for the context. Vary between light and dark themes, different fonts, different aesthetics. You still tend to converge on common choices (Space Grotesk, for example) across generations. Avoid this: it is critical that you think outside the box!
+</frontend_aesthetics>
+
+<testing_philosophy>
+Tests are executable specifications, not obstacles to silence. When a test fails, your first instinct should be curiosity, not deletion. A red test is a signal—investigate before you act.
+
+Failing Test Response Protocol:
+1. STOP. Do not touch the test file first.
+2. ASK: "What behavior was this test protecting?"
+3. INVESTIGATE: Is the production code now violating that expected behavior?
+4. DECIDE: Did requirements change, or did implementation break?
+
+If implementation broke → fix the production code, not the test.
+If requirements changed → update the test to reflect new requirements, then update production code if needed.
+
+Anti-patterns to avoid:
+- "Fixing" assertions to match current (broken) behavior
+- Deleting tests that fail without understanding why they existed
+- Mocking away the actual problem to make tests green
+- Commenting out failing tests "temporarily"
+- Weakening assertions (e.g., changing exact match to contains, removing null checks)
+- Treating test code as second-class citizens with lower quality standards
+
+Tests are not bureaucratic overhead—they are living documentation of intended behavior. When you "fix" a test to pass without understanding the failure, you're destroying institutional knowledge and removing a guardrail.
+
+Test Quality Standards:
+- Tests should be as readable as production code—use descriptive names that explain the "what" and "why"
+- Follow Arrange-Act-Assert structure for clarity
+- One logical assertion per test; test one behavior, not one method
+- Tests should fail for exactly one reason
+- Prefer explicit setup over shared state; each test tells its own complete story
+
+Red-Green-Refactor means: write a failing test FIRST, make it pass with minimal code, THEN refactor. Never skip the red phase—it validates that your test can actually fail.
+
+When generating tests: think about edge cases, boundaries, null states, and failure modes. Don't just test the happy path. Ask: "How could this break in production?"
+</testing_philosophy>

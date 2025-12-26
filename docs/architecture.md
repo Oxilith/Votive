@@ -338,31 +338,7 @@ flowchart TB
 
 ## Environment Configuration
 
-### Backend Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| ANTHROPIC_API_KEY | Yes | - | Claude API key |
-| PORT | No | 3001 | Server port |
-| NODE_ENV | No | development | Environment mode |
-| PROMPT_SERVICE_URL | No | http://localhost:3002 | Prompt service URL |
-| THINKING_ENABLED | No | true | Enable Claude extended thinking |
-| CIRCUIT_BREAKER_TIMEOUT | No | 5000 | Circuit breaker timeout (ms) |
-| CIRCUIT_BREAKER_RESET_TIMEOUT | No | 30000 | Circuit reset timeout (ms) |
-
-### Prompt Service Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| DATABASE_URL | Prod | file:./dev.db | SQLite database path (required in production) |
-| DATABASE_KEY | Yes | - | Encryption key (32+ chars) |
-| ADMIN_API_KEY | Prod | - | Admin authentication key |
-| SESSION_SECRET | Prod | ADMIN_API_KEY* | Cookie signing secret (32+ chars, required in production) |
-| PORT | No | 3002 | Server port |
-| NODE_ENV | No | development | Environment mode |
-| CORS_ORIGINS | No | localhost | Allowed CORS origins |
-
-*In development, `SESSION_SECRET` falls back to `ADMIN_API_KEY` with a warning. In production, a separate `SESSION_SECRET` is required for security (prevents session forgery if API key is compromised).
+For complete environment variable reference, see [Production Deployment Guide](production-deployment.md#environment-variables).
 
 ## Monitoring & Observability
 

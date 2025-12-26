@@ -84,20 +84,14 @@ npm run dev:app                        # Starts on https://localhost:3000
 
 ### Environment Setup
 
-**Backend** (`/backend/.env`):
-```
-ANTHROPIC_API_KEY=sk-ant-...  # Required
-PORT=3001
-NODE_ENV=development
-HTTPS_ENABLED=true
-CORS_ORIGIN=https://localhost:3000
-THINKING_ENABLED=true         # Enable/disable Claude extended thinking mode
+Copy the example environment files and configure them:
+
+```bash
+cp backend/.env.example backend/.env           # Add your ANTHROPIC_API_KEY
+cp prompt-service/.env.example prompt-service/.env  # Configure database encryption
 ```
 
-**Frontend** (`/app/.env`):
-```
-VITE_API_URL=https://localhost:3001
-```
+See [Production Deployment > Environment Variables](docs/production-deployment.md#environment-variables) for the complete environment variable reference.
 
 ## Project Structure
 
@@ -184,11 +178,17 @@ Quick deployment using pre-built multi-arch images:
 
 ```bash
 # macOS/Linux
-ANTHROPIC_API_KEY=<YOUR_KEY> DATABASE_KEY=<32+_CHAR_SECRET> \
+ANTHROPIC_API_KEY=<YOUR_KEY> \
+DATABASE_KEY=<32+_CHAR_SECRET> \
+ADMIN_API_KEY=<32+_CHAR_SECRET> \
+SESSION_SECRET=<32+_CHAR_SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 
 # Windows (PowerShell)
-$env:ANTHROPIC_API_KEY="<YOUR_KEY>"; $env:DATABASE_KEY="<32+_CHAR_SECRET>"
+$env:ANTHROPIC_API_KEY="<YOUR_KEY>"
+$env:DATABASE_KEY="<32+_CHAR_SECRET>"
+$env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
+$env:SESSION_SECRET="<32+_CHAR_SECRET>"
 docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -203,8 +203,9 @@ See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation includi
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/architecture.md) | System design, diagrams, and technical decisions |
+| [Production Deployment](docs/production-deployment.md) | Environment variables, security, and deployment best practices |
 | [Docker Hub Workflow](docs/docker-hub.md) | Container deployment, publishing, and troubleshooting |
-| [Production Deployment](docs/ClaudeDocs/production-deployment.md) | Security, configuration, and deployment best practices |
+| [Known Limitations](docs/known-limitations.md) | Cache behavior, scaling considerations, and operational details |
 | [Motivation](docs/Motivation.md) | Theoretical framework and psychology principles |
 
 ## API Endpoints
