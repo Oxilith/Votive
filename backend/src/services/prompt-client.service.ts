@@ -131,9 +131,14 @@ export class PromptClientService {
             'Background cache refresh successful'
           );
         },
-        onFailure: (task: BackgroundTask<PromptRefreshTaskId>, attempts: number) => {
+        onFailure: (task: BackgroundTask<PromptRefreshTaskId>, attempts: number, lastError?: unknown) => {
           logger.warn(
-            { key: task.id.key, thinkingEnabled: task.id.thinkingEnabled, attempts },
+            {
+              key: task.id.key,
+              thinkingEnabled: task.id.thinkingEnabled,
+              attempts,
+              error: lastError instanceof Error ? lastError.message : 'Unknown error',
+            },
             'Background refresh failed after max attempts'
           );
         },
@@ -143,10 +148,30 @@ export class PromptClientService {
             'Background refresh cancelled - overall timeout exceeded'
           );
         },
-        onDropped: (task: BackgroundTask<PromptRefreshTaskId>) => {
+        onDropped: (
+          task: BackgroundTask<PromptRefreshTaskId>,
+          context: { queueSize: number; maxQueueSize: number }
+        ) => {
           logger.warn(
-            { key: task.id.key, thinkingEnabled: task.id.thinkingEnabled },
+            {
+              key: task.id.key,
+              thinkingEnabled: task.id.thinkingEnabled,
+              queueSize: context.queueSize,
+              maxQueueSize: context.maxQueueSize,
+            },
             'Background refresh queue full - dropping oldest task'
+          );
+        },
+        onHalted: (task: BackgroundTask<PromptRefreshTaskId>, attempt: number) => {
+          logger.info(
+            { key: task.id.key, thinkingEnabled: task.id.thinkingEnabled, attempt },
+            'Background refresh halted - circuit breaker open'
+          );
+        },
+        onCallbackError: (callbackName: string, error: unknown) => {
+          logger.error(
+            { callbackName, error: error instanceof Error ? error.message : 'Unknown error' },
+            'Background refresh manager callback threw'
           );
         },
       }
@@ -276,16 +301,23 @@ export class PromptClientService {
    * This is wrapped by the circuit breaker
    */
   private async recordConversionInternal(variantId: string): Promise<undefined> {
-    const response = await fetchWithTimeout(`${this.baseUrl}/api/resolve/${variantId}/conversion`, {
-      method: 'POST',
-      timeoutMs: REQUEST_TIMEOUT_MS,
-    });
+    try {
+      const response = await fetchWithTimeout(`${this.baseUrl}/api/resolve/${variantId}/conversion`, {
+        method: 'POST',
+        timeoutMs: REQUEST_TIMEOUT_MS,
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} recording conversion for variant ${variantId}`);
+      }
+      logger.debug({ variantId }, 'A/B test conversion recorded');
+      return undefined;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Conversion recording timed out for variant ${variantId}`);
+      }
+      throw error;
     }
-    logger.debug({ variantId }, 'A/B test conversion recorded');
-    return undefined;
   }
 
   /**
@@ -314,6 +346,10 @@ export class PromptClientService {
       timeoutMs: REQUEST_TIMEOUT_MS,
     });
 
+    if (!response.ok) {
+      logger.debug({ status: response.status }, 'Health check returned non-OK status');
+    }
+
     return response.ok;
   }
 
@@ -325,7 +361,11 @@ export class PromptClientService {
   async healthCheck(): Promise<boolean> {
     try {
       return await this.healthCircuitBreaker.fire();
-    } catch {
+    } catch (error) {
+      logger.debug(
+        { error: error instanceof Error ? error.message : 'Unknown error' },
+        'Health check failed'
+      );
       return false;
     }
   }

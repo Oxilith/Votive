@@ -8,6 +8,7 @@
  * - Tests timeout handling (overall operation timeout)
  * - Tests duplicate prevention via markInProgress callback
  * - Tests edge cases (empty queue, rapid additions, shouldHalt)
+ * - Tests callback error handling (onHalted, onCallbackError)
  * @dependencies
  * - vitest for testing framework
  * - BackgroundRefreshManager for utility under test
@@ -147,7 +148,11 @@ describe('BackgroundRefreshManager', () => {
       manager.schedule({ id: 'task-4' });
 
       expect(manager.getQueueLength()).toBe(2);
-      expect(mockCallbacks.onDropped).toHaveBeenCalledWith({ id: 'task-2' });
+      // queueSize is 1 because the callback is invoked after shift() but before push()
+      expect(mockCallbacks.onDropped).toHaveBeenCalledWith(
+        { id: 'task-2' },
+        { queueSize: 1, maxQueueSize: 2 }
+      );
     });
 
     it('should call onDropped callback when task is dropped', () => {
@@ -166,7 +171,11 @@ describe('BackgroundRefreshManager', () => {
       manager.schedule({ id: 'task-3' }); // Drops task-2
 
       expect(mockCallbacks.onDropped).toHaveBeenCalledTimes(1);
-      expect(mockCallbacks.onDropped).toHaveBeenCalledWith({ id: 'task-2' });
+      // queueSize is 0 because the callback is invoked after shift() but before push()
+      expect(mockCallbacks.onDropped).toHaveBeenCalledWith(
+        { id: 'task-2' },
+        { queueSize: 0, maxQueueSize: 1 }
+      );
     });
   });
 
@@ -345,7 +354,11 @@ describe('BackgroundRefreshManager', () => {
 
       // Attempt + 2 retries = 3 total calls
       expect(mockCallbacks.execute).toHaveBeenCalledTimes(3);
-      expect(mockCallbacks.onFailure).toHaveBeenCalledWith({ id: 'task-1' }, 3);
+      expect(mockCallbacks.onFailure).toHaveBeenCalledWith(
+        { id: 'task-1' },
+        3,
+        expect.any(Error)
+      );
       expect(mockCallbacks.onSuccess).not.toHaveBeenCalled();
     });
 
@@ -511,6 +524,28 @@ describe('BackgroundRefreshManager', () => {
 
       // shouldHalt is checked before each attempt (including retries)
       expect(mockCallbacks.shouldHalt).toHaveBeenCalled();
+    });
+
+    it('should call onHalted when shouldHalt returns true during retry', async () => {
+      const config: BackgroundRefreshManagerConfig = {
+        maxRetryAttempts: 3,
+        baseRetryDelayMs: 100,
+      };
+
+      const onHalted = vi.fn();
+      const callbacks = { ...mockCallbacks, onHalted };
+      const manager = new BackgroundRefreshManager(callbacks, config);
+
+      vi.mocked(callbacks.execute).mockRejectedValueOnce(new Error('First attempt failed'));
+      const shouldHaltMock = callbacks.shouldHalt;
+      if (!shouldHaltMock) throw new Error('Expected shouldHalt mock to be defined');
+      vi.mocked(shouldHaltMock).mockReturnValueOnce(false).mockReturnValue(true);
+
+      manager.schedule({ id: 'task-1' });
+      await vi.runAllTimersAsync();
+
+      expect(onHalted).toHaveBeenCalledWith({ id: 'task-1' }, 1);
+      expect(callbacks.onFailure).not.toHaveBeenCalled();
     });
   });
 
@@ -775,6 +810,25 @@ describe('BackgroundRefreshManager', () => {
 
       // Should complete without errors
       expect(minimalCallbacks.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onCallbackError when onSuccess callback throws', async () => {
+      const onCallbackError = vi.fn();
+      const callbacks: BackgroundRefreshCallbacks<string> = {
+        ...mockCallbacks,
+        onSuccess: vi.fn().mockImplementation(() => {
+          throw new Error('Callback failed');
+        }),
+        onCallbackError,
+      };
+
+      const manager = new BackgroundRefreshManager(callbacks, { maxConcurrent: 1 });
+
+      manager.schedule({ id: 'task-1' });
+      await vi.runAllTimersAsync();
+
+      expect(callbacks.execute).toHaveBeenCalledTimes(1);
+      expect(onCallbackError).toHaveBeenCalledWith('onSuccess', expect.any(Error));
     });
   });
 });

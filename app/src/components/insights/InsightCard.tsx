@@ -3,7 +3,7 @@
  * @purpose Reusable card component for displaying AI analysis insights
  * @functionality
  * - Renders different insight types (patterns, contradictions, blind spots, leverage points, risks)
- * - Uses type-safe property access with 'in' operator checks
+ * - Uses type-safe property access with 'in' operator checks for polymorphic rendering
  * - Displays optional fields like evidence, severity, hypothesis based on insight type
  * - Supports icons, titles, and various content sections
  * - Uses shared theme styles for consistent appearance
@@ -24,11 +24,6 @@ import type {
   AnalysisRisk,
 } from '@/types/assessment.types';
 import { cardStyles, textStyles, badgeStyles } from '@/styles/theme';
-
-/**
- * Discriminator type for identifying insight categories
- */
-export type InsightType = 'pattern' | 'contradiction' | 'blindSpot' | 'leverage' | 'risk';
 
 /**
  * Extended types for leverage points and risks that may include an icon
@@ -53,8 +48,6 @@ export type InsightItem =
 export interface InsightCardProps {
   /** The insight item to display */
   item: InsightItem;
-  /** The type of insight (used for potential future per-type styling) */
-  type: InsightType;
 }
 
 /**
@@ -62,12 +55,8 @@ export interface InsightCardProps {
  * Uses type-safe 'in' operator checks for conditional rendering based on
  * which properties exist on the insight item.
  */
-const InsightCard: React.FC<InsightCardProps> = ({ item, type }) => {
+const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
   const { t } = useTranslation();
-
-  // Use shared theme styles - all insight types use consistent neutral colors
-  // type is kept for potential future per-type styling
-  void type;
 
   return (
     <div className={`p-5 ${cardStyles.base} space-y-3`}>

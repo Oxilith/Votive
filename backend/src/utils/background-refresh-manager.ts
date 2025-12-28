@@ -107,8 +107,9 @@ export interface BackgroundRefreshCallbacks<T> {
    * Called when a task fails after all retry attempts
    * @param task The failed task
    * @param attempts Number of attempts made
+   * @param lastError The error from the final attempt (if available)
    */
-  onFailure?: (task: BackgroundTask<T>, attempts: number) => void;
+  onFailure?: (task: BackgroundTask<T>, attempts: number, lastError?: unknown) => void;
 
   /**
    * Called when a task times out (exceeds maxRefreshDurationMs)
@@ -120,8 +121,26 @@ export interface BackgroundRefreshCallbacks<T> {
   /**
    * Called when a task is dropped from the queue due to size limits
    * @param task The dropped task
+   * @param context Queue state at time of drop
    */
-  onDropped?: (task: BackgroundTask<T>) => void;
+  onDropped?: (
+    task: BackgroundTask<T>,
+    context: { queueSize: number; maxQueueSize: number }
+  ) => void;
+
+  /**
+   * Called when processing is halted due to shouldHalt() returning true
+   * @param task The task that was halted
+   * @param attempt The attempt number when halted
+   */
+  onHalted?: (task: BackgroundTask<T>, attempt: number) => void;
+
+  /**
+   * Called when a lifecycle callback (onSuccess, etc.) throws an error
+   * @param callbackName Name of the callback that threw
+   * @param error The error that was thrown
+   */
+  onCallbackError?: (callbackName: string, error: unknown) => void;
 }
 
 /**
@@ -222,7 +241,10 @@ export class BackgroundRefreshManager<T> {
     if (this.pendingQueue.length >= this.config.maxQueueSize) {
       const dropped = this.pendingQueue.shift();
       if (dropped) {
-        this.callbacks.onDropped?.(dropped);
+        this.callbacks.onDropped?.(dropped, {
+          queueSize: this.pendingQueue.length,
+          maxQueueSize: this.config.maxQueueSize,
+        });
       }
     }
     this.pendingQueue.push(task);
@@ -271,6 +293,7 @@ export class BackgroundRefreshManager<T> {
 
     // Check if we should halt (e.g., circuit breaker is open)
     if (this.callbacks.shouldHalt?.()) {
+      this.callbacks.onHalted?.(task, attempt);
       return;
     }
 
@@ -279,14 +302,15 @@ export class BackgroundRefreshManager<T> {
       // Call onSuccess in a separate try-catch to prevent callback errors from triggering retry
       try {
         this.callbacks.onSuccess?.(task);
-      } catch {
-        // Ignore errors in onSuccess callback - task executed successfully
+      } catch (callbackError) {
+        // Task executed successfully, but callback failed - notify via callback
+        this.callbacks.onCallbackError?.('onSuccess', callbackError);
       }
-    } catch {
+    } catch (executeError) {
       if (attempt < this.config.maxRetryAttempts) {
         await this.retryTask(task, attempt + 1, startTime);
       } else {
-        this.callbacks.onFailure?.(task, attempt + 1);
+        this.callbacks.onFailure?.(task, attempt + 1, executeError);
       }
     }
   }

@@ -157,15 +157,15 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({ responses }) => {
 
             {/* Content */}
             <div className="space-y-4">
-              {activeTab === 'patterns' && analysis.patterns?.map((item, i) => <InsightCard key={i} item={item} type="pattern" />)}
+              {activeTab === 'patterns' && analysis.patterns?.map((item, i) => <InsightCard key={i} item={item} />)}
 
-              {activeTab === 'contradictions' && analysis.contradictions?.map((item, i) => <InsightCard key={i} item={item} type="contradiction" />)}
+              {activeTab === 'contradictions' && analysis.contradictions?.map((item, i) => <InsightCard key={i} item={item} />)}
 
-              {activeTab === 'blindSpots' && analysis.blindSpots?.map((item, i) => <InsightCard key={i} item={item} type="blindSpot" />)}
+              {activeTab === 'blindSpots' && analysis.blindSpots?.map((item, i) => <InsightCard key={i} item={item} />)}
 
-              {activeTab === 'leverage' && analysis.leveragePoints?.map((item, i) => <InsightCard key={i} item={{ ...item, icon: '🎯' }} type="leverage" />)}
+              {activeTab === 'leverage' && analysis.leveragePoints?.map((item, i) => <InsightCard key={i} item={{ ...item, icon: '🎯' }} />)}
 
-              {activeTab === 'risks' && analysis.risks?.map((item, i) => <InsightCard key={i} item={{ ...item, icon: '⚠️' }} type="risk" />)}
+              {activeTab === 'risks' && analysis.risks?.map((item, i) => <InsightCard key={i} item={{ ...item, icon: '⚠️' }} />)}
 
               {activeTab === 'synthesis' && analysis.identitySynthesis && (
                 <div className="space-y-6">
