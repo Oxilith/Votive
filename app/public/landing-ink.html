@@ -503,11 +503,12 @@
        HERO - ASYMMETRIC, BREATHING SPACE
        ======================================== */
     .hero {
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       align-items: center;
       padding: var(--space-4xl) 0;
       position: relative;
+      overflow: hidden;
     }
 
     .hero-inner {
@@ -530,42 +531,27 @@
       position: relative;
     }
 
-    /* Vermilion ink brush seal */
-    .hero-seal {
-      position: absolute;
-      top: -60px;
-      left: -40px;
-      transform: rotate(-8deg);
-      width: 72px;
-      height: 72px;
+    /* Hero eyebrow - red line + gray text */
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
       opacity: 0;
-      animation: seal-appear 0.6s var(--ease-out) 1s forwards;
-      pointer-events: none;
-      z-index: 1;
+      transform: translateY(20px);
+      animation: fade-up 0.8s var(--ease-out) 0.2s forwards;
     }
 
-    @keyframes seal-appear {
-      from {
-        opacity: 0;
-        transform: rotate(-8deg) scale(0.8);
-      }
-      to {
-        opacity: 0.55;
-        transform: rotate(-8deg) scale(1);
-      }
-    }
-
-    .hero-seal svg {
-      width: 100%;
-      height: 100%;
-      fill: var(--accent);
-      filter: url(#brush-filter);
-    }
-
-    @media (max-width: 768px) {
-      .hero-seal {
-        display: none;
-      }
+    .hero-eyebrow::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--accent);
     }
 
     .hero-tagline {
@@ -712,6 +698,30 @@
       }
     }
 
+    /* Ink brush decoration */
+    .hero__ink {
+      position: absolute;
+      right: -5%;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      width: auto;
+      max-width: 500px;
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .dark .hero__ink {
+      opacity: 0.08;
+    }
+
+    @media (max-width: 1024px) {
+      .hero__ink {
+        display: none;
+      }
+    }
+
     /* ========================================
        PHILOSOPHY - CENTERED WISDOM
        ======================================== */
@@ -731,7 +741,7 @@
       font-size: 0.6875rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: var(--accent);
+      color: var(--text-muted);
       margin-bottom: var(--space-md);
       display: flex;
       align-items: center;
@@ -778,6 +788,16 @@
       color: var(--text-primary);
       margin-bottom: var(--space-md);
       padding-left: var(--space-xl);
+    }
+
+    .philosophy-quote blockquote::before {
+      content: '"';
+      color: var(--accent);
+    }
+
+    .philosophy-quote blockquote::after {
+      content: '"';
+      color: var(--accent);
     }
 
     .philosophy-quote cite {
@@ -852,12 +872,12 @@
       opacity: 0.5;
     }
 
-    /* Asymmetric grid placement */
-    .stone:nth-child(1) { grid-column: 1 / 5; }
-    .stone:nth-child(2) { grid-column: 5 / 9; margin-top: var(--space-2xl); }
-    .stone:nth-child(3) { grid-column: 9 / 13; }
-    .stone:nth-child(4) { grid-column: 2 / 6; }
-    .stone:nth-child(5) { grid-column: 7 / 11; margin-top: var(--space-lg); }
+    /* Asymmetric grid placement - zen garden style */
+    .stone:nth-child(1) { grid-column: 1 / 6; }
+    .stone:nth-child(2) { grid-column: 7 / 13; }
+    .stone:nth-child(3) { grid-column: 2 / 7; }
+    .stone:nth-child(4) { grid-column: 8 / 13; }
+    .stone:nth-child(5) { grid-column: 1 / 7; }
 
     @media (max-width: 1024px) {
       .stone:nth-child(1),
@@ -1315,7 +1335,7 @@
        ======================================== */
     @media print {
       .nav, .theme-toggle, .lang-toggle,
-      .hero-cta, .nav-cta, .cta-button, .hero-seal, .hero-stroke {
+      .hero-cta, .nav-cta, .cta-button, .hero-stroke {
         display: none !important;
       }
 
@@ -1386,18 +1406,7 @@
   <section class="hero">
     <div class="hero-inner">
       <div class="hero-content">
-        <!-- Ink brush seal accent -->
-        <div class="hero-seal">
-          <svg viewBox="0 0 100 100" aria-hidden="true">
-            <defs>
-              <filter id="brush-filter" x="-20%" y="-20%" width="140%" height="140%">
-                <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="4" result="noise"/>
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-            </defs>
-            <rect x="5" y="5" width="90" height="90" rx="8"/>
-          </svg>
-        </div>
+        <p class="hero-eyebrow" data-i18n="hero.eyebrow">Know Yourself First</p>
 
         <h1 class="hero-tagline">
           <span class="hero-word" data-i18n="hero.word1">Every</span>
@@ -1430,6 +1439,13 @@
         <p class="hero-votes-desc" data-i18n="hero.votesDesc">toward better selves</p>
       </div>
     </div>
+
+    <!-- Decorative ink stroke -->
+    <svg class="hero__ink" viewBox="0 0 400 800" fill="none" aria-hidden="true">
+      <path d="M200 0 Q 250 200 180 400 Q 120 600 220 800" stroke="currentColor" stroke-width="80" stroke-linecap="round"/>
+      <circle cx="200" cy="150" r="60" fill="currentColor" opacity="0.3"/>
+      <circle cx="180" cy="450" r="40" fill="currentColor" opacity="0.2"/>
+    </svg>
   </section>
 
   <!-- Philosophy Section -->
@@ -1445,7 +1461,7 @@
 
       <div class="philosophy-quote reveal reveal-delay-3">
         <blockquote data-i18n="philosophy.quote">
-          "The curious paradox is that when I accept myself just as I am, then I can change."
+          The curious paradox is that when I accept myself just as I am, then I can change.
         </blockquote>
         <cite>— <span data-i18n="philosophy.quoteAuthor">Carl Rogers</span></cite>
       </div>
@@ -1592,7 +1608,6 @@
       </button>
       <div class="cta-meta reveal reveal-delay-3">
         <span data-i18n="cta.timeEstimate">~15 minutes of honest reflection</span>
-        <span data-i18n="cta.openSource">Free to use · No account required</span>
       </div>
     </div>
   </section>
@@ -1625,20 +1640,20 @@
     const translations = {
       en: {
         nav: { brand: "Votive", philosophy: "Philosophy", journey: "The Journey", insights: "AI Insights", beginDiscovery: "Begin Discovery" },
-        hero: { word1: "Every", word2: "action", word3: "is", word4: "a", word5: "vote", word6: "for", word7: "who", word8: "you're becoming.", subtitle: "Most habit apps fail because they skip the foundation: understanding who you already are. Votive guides you through AI-powered self-discovery before goal-setting.", cta: "Start Your Discovery", votesLabel: "Votes Cast", votesDesc: "toward better selves" },
-        philosophy: { label: "The Problem", title: "Goals fail when they skip the self", p1: "You've tried habit trackers. Morning routines. The 21-day challenges. They work for a while, then dissolve. Not because you lack discipline, but because you started in the wrong place.", p2: "Real change doesn't begin with goals. It begins with understanding who you already are: your energy patterns, your hidden motivations, the unconscious behaviors that shape your days.", quote: "\"The curious paradox is that when I accept myself just as I am, then I can change.\"", quoteAuthor: "Carl Rogers" },
+        hero: { eyebrow: "Know Yourself First", word1: "Every", word2: "action", word3: "is", word4: "a", word5: "vote", word6: "for", word7: "who", word8: "you're becoming.", subtitle: "Most habit apps fail because they skip the foundation: understanding who you already are. Votive guides you through AI-powered self-discovery before goal-setting.", cta: "Start Your Discovery", votesLabel: "Votes Cast", votesDesc: "toward better selves" },
+        philosophy: { label: "The Problem", title: "Goals fail when they skip the self", p1: "You've tried habit trackers. Morning routines. The 21-day challenges. They work for a while, then dissolve. Not because you lack discipline, but because you started in the wrong place.", p2: "Real change doesn't begin with goals. It begins with understanding who you already are: your energy patterns, your hidden motivations, the unconscious behaviors that shape your days.", quote: "The curious paradox is that when I accept myself just as I am, then I can change.", quoteAuthor: "Carl Rogers" },
         journey: { label: "The Journey", title: "Five phases of transformation", subtitle: "Votive guides you through a deliberate progression: from understanding who you are to becoming who you aspire to be.", comingSoon: "Coming Soon", phases: { 1: { name: "State Awareness", title: "Know Your Rhythms", description: "Map your energy cycles, mood triggers, and willpower patterns. Discover what drains you and what restores you.", features: ["Peak energy times", "Emotional triggers", "Willpower patterns"] }, 2: { name: "Identity Mapping", title: "See Yourself Clearly", description: "Examine your current identity, automatic behaviors, and keystone habits. Surface your core values and natural strengths.", features: ["Self-perception gaps", "Core values alignment", "Keystone behaviors"] }, 3: { name: "Identity Design", title: "Envision Your Future Self", description: "Define your aspirational identity and create believable stepping-stones to bridge the gap.", features: ["Aspirational identity", "Identity bridges", "Behavior mapping"] }, 4: { name: "System Design", title: "Build Your Architecture", description: "Design habit loops, optimize your environment, and create accountability structures.", features: ["Habit architecture", "Environment design", "Accountability"] }, 5: { name: "Integration", title: "Embody the Change", description: "Track progress, collect behavioral evidence, and reinforce your evolving identity.", features: ["Progress tracking", "Identity reinforcement", "Evidence collection"] } } },
         insights: { label: "AI Insights", title: "Intelligence that understands you", subtitle: "Claude analyzes your responses to find patterns, contradictions, and leverage points that rule-based systems would miss.", features: ["Hidden behavioral patterns", "Internal contradictions", "Blind spots and assumptions", "High-leverage opportunities"], quote: { part1: "You describe yourself as ", highlight1: "disciplined", part2: ", yet your energy crashes and mood triggers suggest you're running on ", highlight2: "willpower alone", part3: ", a finite resource. Your keystone behavior of morning exercise could be the anchor that replenishes rather than depletes, if you shift from forcing performance to honoring rhythm." }, sampleCard: { label: "Sample Insight", category: "Identity Synthesis", analysis: "This isn't hypocrisy, it's a gap between your aspirational and actual identity. Understanding this tension is the first step to bridging it.", poweredBy: "Powered by Claude AI" } },
-        cta: { title: "Ready to understand yourself?", subtitle: "The assessment takes about 15 minutes. No accounts, no tracking, just honest reflection.", button: "Begin Your Discovery", timeEstimate: "~15 minutes of honest reflection", openSource: "Free to use · No account required" },
+        cta: { title: "Ready to understand yourself?", subtitle: "The assessment takes about 15 minutes. No accounts, no tracking, just honest reflection.", button: "Begin Your Discovery", timeEstimate: "~15 minutes of honest reflection" },
         footer: { brand: "Votive", github: "GitHub", author: "by Konrad Jagusiak" }
       },
       pl: {
         nav: { brand: "Votive", philosophy: "Filozofia", journey: "Podróż", insights: "Analizy AI", beginDiscovery: "Rozpocznij odkrywanie" },
-        hero: { word1: "Każde", word2: "działanie", word3: "to", word4: "", word5: "głos", word6: "za", word7: "tym,", word8: "kim się stajesz.", subtitle: "Większość aplikacji do nawyków zawodzi, bo pomija fundament: zrozumienie kim już jesteś. Votive prowadzi Cię przez samopoznanie wspierane AI, zanim przejdziesz do celów.", cta: "Rozpocznij odkrywanie", votesLabel: "Oddanych głosów", votesDesc: "ku lepszym wersjom siebie" },
-        philosophy: { label: "Problem", title: "Cele zawodzą gdy pomijają jaźń", p1: "Próbowałeś aplikacji do nawyków. Porannych rutyn. 21-dniowych wyzwań. Działają przez chwilę, potem się rozpadają. Nie dlatego, że brakuje Ci dyscypliny, ale dlatego, że zacząłeś w złym miejscu.", p2: "Prawdziwa zmiana nie zaczyna się od celów. Zaczyna się od zrozumienia kim już jesteś: Twoich wzorców energii, ukrytych motywacji, nieświadomych zachowań kształtujących Twoje dni.", quote: "\"Ciekawym paradoksem jest to, że kiedy akceptuję siebie takim, jakim jestem, wtedy mogę się zmienić.\"", quoteAuthor: "Carl Rogers" },
+        hero: { eyebrow: "Najpierw poznaj siebie", word1: "Każde", word2: "działanie", word3: "to", word4: "", word5: "głos", word6: "za", word7: "tym,", word8: "kim się stajesz.", subtitle: "Większość aplikacji do nawyków zawodzi, bo pomija fundament: zrozumienie kim już jesteś. Votive prowadzi Cię przez samopoznanie wspierane AI, zanim przejdziesz do celów.", cta: "Rozpocznij odkrywanie", votesLabel: "Oddanych głosów", votesDesc: "ku lepszym wersjom siebie" },
+        philosophy: { label: "Problem", title: "Cele zawodzą gdy pomijają jaźń", p1: "Próbowałeś aplikacji do nawyków. Porannych rutyn. 21-dniowych wyzwań. Działają przez chwilę, potem się rozpadają. Nie dlatego, że brakuje Ci dyscypliny, ale dlatego, że zacząłeś w złym miejscu.", p2: "Prawdziwa zmiana nie zaczyna się od celów. Zaczyna się od zrozumienia kim już jesteś: Twoich wzorców energii, ukrytych motywacji, nieświadomych zachowań kształtujących Twoje dni.", quote: "Ciekawym paradoksem jest to, że kiedy akceptuję siebie takim, jakim jestem, wtedy mogę się zmienić.", quoteAuthor: "Carl Rogers" },
         journey: { label: "Podróż", title: "Pięć faz transformacji", subtitle: "Votive prowadzi Cię przez świadomą progresję: od zrozumienia kim jesteś do stawania się tym, kim chcesz być.", comingSoon: "Wkrótce", phases: { 1: { name: "Świadomość Stanu", title: "Poznaj swoje rytmy", description: "Zmapuj cykle energii, wyzwalacze nastroju i wzorce siły woli. Odkryj co Cię wyczerpuje i co Cię regeneruje.", features: ["Szczyty energii", "Wyzwalacze emocji", "Wzorce siły woli"] }, 2: { name: "Mapowanie Tożsamości", title: "Zobacz siebie wyraźnie", description: "Zbadaj swoją obecną tożsamość, automatyczne zachowania i kluczowe nawyki. Odkryj swoje wartości i naturalne mocne strony.", features: ["Luki w samopostrzeganiu", "Zgodność z wartościami", "Kluczowe zachowania"] }, 3: { name: "Projektowanie Tożsamości", title: "Wyobraź sobie przyszłego siebie", description: "Zdefiniuj swoją aspiracyjną tożsamość i stwórz wiarygodne kamienie milowe by zbudować most.", features: ["Aspiracyjna tożsamość", "Mosty tożsamości", "Mapowanie zachowań"] }, 4: { name: "Projektowanie Systemu", title: "Zbuduj swoją architekturę", description: "Zaprojektuj pętle nawyków, zoptymalizuj środowisko i stwórz struktury odpowiedzialności.", features: ["Architektura nawyków", "Projektowanie środowiska", "Odpowiedzialność"] }, 5: { name: "Integracja", title: "Ucieleśnij zmianę", description: "Śledź postępy, zbieraj dowody behawioralne i wzmacniaj swoją ewoluującą tożsamość.", features: ["Śledzenie postępów", "Wzmacnianie tożsamości", "Zbieranie dowodów"] } } },
         insights: { label: "Analizy AI", title: "Inteligencja która Cię rozumie", subtitle: "Claude analizuje Twoje odpowiedzi by znaleźć wzorce, sprzeczności i punkty dźwigni, które systemy oparte na regułach by przeoczyły.", features: ["Ukryte wzorce behawioralne", "Wewnętrzne sprzeczności", "Martwe punkty i założenia", "Możliwości wysokiej dźwigni"], quote: { part1: "Opisujesz siebie jako ", highlight1: "zdyscyplinowanego", part2: ", ale spadki energii i wyzwalacze nastroju sugerują, że działasz wyłącznie na ", highlight2: "sile woli", part3: " — ograniczonym zasobie. Twoje kluczowe zachowanie, poranne ćwiczenia, może stać się kotwicą, która regeneruje zamiast wyczerpywać, jeśli przejdziesz od wymuszania wydajności do szanowania rytmu." }, sampleCard: { label: "Przykładowa analiza", category: "Synteza tożsamości", analysis: "To nie hipokryzja, to luka między Twoją aspiracyjną a rzeczywistą tożsamością. Zrozumienie tego napięcia to pierwszy krok do jego pokonania.", poweredBy: "Wspierane przez Claude AI" } },
-        cta: { title: "Gotowy by zrozumieć siebie?", subtitle: "Ocena zajmuje około 15 minut. Bez kont, bez śledzenia, tylko szczera refleksja.", button: "Rozpocznij odkrywanie", timeEstimate: "~15 minut szczerej refleksji", openSource: "Darmowe · Bez rejestracji" },
+        cta: { title: "Gotowy by zrozumieć siebie?", subtitle: "Ocena zajmuje około 15 minut. Bez kont, bez śledzenia, tylko szczera refleksja.", button: "Rozpocznij odkrywanie", timeEstimate: "~15 minut szczerej refleksji" },
         footer: { brand: "Votive", github: "GitHub", author: "Konrad Jagusiak" }
       }
     };
