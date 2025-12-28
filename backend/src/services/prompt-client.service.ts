@@ -358,23 +358,16 @@ export class PromptClientService {
    * This is wrapped by the circuit breaker
    */
   private async recordConversionInternal(variantId: string): Promise<undefined> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => { controller.abort(); }, REQUEST_TIMEOUT_MS);
+    const response = await fetchWithTimeout(`${this.baseUrl}/api/resolve/${variantId}/conversion`, {
+      method: 'POST',
+      timeoutMs: REQUEST_TIMEOUT_MS,
+    });
 
-    try {
-      const response = await fetch(`${this.baseUrl}/api/resolve/${variantId}/conversion`, {
-        method: 'POST',
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      logger.debug({ variantId }, 'A/B test conversion recorded');
-      return undefined;
-    } finally {
-      clearTimeout(timeoutId);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
+    logger.debug({ variantId }, 'A/B test conversion recorded');
+    return undefined;
   }
 
   /**
