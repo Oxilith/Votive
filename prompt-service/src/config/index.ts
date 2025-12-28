@@ -7,6 +7,8 @@
  * - Provides typed configuration object for application use
  * - Throws descriptive errors for missing required values
  * - Displays prominent warning when DEV_AUTH_BYPASS is enabled at startup
+ * - Validates JWT secrets are present and different in production
+ * - Configures SMTP email settings for password reset and verification emails
  * @dependencies
  * - dotenv for environment variable loading
  * - zod for schema validation
@@ -50,6 +52,30 @@ const configSchema = z.object({
     .string()
     .transform((val) => val === 'true')
     .default('false'),
+
+  // JWT Authentication
+  jwtAccessSecret: z.string().min(32).optional(),
+  jwtRefreshSecret: z.string().min(32).optional(),
+  jwtAccessExpiry: z.string().default('15m'),
+  jwtRefreshExpiry: z.string().default('7d'),
+
+  // Password Hashing
+  bcryptSaltRounds: z.coerce.number().min(4).max(31).default(10),
+
+  // SMTP Email Configuration
+  smtpHost: z.string().optional(),
+  smtpPort: z.coerce.number().default(587),
+  smtpSecure: z
+    .string()
+    .transform((val) => val === 'true')
+    .default('false'),
+  smtpUser: z.string().optional(),
+  smtpPassword: z.string().optional(),
+  smtpFrom: z.string().optional(),
+
+  // Application URLs (for email links)
+  appUrl: z.string().url().optional(),
+  apiUrl: z.string().url().optional(),
 });
 
 type Config = z.infer<typeof configSchema> & {
@@ -70,6 +96,21 @@ function loadConfig(): Config {
     if (!process.env['SESSION_SECRET']) {
       throw new Error(
         'SESSION_SECRET is required in production. Using ADMIN_API_KEY as fallback is a security risk - if the API key leaks, session cookies can be forged.'
+      );
+    }
+    if (!process.env['JWT_ACCESS_SECRET']) {
+      throw new Error(
+        'JWT_ACCESS_SECRET is required in production. Generate with: openssl rand -hex 32'
+      );
+    }
+    if (!process.env['JWT_REFRESH_SECRET']) {
+      throw new Error(
+        'JWT_REFRESH_SECRET is required in production. Generate with: openssl rand -hex 32'
+      );
+    }
+    if (process.env['JWT_ACCESS_SECRET'] === process.env['JWT_REFRESH_SECRET']) {
+      throw new Error(
+        'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be different for security.'
       );
     }
   }
@@ -100,6 +141,23 @@ function loadConfig(): Config {
     adminApiKey: process.env['ADMIN_API_KEY'],
     sessionSecret: process.env['SESSION_SECRET'] ?? process.env['ADMIN_API_KEY'],
     devAuthBypass: process.env['DEV_AUTH_BYPASS'],
+    // JWT Authentication
+    jwtAccessSecret: process.env['JWT_ACCESS_SECRET'],
+    jwtRefreshSecret: process.env['JWT_REFRESH_SECRET'],
+    jwtAccessExpiry: process.env['JWT_ACCESS_EXPIRY'],
+    jwtRefreshExpiry: process.env['JWT_REFRESH_EXPIRY'],
+    // Password Hashing
+    bcryptSaltRounds: process.env['BCRYPT_SALT_ROUNDS'],
+    // SMTP Email Configuration
+    smtpHost: process.env['SMTP_HOST'],
+    smtpPort: process.env['SMTP_PORT'],
+    smtpSecure: process.env['SMTP_SECURE'],
+    smtpUser: process.env['SMTP_USER'],
+    smtpPassword: process.env['SMTP_PASSWORD'],
+    smtpFrom: process.env['SMTP_FROM'],
+    // Application URLs
+    appUrl: process.env['APP_URL'],
+    apiUrl: process.env['API_URL'],
   });
 
   if (!result.success) {
