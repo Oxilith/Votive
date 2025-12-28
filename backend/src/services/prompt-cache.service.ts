@@ -7,6 +7,7 @@
  * - Implements LRU eviction when cache exceeds max entries (100) using O(n) array-based tracking
  * - Tracks refresh operations to prevent duplicate requests
  * - Provides cache freshness checking
+ * - Exposes cached keys for dynamic cache recovery
  * @dependencies
  * - shared/index for PromptConfig type
  * - @/config for TTL configuration
@@ -232,6 +233,30 @@ export class PromptCacheService {
       misses: this.misses,
       hitRatio: total > 0 ? this.hits / total : 0,
     };
+  }
+
+  /**
+   * Gets all currently cached prompt keys
+   * Used for dynamic cache recovery when circuit breaker closes
+   * @returns Array of cached prompt identifiers with their thinking mode
+   */
+  getCachedKeys(): Array<{ key: string; thinkingEnabled: boolean }> {
+    const keys: Array<{ key: string; thinkingEnabled: boolean }> = [];
+
+    for (const cacheKey of this.cache.keys()) {
+      // Parse cache key format: "KEY:1" or "KEY:0"
+      const lastColonIndex = cacheKey.lastIndexOf(':');
+      if (lastColonIndex !== -1) {
+        const key = cacheKey.substring(0, lastColonIndex);
+        const thinkingFlag = cacheKey.substring(lastColonIndex + 1);
+        keys.push({
+          key,
+          thinkingEnabled: thinkingFlag === '1',
+        });
+      }
+    }
+
+    return keys;
   }
 }
 
