@@ -218,3 +218,75 @@ Since npm commands are not allowed in sandbox, the following steps must be run e
    Check RefreshToken table has entry linked to user
 
 Next: subtask-6-3 - End-to-end verification of token refresh flow
+
+=== SESSION UPDATE: subtask-6-4 ===
+Date: 2025-12-28
+Subtask: End-to-end verification of password reset flow
+
+Code Verification Complete:
+All password reset implementation files verified:
+- Route: POST /api/user-auth/password-reset (request reset)
+- Route: POST /api/user-auth/password-reset/confirm (confirm with token)
+- Controller: requestPasswordReset and confirmPasswordReset handlers
+- Service: UserService.requestPasswordReset() and confirmPasswordReset() methods
+- Email: EmailService.sendPasswordResetEmail() with HTML/plaintext templates
+- Validators: passwordResetRequestSchema and passwordResetConfirmSchema (Zod)
+- Database: PasswordResetToken model with token, expiresAt, usedAt fields
+
+Security Features Verified:
+- Generic success message always returned (prevents user enumeration)
+- Token expires after 1 hour (PASSWORD_RESET_TOKEN_EXPIRY_MS = 60*60*1000)
+- Token marked as used on successful reset (usedAt field)
+- All refresh tokens invalidated on password reset (forces re-login)
+- New password hashed with bcrypt async methods
+- Uses timing-safe token lookup via unique constraint
+
+Manual E2E Verification Steps:
+Since npm commands are not allowed in sandbox, the following steps must be run externally:
+
+Prerequisites:
+1. Get Ethereal SMTP credentials from https://ethereal.email/create
+2. Update prompt-service/.env with SMTP_USER and SMTP_PASSWORD
+3. Ensure service is running: cd prompt-service && npm install && npm run db:generate && npm run db:migrate && npm run dev
+
+Step 1: Register a test user (if not already done)
+   curl -X POST http://localhost:3002/api/user-auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password123"}'
+   Expected: 201 Created
+
+Step 2: Request password reset
+   curl -X POST http://localhost:3002/api/user-auth/password-reset \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com"}'
+   Expected: 200 OK with { message: "If an account with that email exists, a password reset link has been sent." }
+
+Step 3: Check Ethereal inbox for reset email
+   - Go to https://ethereal.email/messages
+   - Find the "Reset Your Votive Password" email
+   - Extract the reset token from the URL: /reset-password?token=<TOKEN>
+
+Step 4: Confirm password reset with token
+   curl -X POST http://localhost:3002/api/user-auth/password-reset/confirm \
+     -H "Content-Type: application/json" \
+     -d '{"token": "<TOKEN_FROM_EMAIL>", "newPassword": "newpassword456"}'
+   Expected: 200 OK with { message: "Password has been reset successfully. Please login with your new password." }
+
+Step 5: Login with new password - should succeed
+   curl -X POST http://localhost:3002/api/user-auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "newpassword456"}'
+   Expected: 200 OK with { user, accessToken }
+
+Step 6: Verify old password no longer works
+   curl -X POST http://localhost:3002/api/user-auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password123"}'
+   Expected: 401 Unauthorized with { error: "Invalid email or password", code: "AUTHENTICATION_FAILED" }
+
+Additional Verification:
+- Database: Check PasswordResetToken table - token should have usedAt set
+- Database: Check RefreshToken table - all tokens for user should be deleted
+- Security: Try using same reset token again - should fail with "Invalid or expired password reset token"
+
+Next: subtask-6-5 - End-to-end verification of email verification flow
