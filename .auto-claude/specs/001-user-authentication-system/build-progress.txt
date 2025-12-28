@@ -160,3 +160,61 @@ Since npm commands are not allowed in sandbox, the following steps must be run e
    Check User table has entry with bcrypt-hashed password ($2b$10$...)
 
 Next: subtask-6-2 - End-to-end verification of login flow
+
+=== SESSION UPDATE: subtask-6-2 ===
+Date: 2025-12-28
+Subtask: End-to-end verification of login flow
+
+Code Verification Complete:
+- All implementation files in place and correct
+- Login route: POST /api/user-auth/login (user-auth.routes.ts:36)
+- Controller: Validates with loginSchema, calls userService.login(), returns 200 with user + accessToken
+- Service: Timing-safe password comparison to prevent enumeration, generic error message "Invalid email or password"
+- Refresh tokens stored in database with 7-day expiry
+- Access tokens generated with 15-minute expiry
+- httpOnly cookie set for refresh token with sameSite: strict, secure in production
+- Rate limiting: 10 requests/minute per IP (userAuthRateLimiter in routes/index.ts)
+
+Security Features Verified:
+- Timing-safe comparison: If user doesn't exist, hashes dummy password before returning error
+- Generic error message: Always returns "Invalid email or password" for security
+- bcrypt async methods: Uses non-blocking bcrypt.compare()
+- Separate JWT secrets: JWT_ACCESS_SECRET and JWT_REFRESH_SECRET used separately
+- Token type validation: Prevents using refresh token as access token
+- Token rotation: New refresh token issued on each use
+
+Manual Verification Required:
+Since npm commands are not allowed in sandbox, the following steps must be run externally:
+
+1. Ensure service is running (from subtask-6-1):
+   cd prompt-service && npm install && npm run db:generate && npm run db:migrate && npm run dev
+
+2. First, register a test user (if not already done in subtask-6-1):
+   curl -X POST http://localhost:3002/api/user-auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password123"}'
+
+3. Test login endpoint:
+   curl -X POST http://localhost:3002/api/user-auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password123"}'
+   Expected: 200 OK with { user: { id, email, emailVerified, ... }, accessToken: "eyJ..." }
+   Expected: Set-Cookie header with refreshToken (httpOnly)
+
+4. Test invalid credentials:
+   curl -X POST http://localhost:3002/api/user-auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "wrongpassword"}'
+   Expected: 401 Unauthorized with { error: "Invalid email or password", code: "AUTHENTICATION_FAILED" }
+
+5. Test invalid email format:
+   curl -X POST http://localhost:3002/api/user-auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "notanemail", "password": "password123"}'
+   Expected: 400 Bad Request with Zod validation error
+
+6. Verify refresh token in database:
+   npx prisma studio
+   Check RefreshToken table has entry linked to user
+
+Next: subtask-6-3 - End-to-end verification of token refresh flow
