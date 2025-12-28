@@ -152,3 +152,6 @@ build/
 
 # Playwright MCP screenshots
 .playwright-mcp/
+
+# Git worktrees
+.worktrees/
