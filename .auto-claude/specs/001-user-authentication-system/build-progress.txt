@@ -1,0 +1,162 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: User Authentication System
+Workspace: prompt-service (primary), app (integration)
+Started: 2025-12-28
+
+Workflow Type: feature
+Rationale: Net-new JWT-based authentication system to enable persistent user accounts and cross-device assessment progress storage
+
+Session 1 (Planner):
+- Created implementation_plan.json
+- Phases: 6
+- Total subtasks: 19
+- Created init.sh
+- Created build-progress.txt
+
+Phase Summary:
+- Phase 1 (Database Schema & Dependencies): 4 subtasks, no dependencies
+- Phase 2 (Auth Utilities & Services): 5 subtasks, depends on phase-1
+- Phase 3 (User Service & Business Logic): 2 subtasks, depends on phase-2
+- Phase 4 (JWT Authentication Middleware): 1 subtask, depends on phase-2
+- Phase 5 (Authentication API Endpoints): 3 subtasks, depends on phase-3 and phase-4
+- Phase 6 (Integration & End-to-End Verification): 6 subtasks, depends on phase-5
+
+Services Involved:
+- prompt-service (primary): Owns User DB, auth logic, JWT generation/validation, email service
+- app (integration): Frontend will consume auth APIs (out of scope for this task)
+- backend (integration): May need protected endpoints integration (out of scope for this task)
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 1
+- Parallel groups:
+  * phase-2-auth-utilities + phase-4-auth-middleware (both depend only on phase-1, different file sets)
+- Speedup estimate: 1.2x faster than sequential
+
+Implementation Approach:
+1. Database-first: Set up User, RefreshToken, PasswordResetToken models
+2. Utilities: Build JWT, password hashing, email, token generation utilities
+3. Business logic: Create user service with registration, login, token management
+4. Routes: Implement 7 auth endpoints (register, login, refresh, password-reset, password-reset/confirm, verify-email, logout)
+5. Integration: Verify complete flows end-to-end
+
+Critical Notes:
+- Existing auth.routes.ts is for ADMIN sessions (API key + cookies) - keep separate
+- User auth goes in user-auth.routes.ts
+- Use bcryptjs ASYNC methods only (never blocking sync variants)
+- JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be different
+- Refresh tokens in httpOnly cookies for XSS protection
+- Reuse timing-safe comparison from src/utils/crypto.ts
+
+Verification Strategy:
+- Risk level: critical
+- Test types: unit, integration, e2e, security
+- Security scanning: Required (secrets scan, npm audit)
+- Staging deployment: Recommended
+
+=== STARTUP COMMAND ===
+
+To continue building this spec, run:
+
+  cd .auto-claude && source .venv/bin/activate && python run.py --spec 001 --parallel 1
+
+Note: Parallelism set to 1 due to sequential dependencies between phases.
+      Only phase-2 and phase-4 can run concurrently (limited speedup).
+
+=== END SESSION 1 ===
+
+Next Steps:
+1. Coder agent will pick up subtask-1-1 (install npm packages)
+2. Follow phases sequentially: database → utilities → service → middleware → routes → integration
+3. QA agent will verify comprehensive testing requirements after implementation
+
+Dependencies to Install:
+- jsonwebtoken
+- bcryptjs
+- nodemailer
+- @types/jsonwebtoken
+- @types/bcryptjs
+- @types/nodemailer
+
+Environment Variables Needed (add to prompt-service/.env):
+- JWT_ACCESS_SECRET (generate: openssl rand -hex 32)
+- JWT_REFRESH_SECRET (generate: openssl rand -hex 32, must be different)
+- JWT_ACCESS_EXPIRY (recommend: 15m)
+- JWT_REFRESH_EXPIRY (recommend: 7d)
+- BCRYPT_SALT_ROUNDS (recommend: 10)
+- SMTP_HOST (dev: smtp.ethereal.email)
+- SMTP_PORT (dev: 587)
+- SMTP_USER (dev: from ethereal.email/create)
+- SMTP_PASSWORD (dev: from ethereal.email/create)
+- SMTP_FROM_EMAIL (e.g., noreply@votive.app)
+- SMTP_FROM_NAME (e.g., Votive)
+- APP_URL (for email links: https://localhost:3000)
+- API_URL (for internal use: http://localhost:3002)
+
+=== SESSION UPDATE: subtask-5-2 ===
+Date: 2025-12-28
+Subtask: Create user auth routes file with registration, login, refresh, password reset, email verification, logout endpoints
+
+Completed:
+- Created prompt-service/src/routes/user-auth.routes.ts
+- Followed ab-test.routes.ts pattern with asyncHandler wrapper
+- Public routes: POST /register, POST /login, POST /refresh, POST /password-reset, POST /password-reset/confirm, GET /verify-email/:token, POST /logout
+- Protected routes (require jwtAuthMiddleware): POST /resend-verification, POST /logout-all, GET /me
+- Exports userAuthRoutes for main app registration
+
+Files Created:
+- prompt-service/src/routes/user-auth.routes.ts (85 lines)
+
+Verification:
+- TypeScript type-check must be run externally (npm run type-check)
+- All imports verified: userAuthController and jwtAuthMiddleware exports exist
+
+Git Commit: 9897e85
+
+Next: subtask-5-3 - Register user auth routes in main Express app
+
+=== SESSION UPDATE: subtask-6-1 ===
+Date: 2025-12-28
+Subtask: End-to-end verification of registration flow
+
+Code Verification Complete:
+- All implementation files in place and correct
+- User model in prisma/schema.prisma with password, emailVerified fields
+- UserService.register() properly hashes password with bcrypt, creates user in transaction
+- Controller validates input with Zod, returns 201 status on success
+- Routes registered at /api/user-auth/register with rate limiting (10 req/min)
+- Refresh tokens stored in httpOnly cookies for XSS protection
+- Email verification token generated and email sent (logged in dev mode)
+
+Environment Setup Created:
+- Created .env file from .env.example with development secrets
+- JWT_ACCESS_SECRET and JWT_REFRESH_SECRET configured (different values)
+- BCRYPT_SALT_ROUNDS=10, JWT_ACCESS_EXPIRY=15m, JWT_REFRESH_EXPIRY=7d
+
+Manual Verification Required:
+Since npm commands are not allowed in sandbox, the following steps must be run externally:
+
+1. Install dependencies:
+   cd prompt-service && npm install
+
+2. Generate Prisma client:
+   npm run db:generate
+
+3. Run database migrations:
+   npm run db:migrate
+
+4. Start the service:
+   npm run dev
+
+5. Test registration endpoint:
+   curl -X POST http://localhost:3002/api/user-auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"email": "test@example.com", "password": "password123"}'
+   Expected: 201 Created with { user, accessToken }
+
+6. Verify in database:
+   npx prisma studio
+   Check User table has entry with bcrypt-hashed password ($2b$10$...)
+
+Next: subtask-6-2 - End-to-end verification of login flow
