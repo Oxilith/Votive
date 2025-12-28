@@ -100,21 +100,25 @@ describe('fetchWithTimeout', () => {
   describe('timeout handling', () => {
     it('should abort request when timeout is exceeded', async () => {
       // Create a promise that never resolves to simulate slow response
+      // But respects the abort signal
       mockFetch.mockImplementationOnce(
-        () =>
-          new Promise(() => {
-            // Never resolves
+        (_url: string, options: RequestInit) =>
+          new Promise((_, reject) => {
+            options.signal?.addEventListener('abort', () => {
+              const error = new Error('Aborted');
+              error.name = 'AbortError';
+              reject(error);
+            });
           })
       );
 
       const fetchPromise = fetchWithTimeout('https://api.example.com/slow', {
-        timeoutMs: 5000,
+        timeoutMs: 100,
       });
 
-      // Advance time past the timeout
-      await vi.advanceTimersByTimeAsync(5001);
+      // Advance time past the timeout and await result
+      vi.advanceTimersByTime(101);
 
-      await expect(fetchPromise).rejects.toThrow();
       await expect(fetchPromise).rejects.toMatchObject({
         name: 'AbortError',
       });
@@ -127,7 +131,9 @@ describe('fetchWithTimeout', () => {
       mockFetch.mockImplementationOnce(
         () =>
           new Promise((resolve) => {
-            setTimeout(() => resolve(mockResponse), 4000);
+            setTimeout(() => {
+              resolve(mockResponse);
+            }, 4000);
           })
       );
 
@@ -143,22 +149,24 @@ describe('fetchWithTimeout', () => {
     });
 
     it('should use the provided timeout value', async () => {
+      // Mock fetch that respects abort signal
       mockFetch.mockImplementationOnce(
-        () =>
-          new Promise(() => {
-            // Never resolves
+        (_url: string, options: RequestInit) =>
+          new Promise((_, reject) => {
+            options.signal?.addEventListener('abort', () => {
+              const error = new Error('Aborted');
+              error.name = 'AbortError';
+              reject(error);
+            });
           })
       );
 
       const fetchPromise = fetchWithTimeout('https://api.example.com/slow', {
-        timeoutMs: 1000,
+        timeoutMs: 100,
       });
 
-      // Should not abort at 500ms
-      await vi.advanceTimersByTimeAsync(500);
-
-      // Should abort at 1001ms
-      await vi.advanceTimersByTimeAsync(501);
+      // Advance time past timeout
+      vi.advanceTimersByTime(101);
 
       await expect(fetchPromise).rejects.toMatchObject({
         name: 'AbortError',
