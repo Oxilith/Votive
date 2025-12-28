@@ -1,12 +1,24 @@
 /**
  * @file src/components/shared/icons/index.ts
- * @purpose Barrel export file for icon components
+ * @purpose Centralized icon component library with consistent sizing and accessibility
  * @functionality
- * - Exports base Icon component
- * - Exports individual icon components
- * - Exports icon types (IconProps, IconSize)
+ * - Provides 15+ reusable SVG icon components with shared styling patterns
+ * - Supports four size variants: xs (12px), sm (16px), md (20px), lg (24px)
+ * - All icons use 24x24 viewBox for consistent scaling
+ * - Icons inherit text color via currentColor for seamless theming
+ * - Built-in accessibility support with aria-hidden and aria-label props
  * @dependencies
- * - Icon component modules
+ * - React (FC, SVG elements)
+ *
+ * @example
+ * // Basic usage
+ * import { CheckIcon, SunIcon } from '@/components/shared/icons';
+ * <CheckIcon size="md" />
+ * <SunIcon size="lg" className="text-yellow-500" />
+ *
+ * @example
+ * // Accessible icon with label
+ * <ArrowRightIcon aria-hidden={false} aria-label="Navigate forward" />
  */
 
 // Base Icon component and types

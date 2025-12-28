@@ -1,20 +1,25 @@
-## [1.1.0] - 2025-12-28
+## [1.0.1] - 2025-12-28
 
 ### Added
 - BackgroundRefreshManager utility for background task management with queue limiting, retry logic, and exponential backoff
 - fetchWithTimeout utility consolidating duplicated AbortController patterns
-- Reusable icon components (15+ icons) with shared Icon wrapper and size system
-- InsightCard component extracted for AI analysis display
+- New reusable icon component library for consistent SVG icons across the application
+- Extracted InsightCard as a standalone component for better maintainability
+- Comprehensive unit tests for InsightCard component
+- getCachedKeys() method for dynamic cache recovery
 
 ### Changed
 - PromptClientService now uses BackgroundRefreshManager for background cache refresh
-- Icon system extended with 'xs' size variant (12px)
+- Icon system extended with 'xs' size variant (12px) across all icon components
+- Improved code organization by separating InsightCard component from IdentityInsightsAI
 - Standardized all icon viewBoxes to 24x24 coordinate system
+- Cache recovery now dynamically refreshes cached prompts instead of using hardcoded list
+- Enhanced icon barrel export with comprehensive usage documentation
 
 ### Fixed
-- Icon viewBox inconsistency (CheckIcon, ErrorCircleIcon now use 24x24)
-- Removed !important CSS overrides in MultiSelectStep
-- Error handling improvements in BackgroundRefreshManager callbacks
+- Standardized icon implementations to use centralized icon component
+- Removed unsafe type assertions in insight card analysis patterns
+- Empty evidence arrays no longer render "Evidence" label in InsightCard
 
 ## [1.0.0] - 2025-12-28
 

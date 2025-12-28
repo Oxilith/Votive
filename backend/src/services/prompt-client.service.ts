@@ -43,15 +43,6 @@ interface PromptRefreshTaskId {
   thinkingEnabled: boolean;
 }
 
-/**
- * Prompts to refresh when circuit breaker closes (service recovers)
- * Add new prompt keys here as they are added to the system
- */
-const PROMPTS_TO_CACHE_ON_RECOVERY = [
-  { key: 'IDENTITY_ANALYSIS', thinkingEnabled: true },
-  { key: 'IDENTITY_ANALYSIS', thinkingEnabled: false },
-] as const;
-
 export interface ResolvePromptResponse {
   config: PromptConfig;
   abTestId?: string;
@@ -285,13 +276,21 @@ export class PromptClientService {
   }
 
   /**
-   * Refreshes all commonly used prompt configurations
+   * Refreshes all currently cached prompt configurations
    * Called when circuit breaker closes (service recovers)
+   * Dynamically retrieves cached keys instead of using hardcoded list
    */
   private refreshAllCachedPrompts(): void {
-    logger.info('Service recovered - refreshing prompt cache');
+    const cachedKeys = promptCacheService.getCachedKeys();
 
-    for (const { key, thinkingEnabled } of PROMPTS_TO_CACHE_ON_RECOVERY) {
+    if (cachedKeys.length === 0) {
+      logger.info('Service recovered - no cached prompts to refresh');
+      return;
+    }
+
+    logger.info({ count: cachedKeys.length }, 'Service recovered - refreshing cached prompts');
+
+    for (const { key, thinkingEnabled } of cachedKeys) {
       this.scheduleBackgroundRefresh(key, thinkingEnabled);
     }
   }

@@ -88,7 +88,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       )}
 
       {/* Evidence as array (patterns) */}
-      {'evidence' in item && item.evidence && Array.isArray(item.evidence) && (
+      {'evidence' in item && item.evidence && Array.isArray(item.evidence) && item.evidence.length > 0 && (
         <div className="space-y-1">
           <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
             {t('insights.cards.evidence')}

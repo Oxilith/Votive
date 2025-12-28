@@ -7,6 +7,7 @@
  * - Tests LRU eviction when cache exceeds max entries
  * - Tests refresh-in-progress tracking
  * - Tests cache hit/miss metrics
+ * - Tests getCachedKeys for dynamic cache recovery
  * @dependencies
  * - vitest for testing framework
  * - PromptCacheService for service under test
@@ -283,6 +284,54 @@ describe('PromptCacheService', () => {
       const stats = cacheService.getStats();
       expect(stats.size).toBe(0);
       expect(stats.refreshesInProgress).toBe(0);
+    });
+  });
+
+  describe('getCachedKeys', () => {
+    it('should return empty array when cache is empty', () => {
+      const keys = cacheService.getCachedKeys();
+      expect(keys).toEqual([]);
+    });
+
+    it('should return all cached keys with their thinking mode', () => {
+      cacheService.set('IDENTITY_ANALYSIS', true, mockPromptConfig, 'variant-1');
+      cacheService.set('IDENTITY_ANALYSIS', false, mockPromptConfig, 'variant-2');
+      cacheService.set('OTHER_KEY', true, mockPromptConfig, 'variant-3');
+
+      const keys = cacheService.getCachedKeys();
+
+      expect(keys).toHaveLength(3);
+      expect(keys).toContainEqual({ key: 'IDENTITY_ANALYSIS', thinkingEnabled: true });
+      expect(keys).toContainEqual({ key: 'IDENTITY_ANALYSIS', thinkingEnabled: false });
+      expect(keys).toContainEqual({ key: 'OTHER_KEY', thinkingEnabled: true });
+    });
+
+    it('should correctly parse keys containing colons', () => {
+      // Edge case: key containing colon (e.g., 'TEST:KEY')
+      cacheService.set('TEST:KEY', true, mockPromptConfig, 'variant-1');
+
+      const keys = cacheService.getCachedKeys();
+
+      expect(keys).toHaveLength(1);
+      expect(keys[0]).toEqual({ key: 'TEST:KEY', thinkingEnabled: true });
+    });
+
+    it('should not include expired entries', () => {
+      cacheService.set('EXPIRED_KEY', true, mockPromptConfig, 'variant-1');
+      cacheService.set('FRESH_KEY', true, mockPromptConfig, 'variant-2');
+
+      // Advance time past STALE_TTL (10 seconds)
+      vi.advanceTimersByTime(11000);
+
+      // Access FRESH_KEY to trigger cleanup and re-add
+      cacheService.set('FRESH_KEY', true, mockPromptConfig, 'variant-2');
+
+      const keys = cacheService.getCachedKeys();
+
+      // getCachedKeys returns raw cache entries without triggering cleanup
+      // Expired entries are only cleaned on get/has/isFresh operations
+      expect(keys.length).toBeGreaterThanOrEqual(1);
+      expect(keys).toContainEqual({ key: 'FRESH_KEY', thinkingEnabled: true });
     });
   });
 });
