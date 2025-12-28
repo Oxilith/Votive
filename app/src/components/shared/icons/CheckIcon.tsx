@@ -3,17 +3,19 @@
  * @purpose Checkmark icon for selected/checked states
  * @functionality
  * - Renders a filled checkmark SVG icon
- * - Supports size variants: sm (16px), md (20px), lg (24px)
+ * - Supports size variants: xs (12px), sm (16px), md (20px), lg (24px)
  * - Uses currentColor for fill to inherit text color
+ * - Uses 24x24 viewBox for consistency with other icons
  * @dependencies
  * - React
  * - ./Icon (IconProps, IconSize)
  */
 
 import type { FC } from 'react';
-import type { IconProps } from './Icon';
+import type { IconProps, IconSize } from './Icon';
 
-const sizeConfig: Record<'sm' | 'md' | 'lg', { className: string }> = {
+const sizeConfig: Record<IconSize, { className: string }> = {
+  xs: { className: 'w-3 h-3' },
   sm: { className: 'w-4 h-4' },
   md: { className: 'w-5 h-5' },
   lg: { className: 'w-6 h-6' },
@@ -34,14 +36,14 @@ const CheckIcon: FC<IconProps> = ({
   return (
     <svg
       className={`${config.className} ${className}`.trim()}
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       fill="currentColor"
       aria-hidden={ariaHidden}
       aria-label={ariaLabel}
     >
       <path
         fillRule="evenodd"
-        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+        d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z"
         clipRule="evenodd"
       />
     </svg>

@@ -2,7 +2,7 @@
  * @file src/components/shared/icons/Icon.tsx
  * @purpose Base icon wrapper component providing consistent sizing and accessibility
  * @functionality
- * - Provides three size variants: sm (16px), md (20px), lg (24px)
+ * - Provides four size variants: xs (12px), sm (16px), md (20px), lg (24px)
  * - Supports className prop for additional styling
  * - Sets aria-hidden="true" by default for decorative icons
  * - Uses currentColor for stroke/fill to inherit text color
@@ -12,10 +12,10 @@
 
 import type { FC, ReactNode } from 'react';
 
-export type IconSize = 'sm' | 'md' | 'lg';
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface IconProps {
-  /** Size variant: sm=16px, md=20px, lg=24px */
+  /** Size variant: xs=12px, sm=16px, md=20px, lg=24px */
   size?: IconSize;
   /** Additional CSS classes */
   className?: string;
@@ -28,6 +28,7 @@ export interface IconProps {
 }
 
 const sizeConfig: Record<IconSize, { dimension: number; className: string }> = {
+  xs: { dimension: 12, className: 'w-3 h-3' },
   sm: { dimension: 16, className: 'w-4 h-4' },
   md: { dimension: 20, className: 'w-5 h-5' },
   lg: { dimension: 24, className: 'w-6 h-6' },

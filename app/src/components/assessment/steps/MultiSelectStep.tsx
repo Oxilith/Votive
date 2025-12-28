@@ -61,7 +61,7 @@ export const MultiSelectStep: React.FC<MultiSelectStepProps> = ({ step, value, o
                 }`}
               >
                 {selected.includes(option.id) && (
-                  <CheckIcon size="sm" className="!w-3 !h-3 text-white" />
+                  <CheckIcon size="xs" className="text-white" />
                 )}
               </div>
               <div>
