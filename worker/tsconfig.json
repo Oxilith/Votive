@@ -20,7 +20,8 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src/**/*"],

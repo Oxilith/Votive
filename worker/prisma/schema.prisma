@@ -144,6 +144,11 @@ model User {
   gender    String?   // 'male' | 'female' | 'other' | 'prefer-not-to-say'
   birthYear Int       // Required - store year only for age calculation
 
+  // Account lockout fields (progressive lockout after failed login attempts)
+  failedLoginAttempts Int       @default(0)
+  lockoutUntil        DateTime?
+  lastFailedLoginAt   DateTime?
+
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   emailVerifyTokens   EmailVerifyToken[]
