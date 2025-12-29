@@ -35,13 +35,13 @@ interface PageNavigationProps {
   /** Current page for highlighting active link */
   currentPage: 'assessment' | 'insights' | 'profile';
   /** Navigate to landing page */
-  onNavigateToLanding: () => void;
+  onNavigateToLanding?: () => void;
   /** Navigate to assessment page */
-  onNavigateToAssessment: () => void;
+  onNavigateToAssessment?: () => void;
   /** Navigate to insights page */
-  onNavigateToInsights: () => void;
+  onNavigateToInsights?: () => void;
   /** Navigate to authentication page */
-  onNavigateToAuth: () => void;
+  onNavigateToAuth?: () => void;
   /** Import assessment callback - only shown on assessment page when provided */
   onImport?: () => void;
   /** Export assessment callback - shown when assessment data exists */
@@ -79,7 +79,7 @@ const PageNavigation: FC<PageNavigationProps> = ({
       <div className="flex items-center gap-6 lg:gap-10">
         {/* Logo and Brand - Click to go back to landing */}
         <button
-          onClick={onNavigateToLanding}
+          onClick={() => onNavigateToLanding?.()}
           className="flex items-center gap-2 group"
         >
           <VotiveLogo size="sm" />
@@ -92,7 +92,7 @@ const PageNavigation: FC<PageNavigationProps> = ({
         <div className="hidden md:flex items-center gap-6">
           <button
             type="button"
-            onClick={onNavigateToAssessment}
+            onClick={() => onNavigateToAssessment?.()}
             className={`nav-link font-body text-sm transition-colors cursor-pointer ${
               currentPage === 'assessment'
                 ? 'text-[var(--text-primary)] font-medium'
@@ -103,7 +103,7 @@ const PageNavigation: FC<PageNavigationProps> = ({
           </button>
           <button
             type="button"
-            onClick={onNavigateToInsights}
+            onClick={() => onNavigateToInsights?.()}
             className={`nav-link font-body text-sm transition-colors cursor-pointer ${
               currentPage === 'insights'
                 ? 'text-[var(--text-primary)] font-medium'
@@ -158,7 +158,7 @@ const PageNavigation: FC<PageNavigationProps> = ({
             />
           ) : (
             <button
-              onClick={onNavigateToAuth}
+              onClick={() => onNavigateToAuth?.()}
               className="px-3 py-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             >
               {t('nav.signIn')}
