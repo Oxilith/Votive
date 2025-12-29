@@ -235,10 +235,10 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
       {/* Page Navigation */}
       <PageNavigation
         currentPage="insights"
-        onNavigateToLanding={onNavigateToLanding}
-        onNavigateToAssessment={onNavigateToAssessment}
+        onNavigateToLanding={onNavigateToLanding ?? (() => {})}
+        onNavigateToAssessment={onNavigateToAssessment ?? (() => {})}
         onNavigateToInsights={() => {}} // Already on insights
-        onNavigateToAuth={onNavigateToAuth}
+        onNavigateToAuth={onNavigateToAuth ?? (() => {})}
         onExportAssessment={isReadOnly ? undefined : (hasResponses ? handleExportClick : undefined)}
         onExportAnalysis={isReadOnly ? undefined : (hasAnalysis && onExportAnalysis ? handleExportAnalysisClick : undefined)}
         onNavigateToProfile={onNavigateToProfile}

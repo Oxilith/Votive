@@ -417,10 +417,10 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
       {/* Page Navigation */}
       <PageNavigation
         currentPage="assessment"
-        onNavigateToLanding={onNavigateToLanding}
+        onNavigateToLanding={onNavigateToLanding ?? (() => {})}
         onNavigateToAssessment={() => {}} // Already on assessment
-        onNavigateToInsights={onNavigateToInsights}
-        onNavigateToAuth={onNavigateToAuth}
+        onNavigateToInsights={onNavigateToInsights ?? (() => {})}
+        onNavigateToAuth={onNavigateToAuth ?? (() => {})}
         onImport={isReadOnly ? undefined : handleImportClick}
         onExportAssessment={isReadOnly ? undefined : (hasResponses ? handleExportClick : undefined)}
         onNavigateToProfile={onNavigateToProfile}
