@@ -90,6 +90,41 @@ services:
     networks:
       - app-network
 
+  worker:
+    image: oxilith/votive-worker:latest
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: votive-worker
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/prompts.db
+      - DATABASE_KEY=${DATABASE_KEY}
+      - LOG_LEVEL=info
+      # Job Configuration
+      - JOB_TOKEN_CLEANUP_ENABLED=true
+      - JOB_TOKEN_CLEANUP_SCHEDULE=0 * * * *
+      # Rate Limiting Configuration (optional - for reference)
+      # - RATE_LIMIT_WINDOW_MS=60000
+      # - RATE_LIMIT_LOGIN=5
+      # - RATE_LIMIT_REGISTER=5
+      # - RATE_LIMIT_PASSWORD_RESET=3
+      # - RATE_LIMIT_FORGOT_PASSWORD=3
+      # - RATE_LIMIT_TOKEN_REFRESH=20
+      # - RATE_LIMIT_USER_DATA=30
+      # - RATE_LIMIT_PROFILE=15
+    volumes:
+      - prompt-data:/app/data
+    depends_on:
+      prompt-service:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
   frontend:
     image: oxilith/votive-frontend:latest
     build:

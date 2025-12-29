@@ -67,6 +67,7 @@ const REFRESH_TOKEN_COOKIE_OPTIONS = {
 export class UserAuthController {
   /**
    * POST /api/user-auth/register - Register new user
+   * Returns tokens immediately - email verification is optional.
    */
   async register(req: Request, res: Response): Promise<void> {
     const body = registerSchema.safeParse(req.body);

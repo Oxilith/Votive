@@ -8,10 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Votive - a full-stack behavioral psychology assessment application with AI-powered analysis.
 
-**Architecture**: Monorepo with four packages:
+**Architecture**: Monorepo with five packages:
 - `/app` - React 19 frontend (Vite + Zustand + Tailwind v4)
 - `/backend` - Express API proxy (protects Anthropic API key)
 - `/prompt-service` - Prompt management microservice with admin UI and A/B testing
+- `/worker` - Background job scheduler (token cleanup, extensible for future jobs)
 - `/shared` - Shared TypeScript types (single source of truth)
 
 ## Commands
@@ -146,6 +147,29 @@ Microservice for prompt management with database storage and admin UI:
 
 The backend calls the prompt-service `/api/resolve` endpoint to get prompt configurations.
 
+**User Authentication** (`/prompt-service/src/services/user.service.ts`):
+- JWT-based authentication with access/refresh token rotation
+- Password hashing with bcrypt and timing-safe comparisons
+- Email verification and password reset flows
+- Rate limiting per endpoint (login: 5/min, register: 5/min, password reset: 3/min)
+
+**Rate Limiting** (`/prompt-service/src/middleware/rate-limit.middleware.ts`):
+- Factory pattern for per-route rate limiters
+- Environment-configurable limits with sensible defaults
+- Brute force protection for authentication endpoints
+
+### Worker (`/worker`)
+
+Background job scheduler for maintenance tasks:
+- `src/scheduler/index.ts` - Generic job scheduler using node-cron
+- `src/jobs/token-cleanup.job.ts` - Cleans expired refresh, password reset, and email verification tokens
+- `src/config/index.ts` - Environment-configurable job schedules
+- Shares database with prompt-service via libsql
+
+**Worker Configuration**:
+- `JOB_TOKEN_CLEANUP_ENABLED` - Enable/disable token cleanup (default: true)
+- `JOB_TOKEN_CLEANUP_SCHEDULE` - Cron schedule (default: `0 * * * *` = hourly)
+
 ### Frontend (`/app/src`)
 
 **State Management** - Zustand stores (not Redux):
@@ -206,6 +230,8 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
               localStorage     Prompt-Service  Pino logs
                                     ↓
                               SQLite (encrypted)
+                                    ↑
+                              Worker (cron jobs)
 ```
 
 ## Environment Variables

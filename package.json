@@ -6,7 +6,8 @@
     "shared",
     "backend",
     "app",
-    "prompt-service"
+    "prompt-service",
+    "worker"
   ],
   "scripts": {
     "lint": "npm run lint --workspaces --if-present",
@@ -21,13 +22,15 @@
     "dev:app": "npm run dev -w app",
     "dev:prompt-service": "npm run dev -w prompt-service",
     "dev:prompt-service:all": "npm run dev:all -w prompt-service",
+    "dev:worker": "npm run dev -w worker",
 
     "start:backend": "npm run start -w backend",
     "start:prompt-service": "npm run start -w prompt-service",
+    "start:worker": "npm run start -w worker",
     "preview:app": "npm run preview -w app",
 
     "db:migrate": "npm run db:migrate -w prompt-service",
-    "db:generate": "npm run db:generate -w prompt-service",
+    "db:generate": "npm run db:generate --workspaces --if-present",
     "db:seed": "npm run db:seed -w prompt-service",
     "db:studio": "npm run db:studio -w prompt-service"
   },

@@ -76,6 +76,20 @@ const configSchema = z.object({
   // Application URLs (for email links)
   appUrl: z.string().url().optional(),
   apiUrl: z.string().url().optional(),
+
+  // Rate Limiting Configuration
+  rateLimit: z
+    .object({
+      windowMs: z.coerce.number().default(60_000), // 1 minute
+      login: z.coerce.number().default(5), // 5 req/min - brute force protection
+      register: z.coerce.number().default(5), // 5 req/min - account spam prevention
+      passwordReset: z.coerce.number().default(3), // 3 req/min - email abuse prevention
+      forgotPassword: z.coerce.number().default(3), // 3 req/min - email abuse prevention
+      tokenRefresh: z.coerce.number().default(20), // 20 req/min - normal auth flow
+      userData: z.coerce.number().default(30), // 30 req/min - assessment/analysis
+      profile: z.coerce.number().default(15), // 15 req/min - profile operations
+    })
+    .default({}),
 });
 
 type Config = z.infer<typeof configSchema> & {
@@ -166,6 +180,17 @@ function loadConfig(): Config {
     // Application URLs
     appUrl: process.env['APP_URL'],
     apiUrl: process.env['API_URL'],
+    // Rate Limiting
+    rateLimit: {
+      windowMs: process.env['RATE_LIMIT_WINDOW_MS'],
+      login: process.env['RATE_LIMIT_LOGIN'],
+      register: process.env['RATE_LIMIT_REGISTER'],
+      passwordReset: process.env['RATE_LIMIT_PASSWORD_RESET'],
+      forgotPassword: process.env['RATE_LIMIT_FORGOT_PASSWORD'],
+      tokenRefresh: process.env['RATE_LIMIT_TOKEN_REFRESH'],
+      userData: process.env['RATE_LIMIT_USER_DATA'],
+      profile: process.env['RATE_LIMIT_PROFILE'],
+    },
   });
 
   if (!result.success) {

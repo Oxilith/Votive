@@ -1,3 +1,26 @@
+## [1.0.6] - 2025-12-29
+
+### Added
+- Worker microservice for background job scheduling (`/worker`)
+- Generic job scheduler using node-cron with extensible job interface
+- Token cleanup job that removes expired refresh, password reset, and email verification tokens
+- Per-route rate limiting middleware with factory pattern
+- Environment-configurable rate limits for all authentication endpoints
+- Timing-safe password hashing in registration to prevent email enumeration
+- Unit tests for UserService (51 tests covering all auth flows)
+- Unit tests for EmailService (29 tests covering email delivery)
+- Worker Dockerfile and docker-compose integration
+
+### Changed
+- Rate limiting now per-endpoint: login/register (5/min), password reset (3/min), user data (30/min)
+- Updated production deployment documentation with worker service configuration
+- CLAUDE.md updated with worker microservice and rate limiting architecture
+
+### Security
+- Added timing-safe hash when checking existing emails during registration
+- Implemented aggressive rate limiting for brute force protection on auth endpoints
+- Token cleanup job prevents database bloat from expired tokens
+
 ## [1.0.5] - 2025-12-29
 
 ### Added

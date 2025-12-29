@@ -10,15 +10,26 @@
  * - Routes for analysis CRUD (save, list, get by ID)
  * - Wraps controller methods with async error handling
  * - Applies JWT authentication middleware to protected routes
+ * - Applies per-route rate limiting with env-configurable limits
  * @dependencies
  * - express Router
  * - @/controllers/user-auth.controller for request handling
  * - @/middleware/jwt-auth.middleware for protected routes
+ * - @/middleware/rate-limit.middleware for per-route rate limiting
  */
 
 import { Router, Request, Response, NextFunction } from 'express';
 import { userAuthController } from '@/controllers/user-auth.controller.js';
 import { jwtAuthMiddleware } from '@/middleware/jwt-auth.middleware.js';
+import {
+  loginLimiter,
+  registerLimiter,
+  passwordResetLimiter,
+  forgotPasswordLimiter,
+  tokenRefreshLimiter,
+  userDataLimiter,
+  profileLimiter,
+} from '@/middleware/rate-limit.middleware.js';
 
 const router = Router();
 
@@ -31,118 +42,149 @@ const asyncHandler =
 
 // Public routes - no authentication required
 
-// Registration
-router.post('/register', asyncHandler(userAuthController.register.bind(userAuthController)));
+// Registration (5 req/min default)
+router.post(
+  '/register',
+  registerLimiter,
+  asyncHandler(userAuthController.register.bind(userAuthController))
+);
 
-// Login
-router.post('/login', asyncHandler(userAuthController.login.bind(userAuthController)));
+// Login (5 req/min default)
+router.post(
+  '/login',
+  loginLimiter,
+  asyncHandler(userAuthController.login.bind(userAuthController))
+);
 
-// Token refresh (uses cookie for refresh token)
-router.post('/refresh', asyncHandler(userAuthController.refresh.bind(userAuthController)));
+// Token refresh (20 req/min default)
+router.post(
+  '/refresh',
+  tokenRefreshLimiter,
+  asyncHandler(userAuthController.refresh.bind(userAuthController))
+);
 
-// Password reset - request email
+// Password reset - request email (3 req/min default)
 router.post(
   '/password-reset',
+  passwordResetLimiter,
   asyncHandler(userAuthController.requestPasswordReset.bind(userAuthController))
 );
 
-// Password reset - confirm with token
+// Password reset - confirm with token (3 req/min default)
 router.post(
   '/password-reset/confirm',
+  forgotPasswordLimiter,
   asyncHandler(userAuthController.confirmPasswordReset.bind(userAuthController))
 );
 
-// Email verification (token in URL)
+// Email verification (token in URL) - uses profile limiter (15 req/min)
 router.get(
   '/verify-email/:token',
+  profileLimiter,
   asyncHandler(userAuthController.verifyEmail.bind(userAuthController))
 );
 
-// Logout (works with or without authentication)
-router.post('/logout', asyncHandler(userAuthController.logout.bind(userAuthController)));
+// Logout (uses profile limiter - 15 req/min)
+router.post(
+  '/logout',
+  profileLimiter,
+  asyncHandler(userAuthController.logout.bind(userAuthController))
+);
 
 // Protected routes - require JWT authentication
 
-// Resend verification email
+// Resend verification email (3 req/min - email abuse prevention)
 router.post(
   '/resend-verification',
+  passwordResetLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.resendVerification.bind(userAuthController))
 );
 
-// Logout from all sessions
+// Logout from all sessions (15 req/min)
 router.post(
   '/logout-all',
+  profileLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.logoutAll.bind(userAuthController))
 );
 
-// Get current user profile
+// Get current user profile (15 req/min)
 router.get(
   '/me',
+  profileLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.getCurrentUser.bind(userAuthController))
 );
 
-// Update user profile
+// Update user profile (15 req/min)
 router.put(
   '/profile',
+  profileLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.updateProfile.bind(userAuthController))
 );
 
-// Change password
+// Change password (5 req/min - sensitive operation)
 router.put(
   '/password',
+  loginLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.changePassword.bind(userAuthController))
 );
 
-// Delete account
+// Delete account (5 req/min - sensitive operation)
 router.delete(
   '/account',
+  loginLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.deleteAccount.bind(userAuthController))
 );
 
-// Save assessment
+// Save assessment (30 req/min - user data)
 router.post(
   '/assessment',
+  userDataLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.saveAssessment.bind(userAuthController))
 );
 
-// Get user's assessments
+// Get user's assessments (30 req/min - user data)
 router.get(
   '/assessment',
+  userDataLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.getAssessments.bind(userAuthController))
 );
 
-// Get specific assessment by ID
+// Get specific assessment by ID (30 req/min - user data)
 router.get(
   '/assessment/:id',
+  userDataLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.getAssessmentById.bind(userAuthController))
 );
 
-// Save analysis
+// Save analysis (30 req/min - user data)
 router.post(
   '/analysis',
+  userDataLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.saveAnalysis.bind(userAuthController))
 );
 
-// Get user's analyses
+// Get user's analyses (30 req/min - user data)
 router.get(
   '/analyses',
+  userDataLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.getAnalyses.bind(userAuthController))
 );
 
-// Get specific analysis by ID
+// Get specific analysis by ID (30 req/min - user data)
 router.get(
   '/analysis/:id',
+  userDataLimiter,
   jwtAuthMiddleware,
   asyncHandler(userAuthController.getAnalysisById.bind(userAuthController))
 );

@@ -140,6 +140,15 @@ export interface RefreshResult {
 }
 
 /**
+ * Result of registration request
+ * Returns generic message to prevent email enumeration
+ */
+export interface RegistrationResult {
+  success: true;
+  message: string;
+}
+
+/**
  * Custom error for authentication failures
  */
 export class AuthenticationError extends Error {
@@ -199,10 +208,13 @@ export class UserService {
 
   /**
    * Register a new user account
-   * Creates user with hashed password and sends verification email
+   * Creates user with hashed password and optionally sends verification email
+   *
+   * Security: Uses timing-safe comparison to prevent enumeration via timing attacks.
+   * Returns tokens immediately - email verification is optional (for SMTP-less deployments).
    *
    * @param input - Registration details (email, password)
-   * @returns Authentication result with user and tokens
+   * @returns Authentication result with user and tokens, or throws ConflictError
    * @throws ConflictError if email already exists
    */
   async register(input: RegisterInput): Promise<AuthResult> {
@@ -212,6 +224,8 @@ export class UserService {
     });
 
     if (existingUser) {
+      // Hash dummy password to prevent timing attacks
+      await hashPassword('dummy-password-for-timing');
       throw new ConflictError('Email already exists');
     }
 
@@ -264,6 +278,7 @@ export class UserService {
     });
 
     // Send verification email (don't fail registration if email fails)
+    // This is optional - works without SMTP configured
     await emailService.sendEmailVerificationEmail({
       to: user.email,
       verificationToken: emailVerifyToken.token,

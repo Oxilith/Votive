@@ -6,7 +6,7 @@
  * - Applies admin auth middleware to protected routes (prompts, ab-tests)
  * - Applies rate limiting to admin routes (100 req/15min)
  * - Applies strict rate limiting to auth routes (5 req/min) to prevent brute-force attacks
- * - Applies strict rate limiting to user-auth routes (10 req/min) for login/register
+ * - User-auth routes use per-route rate limiting (see user-auth.routes.ts)
  * - Applies lenient rate limiting to resolve routes (1000 req/min) for service-to-service
  * - Provides a single router for mounting in Express app
  * @dependencies
@@ -58,14 +58,8 @@ const resolveRateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Rate limiter for user auth endpoints (prevent brute-force attacks on login/register)
-const userAuthRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10, // 10 requests per minute (allows some retries but prevents brute-force)
-  message: { error: 'Too many authentication attempts, please try again later' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Note: User auth routes use per-route rate limiting configured in user-auth.routes.ts
+// with env-configurable limits (see rate-limit.middleware.ts)
 
 // Public routes (used by backend service) - rate limited to prevent abuse
 router.use('/resolve', resolveRateLimiter, resolveRoutes);
@@ -73,8 +67,8 @@ router.use('/resolve', resolveRateLimiter, resolveRoutes);
 // Auth routes (public - for login/logout) - rate limited to prevent brute-force attacks
 router.use('/auth', authRateLimiter, authRoutes);
 
-// User auth routes (public - for user registration/login/password reset) - rate limited
-router.use('/user-auth', userAuthRateLimiter, userAuthRoutes);
+// User auth routes - per-route rate limiting applied in user-auth.routes.ts
+router.use('/user-auth', userAuthRoutes);
 
 // Protected admin routes (require X-Admin-Key header + rate limiting)
 router.use('/prompts', adminRateLimiter, adminAuthMiddleware, promptRoutes);

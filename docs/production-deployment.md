@@ -38,8 +38,35 @@ This guide covers security considerations and configuration requirements for dep
 | `SESSION_SECRET` | Yes | - | 32+ char cookie signing secret |
 | `CORS_ORIGINS` | Yes | - | Comma-separated allowed origins |
 | `LOG_LEVEL` | No | info | Pino log level (fatal, error, warn, info, debug, trace) |
+| `RATE_LIMIT_WINDOW_MS` | No | 60000 | Rate limit window (ms) |
+| `RATE_LIMIT_LOGIN` | No | 5 | Login attempts per window |
+| `RATE_LIMIT_REGISTER` | No | 5 | Registration attempts per window |
+| `RATE_LIMIT_PASSWORD_RESET` | No | 3 | Password reset requests per window |
+| `RATE_LIMIT_FORGOT_PASSWORD` | No | 3 | Password reset confirms per window |
+| `RATE_LIMIT_TOKEN_REFRESH` | No | 20 | Token refresh requests per window |
+| `RATE_LIMIT_USER_DATA` | No | 30 | Assessment/analysis requests per window |
+| `RATE_LIMIT_PROFILE` | No | 15 | Profile operations per window |
 
 **Important:** `SESSION_SECRET` must differ from `ADMIN_API_KEY` in production for security. In development, at least one of `SESSION_SECRET` or `ADMIN_API_KEY` must be set—the service will fail to start with a clear error message if neither is configured. When only `ADMIN_API_KEY` is set, it's used as the session secret and a warning is logged.
+
+### Worker Service
+
+The worker service handles background jobs like token cleanup. It shares the database with prompt-service.
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `NODE_ENV` | Yes | development | Set to `production` |
+| `DATABASE_URL` | Yes | - | SQLite database path (same as prompt-service) |
+| `DATABASE_KEY` | Yes | - | 32+ char encryption key (same as prompt-service) |
+| `LOG_LEVEL` | No | info | Pino log level |
+| `JOB_TOKEN_CLEANUP_ENABLED` | No | true | Enable token cleanup job |
+| `JOB_TOKEN_CLEANUP_SCHEDULE` | No | 0 * * * * | Cron schedule (hourly default) |
+
+**Cron Schedule Examples:**
+- `0 * * * *` - Every hour at minute 0 (default)
+- `*/30 * * * *` - Every 30 minutes
+- `0 0 * * *` - Daily at midnight
+- `0 0 * * 0` - Weekly on Sunday at midnight
 
 ## Docker Compose Configuration
 
