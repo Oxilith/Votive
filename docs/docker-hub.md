@@ -28,6 +28,8 @@ ANTHROPIC_API_KEY=<YOUR_KEY> \
 DATABASE_KEY=<32+_CHAR_SECRET> \
 ADMIN_API_KEY=<32+_CHAR_SECRET> \
 SESSION_SECRET=<32+_CHAR_SECRET> \
+JWT_ACCESS_SECRET=<32+_CHAR_SECRET> \
+JWT_REFRESH_SECRET=<32+_CHAR_SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 
 # Windows (PowerShell)
@@ -35,6 +37,8 @@ $env:ANTHROPIC_API_KEY="<YOUR_KEY>"
 $env:DATABASE_KEY="<32+_CHAR_SECRET>"
 $env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
 $env:SESSION_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_ACCESS_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_REFRESH_SECRET="<32+_CHAR_SECRET>"
 docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -51,6 +55,19 @@ This starts:
 | `DATABASE_KEY` | 32+ character encryption key for SQLite |
 | `ADMIN_API_KEY` | 32+ character admin authentication key |
 | `SESSION_SECRET` | 32+ character cookie signing secret (must differ from ADMIN_API_KEY) |
+| `JWT_ACCESS_SECRET` | 32+ character secret for signing access tokens |
+| `JWT_REFRESH_SECRET` | 32+ character secret for signing refresh tokens (must differ from JWT_ACCESS_SECRET) |
+
+### Optional Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SMTP_HOST` | - | SMTP server hostname (for email verification/password reset) |
+| `SMTP_PORT` | 587 | SMTP server port |
+| `SMTP_SECURE` | false | Use SSL/TLS for SMTP |
+| `SMTP_USER` | - | SMTP authentication username |
+| `SMTP_PASSWORD` | - | SMTP authentication password |
+| `SMTP_FROM` | - | Default sender email address |
 
 Generate secure secrets with:
 ```bash
@@ -68,11 +85,13 @@ Build from source instead of using pre-built images:
 git clone https://github.com/Oxilith/votive.git
 cd votive
 
-# Build and run (requires all 4 environment variables)
+# Build and run (requires all 6 environment variables)
 ANTHROPIC_API_KEY=<KEY> \
 DATABASE_KEY=<SECRET> \
 ADMIN_API_KEY=<SECRET> \
 SESSION_SECRET=<SECRET> \
+JWT_ACCESS_SECRET=<SECRET> \
+JWT_REFRESH_SECRET=<SECRET> \
   docker compose up --build
 ```
 
@@ -112,6 +131,8 @@ ANTHROPIC_API_KEY=<KEY> \
 DATABASE_KEY=<SECRET> \
 ADMIN_API_KEY=<SECRET> \
 SESSION_SECRET=<SECRET> \
+JWT_ACCESS_SECRET=<SECRET> \
+JWT_REFRESH_SECRET=<SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -174,6 +195,8 @@ ANTHROPIC_API_KEY=<KEY> \
 DATABASE_KEY=<SECRET> \
 ADMIN_API_KEY=<SECRET> \
 SESSION_SECRET=<SECRET> \
+JWT_ACCESS_SECRET=<SECRET> \
+JWT_REFRESH_SECRET=<SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 ```
 

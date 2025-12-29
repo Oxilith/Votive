@@ -311,7 +311,7 @@ flowchart TB
 
     subgraph SecureStorage["Secure Storage"]
         DB[("Encrypted SQLite")]
-        Secrets["Environment Secrets<br/>- ANTHROPIC_API_KEY<br/>- DATABASE_KEY<br/>- ADMIN_API_KEY"]
+        Secrets["Environment Secrets<br/>- ANTHROPIC_API_KEY<br/>- DATABASE_KEY<br/>- ADMIN_API_KEY<br/>- JWT_ACCESS_SECRET<br/>- JWT_REFRESH_SECRET"]
     end
 
     Browser -->|"HTTPS :443"| Nginx
@@ -329,7 +329,8 @@ flowchart TB
 |-------|---------|----------------|
 | Transport | HTTPS | Nginx SSL termination |
 | API | Rate Limiting | express-rate-limit on admin endpoints |
-| Authentication | HttpOnly Cookie + API Key | Signed HttpOnly session cookie (primary) or X-Admin-Key header (fallback) |
+| Admin Auth | HttpOnly Cookie + API Key | Signed HttpOnly session cookie (primary) or X-Admin-Key header (fallback) |
+| User Auth | JWT Tokens | Access tokens (15m) + refresh tokens (7d) with bcrypt password hashing |
 | Data at Rest | Encryption | libsql AES encryption |
 | Headers | Security Headers | Helmet with CSP directives (script-src, style-src, img-src, connect-src) |
 | CORS | Origin Restriction | Whitelist of allowed origins |

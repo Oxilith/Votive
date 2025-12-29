@@ -29,7 +29,7 @@ export const IntroStep: React.FC<IntroStepProps> = ({
   onBack,
   isFirstStep = true,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('assessment');
 
   return (
     <div className="space-y-6">
@@ -66,7 +66,7 @@ export const IntroStep: React.FC<IntroStepProps> = ({
             onClick={onBack}
             className="px-6 py-3 font-body text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-sm transition-colors"
           >
-            {t('assessment.navigation.back')}
+            {t('navigation.back')}
           </button>
         )}
         <button

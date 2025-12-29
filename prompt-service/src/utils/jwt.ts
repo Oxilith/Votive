@@ -11,7 +11,11 @@
  * - jsonwebtoken for JWT operations
  */
 
-import jwt, { JsonWebTokenError, TokenExpiredError, type SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
+import type { SignOptions } from 'jsonwebtoken';
+
+// CommonJS module - destructure from default export
+const { JsonWebTokenError, TokenExpiredError } = jwt;
 
 /**
  * Payload included in access tokens

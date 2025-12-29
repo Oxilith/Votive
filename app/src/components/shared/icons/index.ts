@@ -7,6 +7,7 @@
  * - All icons use 24x24 viewBox for consistent scaling
  * - Icons inherit text color via currentColor for seamless theming
  * - Built-in accessibility support with aria-hidden and aria-label props
+ * - Includes navigation, theme, feedback, action, brand, and communication icons
  * @dependencies
  * - React (FC, SVG elements)
  *
@@ -47,14 +48,19 @@ export { default as AlertTriangleIcon } from './AlertTriangleIcon';
 // Action icons
 export { default as SearchIcon } from './SearchIcon';
 export { default as RefreshIcon } from './RefreshIcon';
+export { default as LoadingSpinnerIcon } from './LoadingSpinnerIcon';
 
 // Brand icons
 export { default as GitHubIcon } from './GitHubIcon';
+
+// Communication icons
+export { default as MailIcon } from './MailIcon';
 
 // Insight type icons
 export { default as ChartBarIcon } from './ChartBarIcon';
 export { default as SwitchHorizontalIcon } from './SwitchHorizontalIcon';
 export { default as EyeIcon } from './EyeIcon';
+export { default as EyeOffIcon } from './EyeOffIcon';
 export { default as LightningBoltIcon } from './LightningBoltIcon';
 export { default as LightbulbIcon } from './LightbulbIcon';
 export { default as TargetIcon } from './TargetIcon';

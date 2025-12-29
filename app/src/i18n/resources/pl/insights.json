@@ -1,0 +1,52 @@
+{
+  "noAssessment": {
+    "title": "Brak danych oceny",
+    "description": "Najpierw ukończ ocenę, aby odblokować analizę wzorców tożsamości wspieraną przez AI.",
+    "button": "Przejdź do oceny"
+  },
+  "ready": {
+    "title": "Gotowe do analizy",
+    "description": "Kliknij poniżej aby wysłać dane oceny do Claude w celu głębokiej analizy wzorców. Zajmuje to zazwyczaj 10-20 sekund.",
+    "button": "Analizuj moje odpowiedzi"
+  },
+  "loading": {
+    "title": "Analizuję...",
+    "description": "Claude szuka wzorców w Twoich odpowiedziach"
+  },
+  "error": {
+    "title": "Analiza nie powiodła się",
+    "tryAgain": "Spróbuj ponownie",
+    "downloadRaw": "Pobierz surową odpowiedź"
+  },
+  "tabs": {
+    "patterns": "Wzorce",
+    "contradictions": "Sprzeczności",
+    "blindSpots": "Martwe punkty",
+    "leverage": "Dźwignie",
+    "risks": "Ryzyka",
+    "synthesis": "Synteza Tożsamości"
+  },
+  "cards": {
+    "evidence": "Dowody",
+    "theTension": "Napięcie",
+    "vs": "vs",
+    "whatThisMeans": "Co to oznacza",
+    "hypothesis": "Hipoteza",
+    "reframe": "Przeformułowanie",
+    "leveragePoint": "Punkt dźwigni",
+    "reflectionQuestion": "Pytanie do refleksji",
+    "highImpact": "Wysoki wpływ",
+    "mediumImpact": "Średni wpływ"
+  },
+  "synthesisTab": {
+    "whoYouAre": "Kim faktycznie jesteś",
+    "hiddenStrengths": "Ukryte mocne strony",
+    "keyTension": "Kluczowe napięcie",
+    "nextStep": "Twój następny krok tożsamości",
+    "nextStepHelp": "To jest najmniejsza wiarygodna zmiana z miejsca w którym teraz jesteś."
+  },
+  "reanalyze": {
+    "button": "Analizuj ponownie (może znaleźć nowe wzorce)",
+    "description": "Każda analiza może ujawnić inne spostrzeżenia w oparciu o interpretację Claude"
+  }
+}

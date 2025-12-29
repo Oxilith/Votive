@@ -62,6 +62,6 @@ export const navLink = 'nav-link';
 
 // Scroll reveal utilities
 export const scrollReveal = {
-  fadeUp: 'scroll-reveal',
-  stagger: (index: number) => `scroll-reveal [animation-delay:${index * 100}ms]`,
+  fadeUp: 'reveal',
+  stagger: (index: number) => `reveal [animation-delay:${index * 100}ms]`,
 };

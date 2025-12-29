@@ -182,6 +182,8 @@ ANTHROPIC_API_KEY=<YOUR_KEY> \
 DATABASE_KEY=<32+_CHAR_SECRET> \
 ADMIN_API_KEY=<32+_CHAR_SECRET> \
 SESSION_SECRET=<32+_CHAR_SECRET> \
+JWT_ACCESS_SECRET=<32+_CHAR_SECRET> \
+JWT_REFRESH_SECRET=<32+_CHAR_SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 
 # Windows (PowerShell)
@@ -189,6 +191,8 @@ $env:ANTHROPIC_API_KEY="<YOUR_KEY>"
 $env:DATABASE_KEY="<32+_CHAR_SECRET>"
 $env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
 $env:SESSION_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_ACCESS_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_REFRESH_SECRET="<32+_CHAR_SECRET>"
 docker compose -f oci://oxilith/votive-oci:latest up
 ```
 

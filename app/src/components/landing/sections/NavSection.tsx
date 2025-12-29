@@ -7,28 +7,39 @@
  * - Includes theme toggle button with border styling
  * - Includes inline language toggle (EN | PL)
  * - Includes vermilion Begin Discovery CTA button
+ * - Includes Sign In link for authentication
+ * - Shows user avatar dropdown with Profile and Sign Out when authenticated
  * - Floating position with paper background, blur, and subtle border
  * @dependencies
  * - React
  * - react-i18next (useTranslation)
  * - @/components/landing/shared/VotiveLogo
+ * - @/components/shared/UserAvatarDropdown
  * - @/hooks/useThemeContext
  * - @/components/shared/icons (SunIcon, MoonIcon)
+ * - @/stores/useAuthStore
  */
 
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import VotiveLogo from '@/components/landing/shared/VotiveLogo';
+import UserAvatarDropdown from '@/components/shared/UserAvatarDropdown';
 import { useThemeContext } from '@/hooks/useThemeContext';
 import { SunIcon, MoonIcon } from '@/components/shared/icons';
+import { useIsAuthenticated } from '@/stores/useAuthStore';
 
 interface NavSectionProps {
   onStartDiscovery: () => void;
+  onNavigateToAuth?: () => void;
+  onNavigateToSignUp?: () => void;
+  onNavigateToProfile?: () => void;
+  onSignOut?: () => void;
 }
 
-const NavSection: FC<NavSectionProps> = ({ onStartDiscovery }) => {
-  const { t, i18n } = useTranslation();
+const NavSection: FC<NavSectionProps> = ({ onStartDiscovery, onNavigateToAuth, onNavigateToSignUp, onNavigateToProfile, onSignOut }) => {
+  const { t, i18n } = useTranslation(['landing', 'header']);
   const { isDark, toggleTheme } = useThemeContext();
+  const isAuthenticated = useIsAuthenticated();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -40,7 +51,7 @@ const NavSection: FC<NavSectionProps> = ({ onStartDiscovery }) => {
       <a href="#" className="flex items-center gap-2 group">
         <VotiveLogo size="sm" />
         <span className="font-display text-xl font-semibold tracking-[0.05em] text-[var(--text-primary)]">
-          {t('landing.nav.brand')}
+          {t('nav.brand')}
         </span>
       </a>
 
@@ -52,19 +63,19 @@ const NavSection: FC<NavSectionProps> = ({ onStartDiscovery }) => {
             href="#philosophy"
             className="nav-link font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
-            {t('landing.nav.philosophy')}
+            {t('nav.philosophy')}
           </a>
           <a
             href="#journey"
             className="nav-link font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
-            {t('landing.nav.journey')}
+            {t('nav.journey')}
           </a>
           <a
             href="#insights"
             className="nav-link font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
-            {t('landing.nav.insights')}
+            {t('nav.insights')}
           </a>
         </div>
 
@@ -73,7 +84,7 @@ const NavSection: FC<NavSectionProps> = ({ onStartDiscovery }) => {
           onClick={onStartDiscovery}
           className="hidden md:block cta-button px-4 py-2 text-[0.8125rem] font-medium text-white bg-[var(--accent)] transition-all"
         >
-          {t('landing.nav.beginDiscovery')}
+          {t('nav.beginDiscovery')}
         </button>
 
         {/* Controls */}
@@ -107,17 +118,40 @@ const NavSection: FC<NavSectionProps> = ({ onStartDiscovery }) => {
           <button
             onClick={toggleTheme}
             className="w-8 h-8 flex items-center justify-center border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
-            aria-label={isDark ? t('header.theme.toggleLight') : t('header.theme.toggleDark')}
+            aria-label={isDark ? t('header:theme.toggleLight') : t('header:theme.toggleDark')}
           >
             {isDark ? <SunIcon size="sm" /> : <MoonIcon size="sm" />}
           </button>
+
+          {/* Sign In / Sign Up / User Avatar */}
+          {isAuthenticated && onNavigateToProfile && onSignOut ? (
+            <UserAvatarDropdown
+              onNavigateToProfile={onNavigateToProfile}
+              onSignOut={onSignOut}
+            />
+          ) : (
+            <div className="hidden sm:flex items-center gap-3">
+              <button
+                onClick={onNavigateToAuth}
+                className="font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                {t('nav.signIn')}
+              </button>
+              <button
+                onClick={onNavigateToSignUp}
+                className="px-3 py-1.5 font-body text-sm font-medium text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-colors"
+              >
+                {t('nav.signUp')}
+              </button>
+            </div>
+          )}
 
           {/* Mobile CTA Button */}
           <button
             onClick={onStartDiscovery}
             className="md:hidden cta-button px-3 py-1.5 text-xs font-medium text-white bg-[var(--accent)]"
           >
-            {t('landing.nav.begin')}
+            {t('nav.begin')}
           </button>
         </div>
       </div>

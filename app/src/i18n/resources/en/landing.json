@@ -1,0 +1,104 @@
+{
+  "nav": {
+    "brand": "Votive",
+    "philosophy": "Philosophy",
+    "journey": "Journey",
+    "insights": "AI Insights",
+    "beginDiscovery": "Begin Discovery",
+    "begin": "Begin",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "profile": "Profile",
+    "language": {
+      "en": "EN",
+      "pl": "PL"
+    }
+  },
+  "hero": {
+    "eyebrow": "Identity-First Change",
+    "tagline1": "Every action is a",
+    "tagline2Highlight": "vote for who",
+    "tagline3": "you're becoming",
+    "subtitle": "Most habit apps fail because they skip the foundation: understanding who you already are. Votive guides you through AI-powered self-discovery before goal-setting.",
+    "cta": "Begin Your Discovery",
+    "votesLabel": "Votes cast",
+    "votesDesc": "toward better selves"
+  },
+  "philosophy": {
+    "label": "The Problem",
+    "title": "Goals fail when they skip the self",
+    "p1": "You've tried habit trackers. Morning routines. 21-day challenges. They work for a while, then dissolve. Not because you lack discipline, but because you started in the wrong place.",
+    "p2": "Real change doesn't begin with goals. It begins with understanding who you already are: your energy patterns, your hidden motivations, the unconscious behaviors that shape your days.",
+    "quote": "The curious paradox is that when I accept myself just as I am, then I can change.",
+    "quoteAuthor": "Carl Rogers"
+  },
+  "journey": {
+    "label": "The Journey",
+    "title": "Five phases of transformation",
+    "subtitle": "Votive guides you through a deliberate progression: from understanding who you are to becoming who you aspire to be.",
+    "comingSoon": "Coming Soon",
+    "phases": {
+      "1": {
+        "name": "State Awareness",
+        "title": "Know your rhythms",
+        "description": "Map your energy cycles, mood triggers, and willpower patterns. Discover what drains you and what restores you.",
+        "features": ["Peak energy times", "Emotional triggers", "Willpower patterns"]
+      },
+      "2": {
+        "name": "Identity Mapping",
+        "title": "See yourself clearly",
+        "description": "Examine your current identity, automatic behaviors, and keystone habits. Surface your core values and natural strengths.",
+        "features": ["Self-perception gaps", "Values alignment", "Keystone behaviors"]
+      },
+      "3": {
+        "name": "Identity Design",
+        "title": "Envision your future self",
+        "description": "Define your aspirational identity and create believable stepping-stones to bridge the gap.",
+        "features": ["Aspirational identity", "Identity bridges", "Behavior mapping"]
+      },
+      "4": {
+        "name": "System Design",
+        "title": "Build your architecture",
+        "description": "Design habit loops, optimize your environment, and create accountability structures.",
+        "features": ["Habit architecture", "Environment design", "Accountability"]
+      },
+      "5": {
+        "name": "Integration",
+        "title": "Embody the change",
+        "description": "Track progress, collect behavioral evidence, and reinforce your evolving identity.",
+        "features": ["Progress tracking", "Identity reinforcement", "Evidence collection"]
+      }
+    }
+  },
+  "insights": {
+    "label": "AI Insights",
+    "title": "Intelligence that understands you",
+    "subtitle": "Claude analyzes your responses to find patterns, contradictions, and leverage points that rule-based systems would miss.",
+    "types": {
+      "patterns": "Hidden behavioral patterns",
+      "contradictions": "Internal contradictions",
+      "blindSpots": "Blind spots",
+      "leverage": "High-leverage opportunities"
+    },
+    "sampleCard": {
+      "label": "Sample Analysis",
+      "category": "Identity Synthesis",
+      "quote": "\"You describe yourself as <highlight>disciplined</highlight>, yet your energy crashes and mood triggers suggest you're running on <highlight>willpower alone</highlight>, a finite resource. Your keystone behavior of morning exercise could be the anchor that replenishes rather than depletes, if you shift from forcing performance to honoring rhythm.\"",
+      "analysis": "This isn't hypocrisy, it's a gap between your aspirational and actual identity. Understanding this tension is the first step to bridging it.",
+      "poweredBy": "Powered by Claude AI"
+    }
+  },
+  "cta": {
+    "title": "Ready to understand yourself?",
+    "subtitle": "The assessment takes about 15 minutes. No accounts, no tracking, just honest reflection.",
+    "button": "Begin Your Discovery",
+    "timeEstimate": "~15 minutes of honest reflection"
+  },
+  "footer": {
+    "brand": "Votive",
+    "copyright": "© {{year}} Votive. Every action is a vote.",
+    "github": "GitHub",
+    "author": "Konrad Jagusiak"
+  }
+}

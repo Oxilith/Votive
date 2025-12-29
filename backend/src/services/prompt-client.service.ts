@@ -250,7 +250,29 @@ export class PromptClientService {
         throw new Error(clientMessage);
       }
 
-      const data = await response.json() as ResolvePromptResponse;
+      const rawResponseText = await response.text();
+      let responseBody: { success?: boolean; data?: ResolvePromptResponse };
+
+      try {
+        responseBody = JSON.parse(rawResponseText) as { success?: boolean; data?: ResolvePromptResponse };
+      } catch {
+        logger.error(
+          { key, thinkingEnabled, rawResponse: rawResponseText.slice(0, 1000) },
+          'Failed to parse prompt-service response as JSON'
+        );
+        throw new Error('Invalid JSON response from prompt-service');
+      }
+
+      // Validate response structure
+      if (!responseBody.success || !responseBody.data) {
+        logger.error(
+          { key, thinkingEnabled, rawResponse: rawResponseText.slice(0, 2000), parsedResponse: responseBody },
+          'Invalid response structure from prompt-service'
+        );
+        throw new Error('Invalid response structure from prompt-service');
+      }
+
+      const data = responseBody.data;
 
       logger.debug(
         { key, thinkingEnabled, abTestId: data.abTestId, variantId: data.variantId },

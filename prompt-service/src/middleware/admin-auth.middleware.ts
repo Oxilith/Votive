@@ -2,6 +2,7 @@
  * @file prompt-service/src/middleware/admin-auth.middleware.ts
  * @purpose API key authentication middleware for admin routes
  * @functionality
+ * - Allows login page and static assets without authentication (SPA needs to load first)
  * - Validates authentication via HttpOnly session cookie (primary method)
  * - Falls back to X-Admin-Key header validation for backward compatibility
  * - Uses timing-safe comparison to prevent timing attacks
@@ -26,6 +27,32 @@ export function adminAuthMiddleware(
   res: Response,
   next: NextFunction
 ): void {
+  // Allow login page and static assets without authentication
+  // The React SPA needs to load before it can show the login form
+  // Check both req.path (relative when mounted) and req.originalUrl (full path)
+  const path = req.path || '';
+  const originalUrl = req.originalUrl || '';
+
+  // Normalize paths - remove trailing slashes
+  // Only treat as root if path was actually set (not undefined/empty)
+  const normalizedPath = path ? (path.replace(/\/$/, '') || '/') : '';
+  const normalizedOriginalUrl = originalUrl ? (originalUrl.replace(/\/$/, '') || '/') : '';
+
+  // Check for login route (both relative and full paths)
+  const isLoginRoute =
+    normalizedPath === '/login' ||
+    normalizedPath === '/' ||
+    normalizedOriginalUrl === '/admin/login' ||
+    normalizedOriginalUrl === '/admin';
+
+  // Check for static assets
+  const isStaticAsset = /\.(js|css|html|ico|png|svg|woff|woff2|ttf|map|json)$/i.test(path);
+
+  if (isLoginRoute || isStaticAsset) {
+    next();
+    return;
+  }
+
   // Validate auth configuration using shared utility
   const authValidation = validateAuthConfig();
 

@@ -139,9 +139,16 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  // Profile fields
+  name      String    // Required - collected at registration
+  gender    String?   // 'male' | 'female' | 'other' | 'prefer-not-to-say'
+  birthYear Int       // Required - store year only for age calculation
+
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   emailVerifyTokens   EmailVerifyToken[]
+  assessments         Assessment[]
+  analyses            Analysis[]
 
   @@index([email])
   @@index([createdAt])
@@ -192,4 +199,39 @@ model EmailVerifyToken {
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
+}
+
+// ============================================================================
+// User Data Models - Assessment and Analysis Storage
+// ============================================================================
+
+/// User assessment - stores user's assessment responses
+model Assessment {
+  id        String   @id @default(uuid())
+  userId    String
+  responses String   // JSON-stringified AssessmentResponses
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses Analysis[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+/// User analysis - stores AI analysis results linked to user and optionally assessment
+model Analysis {
+  id           String   @id @default(uuid())
+  userId       String
+  assessmentId String?
+  result       String   // JSON-stringified AIAnalysisResult
+  createdAt    DateTime @default(now())
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessment Assessment? @relation(fields: [assessmentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([assessmentId])
+  @@index([createdAt])
 }

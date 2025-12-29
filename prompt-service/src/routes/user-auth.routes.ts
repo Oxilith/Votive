@@ -6,6 +6,8 @@
  * - Routes for token refresh and logout
  * - Routes for password reset flow (request and confirm)
  * - Routes for email verification
+ * - Routes for assessment CRUD (save, list, get by ID)
+ * - Routes for analysis CRUD (save, list, get by ID)
  * - Wraps controller methods with async error handling
  * - Applies JWT authentication middleware to protected routes
  * @dependencies
@@ -80,6 +82,69 @@ router.get(
   '/me',
   jwtAuthMiddleware,
   asyncHandler(userAuthController.getCurrentUser.bind(userAuthController))
+);
+
+// Update user profile
+router.put(
+  '/profile',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.updateProfile.bind(userAuthController))
+);
+
+// Change password
+router.put(
+  '/password',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.changePassword.bind(userAuthController))
+);
+
+// Delete account
+router.delete(
+  '/account',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.deleteAccount.bind(userAuthController))
+);
+
+// Save assessment
+router.post(
+  '/assessment',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.saveAssessment.bind(userAuthController))
+);
+
+// Get user's assessments
+router.get(
+  '/assessment',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.getAssessments.bind(userAuthController))
+);
+
+// Get specific assessment by ID
+router.get(
+  '/assessment/:id',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.getAssessmentById.bind(userAuthController))
+);
+
+// Save analysis
+router.post(
+  '/analysis',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.saveAnalysis.bind(userAuthController))
+);
+
+// Get user's analyses
+router.get(
+  '/analyses',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.getAnalyses.bind(userAuthController))
+);
+
+// Get specific analysis by ID
+router.get(
+  '/analysis/:id',
+  jwtAuthMiddleware,
+  asyncHandler(userAuthController.getAnalysisById.bind(userAuthController))
 );
 
 export { router as userAuthRoutes };

@@ -16,9 +16,10 @@ interface TextareaStepProps {
   step: TextareaStepType;
   value: string;
   onChange: (value: string) => void;
+  isReadOnly?: boolean;
 }
 
-export const TextareaStep: React.FC<TextareaStepProps> = ({ step, value, onChange }) => {
+export const TextareaStep: React.FC<TextareaStepProps> = ({ step, value, onChange, isReadOnly = false }) => {
   const currentValue = value ?? '';
 
   return (
@@ -33,10 +34,11 @@ export const TextareaStep: React.FC<TextareaStepProps> = ({ step, value, onChang
       </div>
       <textarea
         value={currentValue}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => !isReadOnly && onChange(e.target.value)}
         placeholder={step.placeholder}
         rows={step.rows ?? 5}
-        className="w-full p-4 border-2 border-[var(--border)] rounded-sm focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 resize-none font-body text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-[var(--bg-primary)] transition-colors"
+        readOnly={isReadOnly}
+        className={`w-full p-4 border-2 border-[var(--border)] rounded-sm focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 resize-none font-body text-[var(--text-primary)] placeholder-[var(--text-muted)] bg-[var(--bg-primary)] transition-colors ${isReadOnly ? 'cursor-not-allowed opacity-75 bg-[var(--bg-secondary)]' : ''}`}
       />
     </div>
   );

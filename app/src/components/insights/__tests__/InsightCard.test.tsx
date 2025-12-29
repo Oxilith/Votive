@@ -26,17 +26,18 @@ import type {
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
+      // Keys now use 'insights' namespace, so they're passed without prefix
       const translations: Record<string, string> = {
-        'insights.cards.highImpact': 'High Impact',
-        'insights.cards.mediumImpact': 'Medium Impact',
-        'insights.cards.evidence': 'Evidence',
-        'insights.cards.theTension': 'The Tension',
-        'insights.cards.vs': 'vs',
-        'insights.cards.whatThisMeans': 'What This Means',
-        'insights.cards.hypothesis': 'Hypothesis',
-        'insights.cards.reframe': 'Reframe',
-        'insights.cards.leveragePoint': 'Leverage Point',
-        'insights.cards.reflectionQuestion': 'Reflection Question',
+        'cards.highImpact': 'High Impact',
+        'cards.mediumImpact': 'Medium Impact',
+        'cards.evidence': 'Evidence',
+        'cards.theTension': 'The Tension',
+        'cards.vs': 'vs',
+        'cards.whatThisMeans': 'What This Means',
+        'cards.hypothesis': 'Hypothesis',
+        'cards.reframe': 'Reframe',
+        'cards.leveragePoint': 'Leverage Point',
+        'cards.reflectionQuestion': 'Reflection Question',
       };
       return translations[key] ?? key;
     },

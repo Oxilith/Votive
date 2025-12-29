@@ -62,6 +62,7 @@ docker compose up --build   # Build and run full stack
 
 # Production (OCI deployment)
 ANTHROPIC_API_KEY=<key> DATABASE_KEY=<32+chars> ADMIN_API_KEY=<32+chars> SESSION_SECRET=<32+chars> \
+JWT_ACCESS_SECRET=<32+chars> JWT_REFRESH_SECRET=<32+chars> \
   docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -165,6 +166,23 @@ The backend calls the prompt-service `/api/resolve` endpoint to get prompt confi
 - `i18n/resources/` - Translations (en/, pl/)
 - `config/` - Application configuration
 
+**i18n Structure** - Translations are split by feature area:
+- `i18n/resources/{lang}/landing.json` - Landing page sections (nav, hero, philosophy, journey, insights, cta, footer)
+- `i18n/resources/{lang}/header.json` - Navigation/header (nav, buttons, viewOnly, errors, theme)
+- `i18n/resources/{lang}/assessment.json` - Assessment wizard (welcome, phases, synthesis, navigation)
+- `i18n/resources/{lang}/insights.json` - AI analysis display (noAssessment, ready, loading, error, tabs, cards, synthesis)
+- `i18n/resources/{lang}/auth.json` - Authentication (login, register, forgotPassword, resetPassword, verifyEmail)
+- `i18n/resources/{lang}/profile.json` - Profile/settings (tabs, profileTab, passwordTab, assessmentsTab, analysesTab, dangerTab)
+- `i18n/resources/{lang}/common.json` - Shared UI strings (progress, createdAt, viewOnly)
+
+**i18n Rules**:
+- Add translations to the feature-specific file, not common.json
+- Specify namespaces in `useTranslation`: `useTranslation('landing')` or `useTranslation(['assessment', 'header'])`
+- Single namespace: `t('key.path')` - no namespace prefix needed
+- Multiple namespaces: `t('key.path')` for first namespace, `t('ns:key.path')` for secondary namespaces
+- Keep common.json minimal (only truly shared strings across multiple features)
+- Mirror structure exactly in both en/ and pl/ directories
+
 ### Backend (`/backend/src`)
 
 **API Proxy** - Protects Anthropic API key from browser exposure:
@@ -198,7 +216,9 @@ Key variables:
 - `VITE_API_URL` - Frontend build-time (leave empty for Docker, set to `https://localhost:3001` for local dev)
 - `ANTHROPIC_API_KEY` - Claude API key
 - `DATABASE_KEY` / `ADMIN_API_KEY` / `SESSION_SECRET` - 32+ char secrets for prompt-service
+- `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` - 32+ char secrets for user authentication tokens
 - `THINKING_ENABLED` - Backend flag for Claude extended thinking mode (default: true)
+- `SMTP_*` - Optional SMTP configuration for email verification/password reset
 
 ## Testing
 

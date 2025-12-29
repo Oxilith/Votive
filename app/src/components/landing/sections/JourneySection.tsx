@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import PhaseCard from '@/components/landing/shared/PhaseCard';
 
 const JourneySection: FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('landing');
 
   const phases = [
     { number: 1, isActive: true },
@@ -39,18 +39,18 @@ const JourneySection: FC = () => {
   return (
     <section id="journey" className="py-28 bg-[var(--bg-primary)]">
       {/* Section Header - Left aligned */}
-      <div className="max-w-[520px] mb-12 px-6 lg:px-10 lg:ml-[calc((100%-1200px)/2+var(--space-xl))] scroll-reveal">
+      <div className="max-w-[520px] mb-12 px-6 lg:px-10 lg:ml-[calc((100%-1200px)/2+var(--space-xl))] reveal">
         <div className="flex items-center gap-4 mb-4">
           <span className="w-6 h-px bg-[var(--accent)]" />
           <span className="font-mono text-[0.6875rem] tracking-[0.15em] uppercase text-[var(--text-muted)]">
-            {t('landing.journey.label')}
+            {t('journey.label')}
           </span>
         </div>
         <h2 className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-medium leading-[1.3] mb-4">
-          {t('landing.journey.title')}
+          {t('journey.title')}
         </h2>
         <p className="font-body text-base text-[var(--text-secondary)] leading-[1.8]">
-          {t('landing.journey.subtitle')}
+          {t('journey.subtitle')}
         </p>
       </div>
 
@@ -60,10 +60,10 @@ const JourneySection: FC = () => {
           <PhaseCard
             key={phase.number}
             phaseNumber={phase.number}
-            phaseName={t(`landing.journey.phases.${phase.number}.name`)}
-            title={t(`landing.journey.phases.${phase.number}.title`)}
-            description={t(`landing.journey.phases.${phase.number}.description`)}
-            features={t(`landing.journey.phases.${phase.number}.features`, { returnObjects: true }) as string[]}
+            phaseName={t(`journey.phases.${phase.number}.name`)}
+            title={t(`journey.phases.${phase.number}.title`)}
+            description={t(`journey.phases.${phase.number}.description`)}
+            features={t(`journey.phases.${phase.number}.features`, { returnObjects: true }) as string[]}
             isActive={phase.isActive}
             className={`md:col-span-1 ${gridPlacements[index]}`}
           />

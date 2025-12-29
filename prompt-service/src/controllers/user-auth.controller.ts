@@ -8,6 +8,8 @@
  * - Handles password reset flow (request and confirm)
  * - Handles email verification
  * - Handles user logout
+ * - Handles assessment CRUD (save, list, get by ID)
+ * - Handles analysis CRUD (save, list, get by ID)
  * - Returns appropriate HTTP status codes
  * @dependencies
  * - express for request/response handling
@@ -37,6 +39,8 @@ import {
   passwordResetRequestSchema,
   passwordResetConfirmSchema,
   emailVerifyTokenParamSchema,
+  profileUpdateSchema,
+  passwordChangeSchema,
 } from '@/validators/auth.validator.js';
 import { isAppError } from '@/errors/index.js';
 import type { AuthenticatedRequest } from '@/middleware/jwt-auth.middleware.js';
@@ -48,13 +52,16 @@ const REFRESH_TOKEN_COOKIE = 'refreshToken';
 
 /**
  * Cookie options for refresh token (httpOnly for security)
+ * Note: sameSite='lax' allows cookie to be sent on top-level navigations (page refresh)
+ * while still protecting against CSRF on POST requests from other sites
  */
 const REFRESH_TOKEN_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
   path: '/',
+  signed: true, // Sign cookie for integrity verification
 };
 
 export class UserAuthController {
@@ -123,9 +130,9 @@ export class UserAuthController {
    * POST /api/user-auth/refresh - Refresh access token
    */
   async refresh(req: Request, res: Response): Promise<void> {
-    // Get refresh token from cookie
-    const cookies = req.cookies as AuthCookies;
-    const refreshToken = cookies.refreshToken;
+    // Get refresh token from signed cookie
+    const signedCookies = req.signedCookies as AuthCookies;
+    const refreshToken = signedCookies.refreshToken;
 
     if (!refreshToken) {
       res.status(StatusCodes.UNAUTHORIZED).json({
@@ -283,9 +290,9 @@ export class UserAuthController {
    * POST /api/user-auth/logout - Logout user
    */
   async logout(req: Request, res: Response): Promise<void> {
-    // Get refresh token from cookie
-    const cookies = req.cookies as AuthCookies;
-    const refreshToken = cookies.refreshToken;
+    // Get refresh token from signed cookie
+    const signedCookies = req.signedCookies as AuthCookies;
+    const refreshToken = signedCookies.refreshToken;
 
     if (refreshToken) {
       // Invalidate the refresh token in database
@@ -353,6 +360,339 @@ export class UserAuthController {
     }
 
     res.json(user);
+  }
+
+  /**
+   * PUT /api/user-auth/profile - Update user profile
+   * Requires authentication
+   */
+  async updateProfile(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    // Validate request body
+    const parseResult = profileUpdateSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        details: parseResult.error.errors,
+      });
+      return;
+    }
+
+    try {
+      const user = await userService.updateProfile(userId, parseResult.data);
+      res.json(user);
+    } catch (error) {
+      if (isAppError(error)) {
+        res.status(error.statusCode).json(error.toJSON());
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * PUT /api/user-auth/password - Change password
+   * Requires authentication
+   */
+  async changePassword(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    // Validate request body
+    const parseResult = passwordChangeSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        details: parseResult.error.errors,
+      });
+      return;
+    }
+
+    const { currentPassword, newPassword } = parseResult.data;
+
+    try {
+      await userService.changePassword(userId, { currentPassword, newPassword });
+
+      // Clear refresh token cookie after password change
+      res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
+
+      res.json({
+        message: 'Password changed successfully. Please log in again.',
+      });
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        res.status(error.statusCode).json({
+          error: error.message,
+          code: error.code,
+        });
+        return;
+      }
+      if (isAppError(error)) {
+        res.status(error.statusCode).json(error.toJSON());
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * DELETE /api/user-auth/account - Delete user account
+   * Requires authentication
+   */
+  async deleteAccount(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    try {
+      await userService.deleteAccount(userId);
+
+      // Clear refresh token cookie
+      res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
+
+      res.json({
+        message: 'Account deleted successfully.',
+      });
+    } catch (error) {
+      if (isAppError(error)) {
+        res.status(error.statusCode).json(error.toJSON());
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * POST /api/user-auth/assessment - Save assessment
+   * Requires authentication
+   */
+  async saveAssessment(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    const { responses } = req.body as { responses?: unknown };
+
+    if (!responses) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: 'Assessment responses are required',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    try {
+      const assessment = await userService.saveAssessment(
+        userId,
+        typeof responses === 'string' ? responses : JSON.stringify(responses)
+      );
+      res.status(StatusCodes.CREATED).json(assessment);
+    } catch (error) {
+      if (isAppError(error)) {
+        res.status(error.statusCode).json(error.toJSON());
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * GET /api/user-auth/assessment - Get user's assessments
+   * Requires authentication
+   */
+  async getAssessments(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    const assessments = await userService.getAssessments(userId);
+    res.json(assessments);
+  }
+
+  /**
+   * POST /api/user-auth/analysis - Save analysis
+   * Requires authentication
+   */
+  async saveAnalysis(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    const { result, assessmentId } = req.body as {
+      result?: unknown;
+      assessmentId?: string;
+    };
+
+    if (!result) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: 'Analysis result is required',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    try {
+      const analysis = await userService.saveAnalysis(
+        userId,
+        typeof result === 'string' ? result : JSON.stringify(result),
+        assessmentId
+      );
+      res.status(StatusCodes.CREATED).json(analysis);
+    } catch (error) {
+      if (isAppError(error)) {
+        res.status(error.statusCode).json(error.toJSON());
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * GET /api/user-auth/analyses - Get user's analyses
+   * Requires authentication
+   */
+  async getAnalyses(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    const analyses = await userService.getAnalyses(userId);
+    res.json(analyses);
+  }
+
+  /**
+   * GET /api/user-auth/assessment/:id - Get specific assessment by ID
+   * Requires authentication
+   */
+  async getAssessmentById(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: 'Assessment ID is required',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    const assessment = await userService.getAssessmentById(id, userId);
+
+    if (!assessment) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        error: 'Assessment not found',
+        code: 'NOT_FOUND',
+      });
+      return;
+    }
+
+    res.json(assessment);
+  }
+
+  /**
+   * GET /api/user-auth/analysis/:id - Get specific analysis by ID
+   * Requires authentication
+   */
+  async getAnalysisById(req: Request, res: Response): Promise<void> {
+    const authenticatedReq = req as AuthenticatedRequest;
+    const userId = authenticatedReq.user.userId;
+
+    if (!userId) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'Authentication required',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        error: 'Analysis ID is required',
+        code: 'VALIDATION_ERROR',
+      });
+      return;
+    }
+
+    const analysis = await userService.getAnalysisById(id, userId);
+
+    if (!analysis) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        error: 'Analysis not found',
+        code: 'NOT_FOUND',
+      });
+      return;
+    }
+
+    res.json(analysis);
   }
 }
 

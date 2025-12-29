@@ -1,0 +1,60 @@
+{
+  "title": "Account Settings",
+  "subtitle": "Manage your profile and preferences",
+  "tabs": {
+    "profile": "Profile",
+    "password": "Password",
+    "assessments": "Assessments",
+    "analyses": "Analyses",
+    "danger": "Account"
+  },
+  "profileTab": {
+    "title": "Profile Information",
+    "email": "Email",
+    "emailNotVerified": "Email not verified",
+    "name": "Name",
+    "birthYear": "Birth Year",
+    "gender": "Gender",
+    "genderOptions": {
+      "default": "Prefer not to say",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "saveChanges": "Save Changes",
+    "updated": "Profile updated successfully"
+  },
+  "passwordTab": {
+    "title": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "At least 8 characters",
+    "confirmPassword": "Confirm New Password",
+    "changePassword": "Change Password",
+    "changed": "Password changed successfully"
+  },
+  "assessmentsTab": {
+    "title": "Past Assessments",
+    "loading": "Loading...",
+    "empty": "No assessments yet. Complete the assessment to get started.",
+    "fromDate": "Assessment from {{date}}",
+    "responses": "{{count}} responses"
+  },
+  "analysesTab": {
+    "title": "Past Analyses",
+    "loading": "Loading...",
+    "empty": "No analyses yet. Complete an assessment to get your first analysis.",
+    "fromDate": "Analysis from {{date}}"
+  },
+  "dangerTab": {
+    "title": "Danger Zone",
+    "deleteTitle": "Delete Account",
+    "deleteWarning": "This action is permanent and cannot be undone. All your data, including assessments and analyses, will be permanently deleted.",
+    "deleteButton": "Delete My Account",
+    "confirmPrompt": "Are you absolutely sure?",
+    "confirmDelete": "Yes, Delete Everything",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "deleteFailed": "Failed to delete account. Please try again."
+  }
+}

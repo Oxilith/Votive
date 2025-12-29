@@ -19,12 +19,14 @@ interface MultiSelectStepProps {
   step: MultiSelectStepType;
   value: string[];
   onChange: (value: string[]) => void;
+  isReadOnly?: boolean;
 }
 
-export const MultiSelectStep: React.FC<MultiSelectStepProps> = ({ step, value, onChange }) => {
+export const MultiSelectStep: React.FC<MultiSelectStepProps> = ({ step, value, onChange, isReadOnly = false }) => {
   const selected = value ?? [];
 
   const toggleOption = (optionId: string) => {
+    if (isReadOnly) return;
     const newSelected = selected.includes(optionId)
       ? selected.filter((id) => id !== optionId)
       : [...selected, optionId];
@@ -46,11 +48,12 @@ export const MultiSelectStep: React.FC<MultiSelectStepProps> = ({ step, value, o
           <button
             key={option.id}
             onClick={() => toggleOption(option.id)}
+            disabled={isReadOnly}
             className={`text-left p-4 border-2 rounded-sm transition-all ${
               selected.includes(option.id)
                 ? 'border-[var(--accent)] bg-[var(--accent)]/5'
                 : 'border-[var(--border)] hover:border-[var(--accent)]/50'
-            }`}
+            } ${isReadOnly ? 'cursor-not-allowed opacity-75' : ''}`}
           >
             <div className="flex items-center gap-3">
               <div

@@ -55,6 +55,10 @@ const logger = pino({
 // Initialize Express app
 const app = express();
 
+// Trust proxy (nginx) for correct client IP detection and rate limiting
+// Required when running behind reverse proxy
+app.set('trust proxy', 1);
+
 // Security middleware with CSP headers
 app.use(
   helmet({

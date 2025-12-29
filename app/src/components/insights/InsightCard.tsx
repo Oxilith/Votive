@@ -56,7 +56,7 @@ export interface InsightCardProps {
  * which properties exist on the insight item.
  */
 const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('insights');
 
   return (
     <div className={`p-5 ${cardStyles.base} space-y-3`}>
@@ -72,7 +72,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
               item.severity === 'high' ? badgeStyles.accent : badgeStyles.default
             }`}
           >
-            {item.severity === 'high' ? t('insights.cards.highImpact') : t('insights.cards.mediumImpact')}
+            {item.severity === 'high' ? t('cards.highImpact') : t('cards.mediumImpact')}
           </span>
         )}
       </div>
@@ -91,7 +91,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'evidence' in item && item.evidence && Array.isArray(item.evidence) && item.evidence.length > 0 && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.evidence')}
+            {t('cards.evidence')}
           </p>
           <ul className={`font-body text-sm ${textStyles.secondary} space-y-1`}>
             {item.evidence.map((e, i) => (
@@ -108,7 +108,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'evidence' in item && item.evidence && typeof item.evidence === 'string' && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.evidence')}
+            {t('cards.evidence')}
           </p>
           <p className={`font-body text-sm ${textStyles.secondary}`}>{item.evidence}</p>
         </div>
@@ -118,11 +118,11 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'sides' in item && item.sides && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.theTension')}
+            {t('cards.theTension')}
           </p>
           <div className={`flex items-center gap-3 font-body text-sm ${textStyles.secondary}`}>
             <span className="px-3 py-1.5 bg-[var(--bg-tertiary)] rounded-sm">{item.sides[0]}</span>
-            <span className="text-[var(--text-faint)]">{t('insights.cards.vs')}</span>
+            <span className="text-[var(--text-faint)]">{t('cards.vs')}</span>
             <span className="px-3 py-1.5 bg-[var(--bg-tertiary)] rounded-sm">{item.sides[1]}</span>
           </div>
         </div>
@@ -132,7 +132,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'implication' in item && item.implication && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.whatThisMeans')}
+            {t('cards.whatThisMeans')}
           </p>
           <p className={`font-body text-sm ${textStyles.secondary}`}>{item.implication}</p>
         </div>
@@ -142,7 +142,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'hypothesis' in item && item.hypothesis && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.hypothesis')}
+            {t('cards.hypothesis')}
           </p>
           <p className={`font-body text-sm ${textStyles.secondary}`}>{item.hypothesis}</p>
         </div>
@@ -152,7 +152,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'reframe' in item && item.reframe && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.reframe')}
+            {t('cards.reframe')}
           </p>
           <p className={`font-body text-sm font-medium ${textStyles.secondary}`}>{item.reframe}</p>
         </div>
@@ -162,7 +162,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'leverage' in item && item.leverage && (
         <div className="space-y-1">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
-            {t('insights.cards.leveragePoint')}
+            {t('cards.leveragePoint')}
           </p>
           <p className={`font-body text-sm font-medium text-[var(--accent)]`}>{item.leverage}</p>
         </div>
@@ -177,7 +177,7 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {'question' in item && item.question && (
         <div className="mt-3 p-3 bg-[var(--bg-secondary)] rounded-sm border-l-2 border-[var(--accent)]">
           <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted} mb-1`}>
-            {t('insights.cards.reflectionQuestion')}
+            {t('cards.reflectionQuestion')}
           </p>
           <p className={`font-body text-sm italic ${textStyles.secondary}`}>{item.question}</p>
         </div>

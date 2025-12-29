@@ -1,0 +1,60 @@
+{
+  "title": "Ustawienia konta",
+  "subtitle": "Zarządzaj swoim profilem i preferencjami",
+  "tabs": {
+    "profile": "Profil",
+    "password": "Hasło",
+    "assessments": "Oceny",
+    "analyses": "Analizy",
+    "danger": "Konto"
+  },
+  "profileTab": {
+    "title": "Informacje o profilu",
+    "email": "Email",
+    "emailNotVerified": "Email niezweryfikowany",
+    "name": "Imię",
+    "birthYear": "Rok urodzenia",
+    "gender": "Płeć",
+    "genderOptions": {
+      "default": "Wolę nie podawać",
+      "male": "Mężczyzna",
+      "female": "Kobieta",
+      "other": "Inna"
+    },
+    "saveChanges": "Zapisz zmiany",
+    "updated": "Profil zaktualizowany pomyślnie"
+  },
+  "passwordTab": {
+    "title": "Zmień hasło",
+    "currentPassword": "Aktualne hasło",
+    "newPassword": "Nowe hasło",
+    "newPasswordPlaceholder": "Minimum 8 znaków",
+    "confirmPassword": "Potwierdź nowe hasło",
+    "changePassword": "Zmień hasło",
+    "changed": "Hasło zmienione pomyślnie"
+  },
+  "assessmentsTab": {
+    "title": "Poprzednie oceny",
+    "loading": "Ładowanie...",
+    "empty": "Brak ocen. Ukończ ocenę, aby rozpocząć.",
+    "fromDate": "Ocena z {{date}}",
+    "responses": "{{count}} odpowiedzi"
+  },
+  "analysesTab": {
+    "title": "Poprzednie analizy",
+    "loading": "Ładowanie...",
+    "empty": "Brak analiz. Ukończ ocenę, aby uzyskać pierwszą analizę.",
+    "fromDate": "Analiza z {{date}}"
+  },
+  "dangerTab": {
+    "title": "Strefa niebezpieczna",
+    "deleteTitle": "Usuń konto",
+    "deleteWarning": "Ta akcja jest nieodwracalna. Wszystkie Twoje dane, w tym oceny i analizy, zostaną trwale usunięte.",
+    "deleteButton": "Usuń moje konto",
+    "confirmPrompt": "Czy jesteś absolutnie pewien?",
+    "confirmDelete": "Tak, usuń wszystko",
+    "cancel": "Anuluj",
+    "deleting": "Usuwanie...",
+    "deleteFailed": "Nie udało się usunąć konta. Spróbuj ponownie."
+  }
+}

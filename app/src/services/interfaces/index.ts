@@ -7,6 +7,7 @@
  * @dependencies
  * - ./IApiClient
  * - ./IClaudeService
+ * - ./IAuthService
  */
 
 export type {
@@ -22,3 +23,5 @@ export type {
   AnalysisRequest,
   AnalysisResponse,
 } from './IClaudeService';
+
+export type { IAuthService } from './IAuthService';

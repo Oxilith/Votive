@@ -85,6 +85,7 @@ export class ApiClient implements IApiClient {
     const options: RequestInit = {
       method,
       headers,
+      credentials: 'include', // Include httpOnly cookies for auth
       body: body ? JSON.stringify(body) : undefined,
     };
 
@@ -98,10 +99,19 @@ export class ApiClient implements IApiClient {
         const data = await this.parseResponse<T>(response);
 
         if (!response.ok) {
+          // Extract error message - handle both { error: string } and { error: { message: string } }
+          let errorMessage = `Request failed with status ${response.status}`;
+          if (data && typeof data === 'object' && 'error' in data) {
+            const errorField = (data as { error: string | { message: string } }).error;
+            if (typeof errorField === 'string') {
+              errorMessage = errorField;
+            } else if (errorField && typeof errorField === 'object' && 'message' in errorField) {
+              errorMessage = errorField.message;
+            }
+          }
+
           throw new ApiClientError(
-            data && typeof data === 'object' && 'error' in data
-              ? (data as { error: { message: string } }).error.message
-              : `Request failed with status ${response.status}`,
+            errorMessage,
             this.getErrorCode(response.status),
             response.status,
             data

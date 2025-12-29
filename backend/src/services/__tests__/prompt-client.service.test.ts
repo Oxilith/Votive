@@ -152,7 +152,7 @@ describe('PromptClientService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockResolveResponse),
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: mockResolveResponse })),
       });
 
       const result = await service.resolve('IDENTITY_ANALYSIS', true);
@@ -175,7 +175,7 @@ describe('PromptClientService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockResolveResponse),
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: mockResolveResponse })),
       });
 
       await service.resolve('IDENTITY_ANALYSIS', true);
@@ -194,7 +194,7 @@ describe('PromptClientService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ config: mockPromptConfig, variantId: 'test-variant' }),
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: { config: mockPromptConfig, variantId: 'test-variant' } })),
       });
 
       const result = await service.resolve('IDENTITY_ANALYSIS', true);

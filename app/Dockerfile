@@ -20,9 +20,9 @@ WORKDIR /app
 # Copy frontend package files
 COPY app/package*.json ./app/
 
-# Install frontend dependencies
+# Install frontend dependencies (use npm install since workspaces don't have individual lockfiles)
 WORKDIR /app/app
-RUN npm ci
+RUN npm install
 
 # Copy frontend source code and configs
 COPY app/src ./src

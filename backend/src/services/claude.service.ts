@@ -95,7 +95,13 @@ export async function analyzeAssessment(
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     logger.info(
-      { attempt, maxRetries: MAX_RETRIES, model: promptConfig.model },
+      {
+        attempt,
+        maxRetries: MAX_RETRIES,
+        model: promptConfig.model,
+        thinkingEnabled: requestParams.thinking?.type === 'enabled',
+        thinkingBudget: requestParams.thinking?.type === 'enabled' ? requestParams.thinking.budget_tokens : null,
+      },
       'Calling Claude API'
     );
 

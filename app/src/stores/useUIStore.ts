@@ -23,6 +23,12 @@ interface UIState {
   startAtSynthesis: boolean;
   assessmentKey: number;
   hasReachedSynthesis: boolean;
+  pendingAuthReturn: AppView | null; // Where to redirect after successful auth
+
+  // Read-only view state (for viewing saved assessments/analyses by ID)
+  isReadOnly: boolean;
+  viewingResourceId: string | null; // ID of assessment or analysis being viewed
+  viewingAssessmentId: string | null; // Assessment ID for linking new analyses
 
   // Loading/Error state
   isLoading: boolean;
@@ -38,6 +44,11 @@ interface UIState {
   incrementAssessmentKey: () => void;
   setStartAtSynthesis: (value: boolean) => void;
   setHasReachedSynthesis: (value: boolean) => void;
+  setPendingAuthReturn: (view: AppView | null) => void;
+
+  // Read-only mode actions
+  setReadOnlyMode: (resourceId: string, assessmentId?: string) => void;
+  clearReadOnlyMode: () => void;
 
   // Loading/Error actions
   setLoading: (loading: boolean) => void;
@@ -57,6 +68,10 @@ export const useUIStore = create<UIState>()((set) => ({
   startAtSynthesis: false,
   assessmentKey: 0,
   hasReachedSynthesis: false,
+  pendingAuthReturn: null,
+  isReadOnly: false,
+  viewingResourceId: null,
+  viewingAssessmentId: null,
   isLoading: false,
   error: null,
 
@@ -92,6 +107,23 @@ export const useUIStore = create<UIState>()((set) => ({
   setStartAtSynthesis: (value) => set({ startAtSynthesis: value }),
 
   setHasReachedSynthesis: (value) => set({ hasReachedSynthesis: value }),
+
+  setPendingAuthReturn: (view) => set({ pendingAuthReturn: view }),
+
+  // Read-only mode actions
+  setReadOnlyMode: (resourceId, assessmentId) =>
+    set({
+      isReadOnly: true,
+      viewingResourceId: resourceId,
+      viewingAssessmentId: assessmentId ?? null,
+    }),
+
+  clearReadOnlyMode: () =>
+    set({
+      isReadOnly: false,
+      viewingResourceId: null,
+      viewingAssessmentId: null,
+    }),
 
   // Loading/Error actions
   setLoading: (loading) => set({ isLoading: loading }),

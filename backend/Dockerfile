@@ -17,9 +17,9 @@ WORKDIR /app
 # Copy backend package files
 COPY backend/package*.json ./backend/
 
-# Install backend dependencies
+# Install backend dependencies (use npm install since workspaces don't have individual lockfiles)
 WORKDIR /app/backend
-RUN npm ci
+RUN npm install
 
 # Copy backend source code
 COPY backend/src ./src

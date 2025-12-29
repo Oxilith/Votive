@@ -45,6 +45,11 @@ const PASSWORD_RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 const EMAIL_VERIFY_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
+ * Gender options for user profile
+ */
+export type Gender = 'male' | 'female' | 'other' | 'prefer-not-to-say';
+
+/**
  * User data without sensitive fields
  */
 export interface SafeUser {
@@ -52,6 +57,9 @@ export interface SafeUser {
   email: string;
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
+  name: string;
+  gender: Gender | null;
+  birthYear: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -62,6 +70,9 @@ export interface SafeUser {
 export interface RegisterInput {
   email: string;
   password: string;
+  name: string;
+  gender?: Gender;
+  birthYear: number;
 }
 
 /**
@@ -70,6 +81,45 @@ export interface RegisterInput {
 export interface LoginInput {
   email: string;
   password: string;
+}
+
+/**
+ * Input for profile update
+ */
+export interface ProfileUpdateInput {
+  name?: string;
+  gender?: Gender;
+  birthYear?: number;
+}
+
+/**
+ * Input for password change
+ */
+export interface PasswordChangeInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * Saved assessment with metadata
+ */
+export interface SavedAssessment {
+  id: string;
+  userId: string;
+  responses: string; // JSON string
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Saved analysis with metadata
+ */
+export interface SavedAnalysis {
+  id: string;
+  userId: string;
+  assessmentId: string | null;
+  result: string; // JSON string
+  createdAt: Date;
 }
 
 /**
@@ -125,6 +175,9 @@ function toSafeUser(user: User): SafeUser {
     email: user.email,
     emailVerified: user.emailVerified,
     emailVerifiedAt: user.emailVerifiedAt,
+    name: user.name,
+    gender: user.gender as Gender | null,
+    birthYear: user.birthYear,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -167,11 +220,14 @@ export class UserService {
 
     // Create user and tokens in a transaction
     const { user, refreshTokenRecord, emailVerifyToken } = await prisma.$transaction(async (tx) => {
-      // Create user
+      // Create user with profile fields
       const newUser = await tx.user.create({
         data: {
           email: input.email.toLowerCase(),
           password: hashedPassword,
+          name: input.name,
+          gender: input.gender ?? null,
+          birthYear: input.birthYear,
         },
       });
 
@@ -575,6 +631,196 @@ export class UserService {
     });
 
     return user ? toSafeUser(user) : null;
+  }
+
+  /**
+   * Update user profile
+   *
+   * @param userId - User ID
+   * @param input - Profile update data
+   * @returns Updated user without sensitive fields
+   * @throws NotFoundError if user not found
+   */
+  async updateProfile(userId: string, input: ProfileUpdateInput): Promise<SafeUser> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User', userId);
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(input.name !== undefined && { name: input.name }),
+        ...(input.gender !== undefined && { gender: input.gender }),
+        ...(input.birthYear !== undefined && { birthYear: input.birthYear }),
+      },
+    });
+
+    return toSafeUser(updatedUser);
+  }
+
+  /**
+   * Change user password
+   *
+   * @param userId - User ID
+   * @param input - Current and new password
+   * @throws NotFoundError if user not found
+   * @throws AuthenticationError if current password is wrong
+   */
+  async changePassword(userId: string, input: PasswordChangeInput): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User', userId);
+    }
+
+    // Verify current password
+    const isValidPassword = await comparePassword(input.currentPassword, user.password);
+    if (!isValidPassword) {
+      throw new AuthenticationError('Current password is incorrect');
+    }
+
+    // Hash new password and update
+    const hashedPassword = await hashPassword(input.newPassword);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    // Invalidate all refresh tokens for security
+    await prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+  }
+
+  /**
+   * Delete user account and all related data
+   *
+   * @param userId - User ID
+   * @throws NotFoundError if user not found
+   */
+  async deleteAccount(userId: string): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundError('User', userId);
+    }
+
+    // Cascade delete will handle related records
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+  }
+
+  /**
+   * Save assessment for user
+   *
+   * @param userId - User ID
+   * @param responses - Assessment responses as JSON string
+   * @returns Saved assessment
+   */
+  async saveAssessment(userId: string, responses: string): Promise<SavedAssessment> {
+    const assessment = await prisma.assessment.create({
+      data: {
+        userId,
+        responses,
+      },
+    });
+
+    return assessment;
+  }
+
+  /**
+   * Get user's assessments
+   *
+   * @param userId - User ID
+   * @returns List of saved assessments
+   */
+  async getAssessments(userId: string): Promise<SavedAssessment[]> {
+    const assessments = await prisma.assessment.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return assessments;
+  }
+
+  /**
+   * Get specific assessment by ID
+   *
+   * @param assessmentId - Assessment ID
+   * @param userId - User ID for ownership verification
+   * @returns Assessment or null if not found/not owned
+   */
+  async getAssessmentById(assessmentId: string, userId: string): Promise<SavedAssessment | null> {
+    const assessment = await prisma.assessment.findFirst({
+      where: {
+        id: assessmentId,
+        userId,
+      },
+    });
+
+    return assessment;
+  }
+
+  /**
+   * Save analysis for user
+   *
+   * @param userId - User ID
+   * @param result - Analysis result as JSON string
+   * @param assessmentId - Optional linked assessment ID
+   * @returns Saved analysis
+   */
+  async saveAnalysis(userId: string, result: string, assessmentId?: string): Promise<SavedAnalysis> {
+    const analysis = await prisma.analysis.create({
+      data: {
+        userId,
+        result,
+        assessmentId: assessmentId ?? null,
+      },
+    });
+
+    return analysis;
+  }
+
+  /**
+   * Get user's analyses
+   *
+   * @param userId - User ID
+   * @returns List of saved analyses
+   */
+  async getAnalyses(userId: string): Promise<SavedAnalysis[]> {
+    const analyses = await prisma.analysis.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return analyses;
+  }
+
+  /**
+   * Get specific analysis by ID
+   *
+   * @param analysisId - Analysis ID
+   * @param userId - User ID for ownership verification
+   * @returns Analysis or null if not found/not owned
+   */
+  async getAnalysisById(analysisId: string, userId: string): Promise<SavedAnalysis | null> {
+    const analysis = await prisma.analysis.findFirst({
+      where: {
+        id: analysisId,
+        userId,
+      },
+    });
+
+    return analysis;
   }
 }
 

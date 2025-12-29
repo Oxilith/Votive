@@ -38,7 +38,7 @@ const configSchema = z.object({
 
   // Rate Limiting
   rateLimitWindowMs: z.coerce.number().default(60000),
-  rateLimitMaxRequests: z.coerce.number().default(10),
+  rateLimitMaxRequests: z.coerce.number().default(60),
 
   // Claude API Rate Limiting (stricter for expensive API calls)
   claudeRateLimitWindowMs: z.coerce.number().default(60000),

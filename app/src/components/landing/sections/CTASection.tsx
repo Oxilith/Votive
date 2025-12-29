@@ -22,7 +22,7 @@ interface CTASectionProps {
 }
 
 const CTASection: FC<CTASectionProps> = ({ onStartDiscovery }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('landing');
 
   return (
     <section id="begin" className="pt-16 pb-28 bg-[var(--bg-primary)] relative">
@@ -37,28 +37,28 @@ const CTASection: FC<CTASectionProps> = ({ onStartDiscovery }) => {
 
       <div className="max-w-[600px] mx-auto px-6 lg:px-10 text-center pt-12">
         {/* Headline */}
-        <h2 className="font-display text-[clamp(2rem,5vw,2.75rem)] font-medium leading-[1.2] mb-4 scroll-reveal">
-          {t('landing.cta.title')}
+        <h2 className="font-display text-[clamp(2rem,5vw,2.75rem)] font-medium leading-[1.2] mb-4 reveal">
+          {t('cta.title')}
         </h2>
 
         {/* Supporting Text */}
-        <p className="font-body text-[1.0625rem] text-[var(--text-secondary)] leading-[1.8] mb-10 scroll-reveal">
-          {t('landing.cta.subtitle')}
+        <p className="font-body text-[1.0625rem] text-[var(--text-secondary)] leading-[1.8] mb-10 reveal">
+          {t('cta.subtitle')}
         </p>
 
         {/* CTA Button */}
         <button
           onClick={onStartDiscovery}
-          className="cta-button inline-flex items-center gap-4 bg-[var(--accent)] text-white px-10 py-4 text-base font-medium rounded-sm mb-10 opacity-0 scroll-reveal"
+          className="cta-button inline-flex items-center gap-4 bg-[var(--accent)] text-white px-10 py-4 text-base font-medium rounded-sm mb-10 opacity-0 reveal"
           style={{ animation: 'fade-up-opacity 0.8s var(--ease-out) 0.2s forwards' }}
         >
-          {t('landing.cta.button')}
+          {t('cta.button')}
           <ArrowRightIcon size="md" />
         </button>
 
         {/* Time Estimate */}
-        <p className="font-body text-sm text-[var(--text-muted)] leading-[1.8] scroll-reveal">
-          {t('landing.cta.timeEstimate')}
+        <p className="font-body text-sm text-[var(--text-muted)] leading-[1.8] reveal">
+          {t('cta.timeEstimate')}
         </p>
       </div>
     </section>

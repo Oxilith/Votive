@@ -1,0 +1,52 @@
+{
+  "noAssessment": {
+    "title": "No Assessment Data",
+    "description": "Complete the assessment first to unlock AI-powered analysis of your identity patterns.",
+    "button": "Go to Assessment"
+  },
+  "ready": {
+    "title": "Ready to Analyze",
+    "description": "Click below to send your assessment data to Claude for deep pattern analysis. This typically takes a few minutes.",
+    "button": "Analyze My Responses"
+  },
+  "loading": {
+    "title": "Analyzing...",
+    "description": "Claude is finding patterns in your responses"
+  },
+  "error": {
+    "title": "Analysis Failed",
+    "tryAgain": "Try Again",
+    "downloadRaw": "Download Raw Response"
+  },
+  "tabs": {
+    "patterns": "Patterns",
+    "contradictions": "Contradictions",
+    "blindSpots": "Blind Spots",
+    "leverage": "Leverage",
+    "risks": "Risks",
+    "synthesis": "Identity Synthesis"
+  },
+  "cards": {
+    "evidence": "Evidence",
+    "theTension": "The Tension",
+    "vs": "vs",
+    "whatThisMeans": "What This Means",
+    "hypothesis": "Hypothesis",
+    "reframe": "Reframe",
+    "leveragePoint": "Leverage Point",
+    "reflectionQuestion": "Reflection Question",
+    "highImpact": "High Impact",
+    "mediumImpact": "Medium Impact"
+  },
+  "synthesisTab": {
+    "whoYouAre": "Who You Actually Are",
+    "hiddenStrengths": "Hidden Strengths",
+    "keyTension": "The Key Tension",
+    "nextStep": "Your Next Identity Step",
+    "nextStepHelp": "This is the smallest believable shift from where you are now."
+  },
+  "reanalyze": {
+    "button": "Re-analyze (may find new patterns)",
+    "description": "Each analysis can surface different insights based on Claude's interpretation"
+  }
+}

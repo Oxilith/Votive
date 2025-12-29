@@ -17,9 +17,15 @@ interface SingleSelectStepProps {
   step: SingleSelectStepType;
   value: string | undefined;
   onChange: (value: string) => void;
+  isReadOnly?: boolean;
 }
 
-export const SingleSelectStep: React.FC<SingleSelectStepProps> = ({ step, value, onChange }) => {
+export const SingleSelectStep: React.FC<SingleSelectStepProps> = ({ step, value, onChange, isReadOnly = false }) => {
+  const handleClick = (optionId: string) => {
+    if (isReadOnly) return;
+    onChange(optionId);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -34,12 +40,13 @@ export const SingleSelectStep: React.FC<SingleSelectStepProps> = ({ step, value,
         {step.options.map((option: SelectOption) => (
           <button
             key={option.id}
-            onClick={() => onChange(option.id)}
+            onClick={() => handleClick(option.id)}
+            disabled={isReadOnly}
             className={`text-left p-4 border-2 rounded-sm transition-all ${
               value === option.id
                 ? 'border-[var(--accent)] bg-[var(--accent)]/5'
                 : 'border-[var(--border)] hover:border-[var(--accent)]/50'
-            }`}
+            } ${isReadOnly ? 'cursor-not-allowed opacity-75' : ''}`}
           >
             <div className="flex items-center gap-3">
               <div

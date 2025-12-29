@@ -27,7 +27,7 @@ export const AssessmentProgress: React.FC<AssessmentProgressProps> = ({
   currentStep,
   totalSteps,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const progressPercent = (currentStep / totalSteps) * 100;
 
   return (
@@ -45,7 +45,7 @@ export const AssessmentProgress: React.FC<AssessmentProgressProps> = ({
             </span>
           </div>
           <span className="font-mono text-xs uppercase tracking-wider text-[var(--text-muted)]">
-            {t('common.progress.stepOf', { current: currentStep, total: totalSteps })}
+            {t('progress.stepOf', { current: currentStep, total: totalSteps })}
           </span>
         </div>
         <div className="h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">

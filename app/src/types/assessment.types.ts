@@ -26,7 +26,24 @@ export type {
 } from 'shared/index';
 
 // Re-import for use in local interfaces
-import type { AssessmentResponses } from 'shared/index';
+import type { AssessmentResponses, AIAnalysisResult } from 'shared/index';
+
+/**
+ * View-only assessment data (for /assessment/:id routes)
+ */
+export interface ViewOnlyAssessment {
+  responses: AssessmentResponses;
+  createdAt: string;
+}
+
+/**
+ * View-only analysis data (for /insights/:id routes)
+ */
+export interface ViewOnlyAnalysis {
+  result: AIAnalysisResult;
+  createdAt: string;
+  assessmentId: string | null;
+}
 
 // Component props
 export interface AssessmentProps {
@@ -36,6 +53,13 @@ export interface AssessmentProps {
   onImport?: (data: AssessmentResponses) => void;
   onExport?: () => void;
   onNavigateToLanding?: () => void;
+  onNavigateToInsights?: () => void;
+  onNavigateToAuth?: () => void;
+  onNavigateToProfile?: () => void;
+  onSignOut?: () => void;
+  isReadOnly?: boolean;
+  /** View-only assessment data for /assessment/:id routes */
+  viewOnlyAssessment?: ViewOnlyAssessment | null;
 }
 
 export interface InsightsProps {
@@ -46,7 +70,15 @@ export interface InsightsProps {
   hasAnalysis?: boolean;
   onNavigateToLanding?: () => void;
   onNavigateToAssessment?: () => void;
+  onNavigateToAuth?: () => void;
+  onNavigateToProfile?: () => void;
+  onNavigateToAuthWithReturn?: (returnTo: 'insights' | 'assessment') => void;
+  onSignOut?: () => void;
+  isReadOnly?: boolean;
+  viewingAssessmentId?: string | null;
+  /** View-only analysis data for /insights/:id routes */
+  viewOnlyAnalysis?: ViewOnlyAnalysis | null;
 }
 
-// App state
-export type AppView = 'landing' | 'assessment' | 'insights';
+// App state - includes auth views
+export type AppView = 'landing' | 'assessment' | 'insights' | 'auth' | 'profile' | 'verify-email' | 'reset-password';

@@ -5,10 +5,12 @@
  * - Orchestrates all landing page sections in proper order
  * - Adds ma-vertical dividers between sections for visual rhythm
  * - Manages navigation to assessment via onStartDiscovery callback
+ * - Manages navigation to auth and profile pages
  * - Provides smooth scrolling anchor navigation
  * - Integrates with theme context and i18n
  * @dependencies
  * - React
+ * - @/hooks/useScrollReveal
  * - @/components/landing/sections/NavSection
  * - @/components/landing/sections/HeroSection
  * - @/components/landing/sections/PhilosophySection
@@ -26,9 +28,14 @@ import JourneySection from '@/components/landing/sections/JourneySection';
 import InsightsSection from '@/components/landing/sections/InsightsSection';
 import CTASection from '@/components/landing/sections/CTASection';
 import FooterSection from '@/components/landing/sections/FooterSection';
+import useScrollReveal from '@/hooks/useScrollReveal';
 
 interface LandingPageProps {
   onStartDiscovery: () => void;
+  onNavigateToAuth?: () => void;
+  onNavigateToSignUp?: () => void;
+  onNavigateToProfile?: () => void;
+  onSignOut?: () => void;
 }
 
 /**
@@ -43,10 +50,19 @@ const MaVertical: FC = () => (
  */
 const MaBreath: FC = () => <div className="h-28" />;
 
-const LandingPage: FC<LandingPageProps> = ({ onStartDiscovery }) => {
+const LandingPage: FC<LandingPageProps> = ({ onStartDiscovery, onNavigateToAuth, onNavigateToSignUp, onNavigateToProfile, onSignOut }) => {
+  // Enable scroll reveal animations for elements with .reveal class
+  useScrollReveal();
+
   return (
     <div className="min-h-screen">
-      <NavSection onStartDiscovery={onStartDiscovery} />
+      <NavSection
+        onStartDiscovery={onStartDiscovery}
+        onNavigateToAuth={onNavigateToAuth}
+        onNavigateToSignUp={onNavigateToSignUp}
+        onNavigateToProfile={onNavigateToProfile}
+        onSignOut={onSignOut}
+      />
       <HeroSection onStartDiscovery={onStartDiscovery} />
       <PhilosophySection />
       <MaVertical />

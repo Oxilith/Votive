@@ -21,7 +21,7 @@ import VotiveLogo from '@/components/landing/shared/VotiveLogo';
 import { GitHubIcon } from '@/components/shared/icons';
 
 const FooterSection: FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('landing');
   const currentYear = new Date().getFullYear();
 
   return (
@@ -31,13 +31,13 @@ const FooterSection: FC = () => {
         <div className="flex items-center gap-2">
           <VotiveLogo size="sm" />
           <span className="font-display text-base font-semibold tracking-[0.05em]">
-            {t('landing.footer.brand')}
+            {t('footer.brand')}
           </span>
         </div>
 
         {/* Copyright - Center */}
         <span className="font-body text-sm text-[var(--text-muted)]">
-          {t('landing.footer.copyright', { year: currentYear })}
+          {t('footer.copyright', { year: currentYear })}
         </span>
 
         {/* GitHub and Author - Right */}
@@ -49,9 +49,9 @@ const FooterSection: FC = () => {
             className="hover:text-[var(--text-primary)] transition-colors flex items-center gap-2"
           >
             <GitHubIcon size="sm" />
-            {t('landing.footer.github')}
+            {t('footer.github')}
           </a>
-          <span>{t('landing.footer.author')}</span>
+          <span>{t('footer.author')}</span>
         </div>
       </div>
     </footer>

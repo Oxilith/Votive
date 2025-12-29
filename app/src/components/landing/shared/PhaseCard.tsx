@@ -34,14 +34,14 @@ const PhaseCard: FC<PhaseCardProps> = ({
   isActive = true,
   className = '',
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('landing');
 
   // Organic rotation alternates between cards
   const rotation = phaseNumber % 2 === 0 ? 'rotate-[0.5deg]' : '-rotate-[0.5deg]';
 
   return (
     <div
-      className={`stone-card relative p-8 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-sm scroll-reveal ${rotation} ${
+      className={`stone-card relative p-8 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-sm reveal ${rotation} ${
         isActive ? '' : 'coming-soon'
       } ${className}`.trim()}
       style={{ animationDelay: `${(phaseNumber - 1) * 100}ms` }}
@@ -50,7 +50,7 @@ const PhaseCard: FC<PhaseCardProps> = ({
       {!isActive && (
         <div className="absolute top-4 right-4">
           <span className="font-mono text-[9px] uppercase tracking-[0.08em] px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">
-            {t('landing.journey.comingSoon')}
+            {t('journey.comingSoon')}
           </span>
         </div>
       )}
