@@ -17,6 +17,7 @@
  * - @/services/api/AuthService
  * - @/stores/useAuthStore
  * - @/types/auth.types (Gender)
+ * - shared/index (PASSWORD_REGEX, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
  */
 
 import { useState } from 'react';
@@ -27,6 +28,7 @@ import FormButton from '@/components/auth/forms/FormButton';
 import { authService } from '@/services/api/AuthService';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { Gender } from '@/types/auth.types';
+import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from 'shared/index';
 
 /**
  * Props for RegisterForm component
@@ -53,11 +55,6 @@ interface FormErrors {
 const currentYear = new Date().getFullYear();
 const minYear = 1900;
 const maxYear = currentYear - 13; // Must be at least 13 years old
-
-/**
- * Password strength regex: at least 1 uppercase, 1 lowercase, 1 number
- */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 /**
  * RegisterForm - User registration form with profile fields
@@ -108,9 +105,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     // Password validation
     if (!password) {
       newErrors.password = t('validation.passwordRequired');
-    } else if (password.length < 8) {
+    } else if (password.length < PASSWORD_MIN_LENGTH) {
       newErrors.password = t('validation.passwordTooShort');
-    } else if (password.length > 128) {
+    } else if (password.length > PASSWORD_MAX_LENGTH) {
       newErrors.password = t('validation.passwordTooLong');
     } else if (!PASSWORD_REGEX.test(password)) {
       newErrors.password = t('validation.passwordWeak');

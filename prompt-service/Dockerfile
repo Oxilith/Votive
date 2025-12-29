@@ -1,4 +1,7 @@
-# Build stage
+# Prompt Service Dockerfile
+# Prompt management microservice for Votive
+
+# Stage 1: Build
 FROM node:20-alpine AS builder
 
 # Install OpenSSL for Prisma
@@ -6,14 +9,18 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy shared package first (context is project root)
+# Copy and build shared package first
 COPY shared/package.json ./shared/
 COPY shared/src ./shared/src
 COPY shared/tsconfig.json ./shared/
 
-# Install shared package dependencies
 WORKDIR /app/shared
 RUN npm install
+RUN npx tsc
+
+# Create production package.json for the built output and pack it
+RUN echo '{"name":"shared","version":"1.0.0","type":"module","main":"./index.js","exports":{".":"./index.js","./*.js":"./*.js","./*":"./*.js"}}' > dist/package.json
+RUN cd dist && npm pack
 
 WORKDIR /app
 
@@ -21,21 +28,21 @@ WORKDIR /app
 COPY prompt-service/package.json ./prompt-service/
 COPY prompt-service/prisma ./prompt-service/prisma/
 
-# Install prompt-service dependencies (use npm install since workspaces don't have individual lockfiles)
+# Install prompt-service dependencies, replacing shared with the packed tarball
 WORKDIR /app/prompt-service
-RUN npm install
+RUN npm pkg delete dependencies.shared && npm install && npm install ../shared/dist/shared-1.0.0.tgz
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Copy source code (already in /app/prompt-service)
+# Copy source code
 COPY prompt-service/. .
 
 # Build the application
 RUN npm run build:server
 RUN npm run build:admin
 
-# Production stage
+# Stage 2: Production
 FROM node:20-alpine
 
 # Install OpenSSL for Prisma runtime
@@ -48,13 +55,6 @@ COPY --from=builder /app/prompt-service/dist ./dist
 COPY --from=builder /app/prompt-service/node_modules ./node_modules
 COPY --from=builder /app/prompt-service/prisma ./prisma
 COPY --from=builder /app/prompt-service/package.json ./
-
-# Make shared package resolvable at runtime (compiled code is in dist/shared/src/)
-# Remove the broken symlink created by npm during install, then create the real package
-RUN rm -rf node_modules/shared && \
-    mkdir -p node_modules/shared && \
-    echo '{"name":"shared","type":"module","exports":{"./*":"./src/*"}}' > node_modules/shared/package.json && \
-    cp -r dist/shared/src node_modules/shared/
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data
@@ -78,4 +78,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
 # If DATABASE_KEY is set, use custom libsql migration script (encrypted)
 # Otherwise, use standard Prisma migrate deploy (unencrypted)
 # Seed uses custom prisma client so it works with both encrypted and unencrypted DBs
-CMD ["sh", "-c", "if [ -n \"$DATABASE_KEY\" ]; then node dist/prompt-service/scripts/migrate.js; else npx prisma migrate deploy; fi && node dist/prompt-service/prisma/seed.js && npm start"]
+CMD ["sh", "-c", "if [ -n \"$DATABASE_KEY\" ]; then node dist/scripts/migrate.js; else npx prisma migrate deploy; fi && node dist/prisma/seed.js && node dist/src/index.js"]

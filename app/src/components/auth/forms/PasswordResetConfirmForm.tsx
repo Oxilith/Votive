@@ -13,6 +13,7 @@
  * - @/components/auth/forms/FormInput
  * - @/components/auth/forms/FormButton
  * - @/services/api/AuthService
+ * - shared/index (PASSWORD_REGEX, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
  */
 
 import { useState } from 'react';
@@ -22,6 +23,7 @@ import FormInput from '@/components/auth/forms/FormInput';
 import FormButton from '@/components/auth/forms/FormButton';
 import { authService } from '@/services/api/AuthService';
 import { CheckIcon } from '@/components/shared/icons';
+import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from 'shared/index';
 
 /**
  * Props for PasswordResetConfirmForm
@@ -40,11 +42,6 @@ interface FormErrors {
   password?: string;
   confirmPassword?: string;
 }
-
-/**
- * Password strength regex: at least 1 uppercase, 1 lowercase, 1 number
- */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 /**
  * PasswordResetConfirmForm - Set new password after email reset
@@ -66,9 +63,9 @@ const PasswordResetConfirmForm: React.FC<PasswordResetConfirmFormProps> = ({
 
     if (!password) {
       newErrors.password = t('validation.passwordRequired');
-    } else if (password.length < 8) {
+    } else if (password.length < PASSWORD_MIN_LENGTH) {
       newErrors.password = t('validation.passwordTooShort');
-    } else if (password.length > 128) {
+    } else if (password.length > PASSWORD_MAX_LENGTH) {
       newErrors.password = t('validation.passwordTooLong');
     } else if (!PASSWORD_REGEX.test(password)) {
       newErrors.password = t('validation.passwordWeak');

@@ -4,6 +4,7 @@
  * @functionality
  * - Registers new users with hashed passwords
  * - Authenticates users and issues JWT access/refresh tokens
+ * - Implements progressive account lockout after failed login attempts
  * - Refreshes access tokens using valid refresh tokens
  * - Initiates password reset with email delivery
  * - Confirms password reset with token validation
@@ -165,6 +166,9 @@ function toSafeUser(user: User): SafeUser {
     name: user.name,
     gender: user.gender as Gender | null,
     birthYear: user.birthYear,
+    failedLoginAttempts: user.failedLoginAttempts,
+    lockoutUntil: user.lockoutUntil,
+    lastFailedLoginAt: user.lastFailedLoginAt,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -291,15 +295,32 @@ export class UserService {
   /**
    * Authenticate a user with email and password
    *
+   * Security features:
+   * - Timing-safe comparison to prevent enumeration attacks
+   * - Progressive account lockout after failed attempts
+   * - Lockout duration doubles with each successive lockout (15min -> 30min -> 60min...)
+   *
    * @param input - Login credentials (email, password)
    * @returns Authentication result with user and tokens
-   * @throws AuthenticationError if credentials are invalid
+   * @throws AuthenticationError if credentials are invalid or account is locked
    */
   async login(input: LoginInput): Promise<AuthResult> {
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: input.email.toLowerCase() },
     });
+
+    // Check lockout status first (even for non-existent users to prevent enumeration)
+    if (user?.lockoutUntil && user.lockoutUntil > new Date()) {
+      // Use timing-safe hash even in lockout path
+      await hashPassword('dummy-password-for-timing');
+      const minutesRemaining = Math.ceil(
+        (user.lockoutUntil.getTime() - Date.now()) / 60000
+      );
+      throw new AuthenticationError(
+        `Account temporarily locked. Try again in ${minutesRemaining} minute(s).`
+      );
+    }
 
     // Use constant-time comparison to prevent timing attacks
     // Always hash password even if user doesn't exist
@@ -312,7 +333,21 @@ export class UserService {
     // Verify password
     const isValidPassword = await comparePassword(input.password, user.password);
     if (!isValidPassword) {
+      // Increment failed attempts and potentially lock account
+      await this.handleFailedLogin(user);
       throw new AuthenticationError();
+    }
+
+    // Reset failed attempts on successful login
+    if (user.failedLoginAttempts > 0) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: 0,
+          lockoutUntil: null,
+          lastFailedLoginAt: null,
+        },
+      });
     }
 
     // Generate and store refresh token
@@ -331,11 +366,67 @@ export class UserService {
     // Generate access token
     const accessToken = generateAccessToken(user.id, this.jwtConfig);
 
+    // Get fresh user data with reset lockout fields
+    const freshUser = await prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
     return {
-      user: toSafeUser(user),
+      user: toSafeUser(freshUser ?? user),
       accessToken,
       refreshToken: refreshTokenValue,
     };
+  }
+
+  /**
+   * Handle failed login attempt - increment counter and potentially lock account
+   *
+   * @param user - The user who failed to login
+   */
+  private async handleFailedLogin(user: User): Promise<void> {
+    const newAttempts = user.failedLoginAttempts + 1;
+    const updateData: {
+      failedLoginAttempts: number;
+      lastFailedLoginAt: Date;
+      lockoutUntil?: Date;
+    } = {
+      failedLoginAttempts: newAttempts,
+      lastFailedLoginAt: new Date(),
+    };
+
+    // Check if we've hit the lockout threshold
+    if (newAttempts >= config.lockout.maxAttempts) {
+      const lockoutDuration = this.calculateLockoutDuration(newAttempts);
+      updateData.lockoutUntil = new Date(Date.now() + lockoutDuration);
+      logger.warn(
+        { userId: user.id, attempts: newAttempts, lockoutMins: lockoutDuration / 60000 },
+        'Account locked due to failed login attempts'
+      );
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: updateData,
+    });
+  }
+
+  /**
+   * Calculate progressive lockout duration
+   * First lockout: initialDurationMins, then doubles (15 -> 30 -> 60 -> 120...) up to max
+   *
+   * @param attempts - Total number of failed attempts
+   * @returns Lockout duration in milliseconds
+   */
+  private calculateLockoutDuration(attempts: number): number {
+    const { maxAttempts, initialDurationMins, maxDurationMins } = config.lockout;
+    // Calculate how many times the user has been locked out (0-indexed)
+    const lockoutCount = Math.floor((attempts - 1) / maxAttempts);
+    // Double the duration for each lockout, capped at max
+    const durationMins = Math.min(
+      initialDurationMins * Math.pow(2, lockoutCount),
+      maxDurationMins
+    );
+    return durationMins * 60 * 1000; // Convert to ms
   }
 
   /**

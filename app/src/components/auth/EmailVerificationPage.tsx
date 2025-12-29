@@ -56,6 +56,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
 
   // Verify email on mount if token is present
   useEffect(() => {
@@ -85,12 +86,17 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
   const handleResendVerification = async () => {
     setResendLoading(true);
     setResendSuccess(false);
+    setResendError(null);
 
     try {
       await authService.resendVerification();
       setResendSuccess(true);
-    } catch {
-      // Silently fail - user might not be logged in
+    } catch (error) {
+      if (error instanceof Error) {
+        setResendError(error.message);
+      } else {
+        setResendError(t('verifyEmail.resendError'));
+      }
     } finally {
       setResendLoading(false);
     }
@@ -163,6 +169,11 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
               >
                 {resendLoading ? t('verifyEmail.resending') : resendSuccess ? t('verifyEmail.resent') : t('verifyEmail.resend')}
               </button>
+              {resendError && (
+                <p className="font-body text-sm text-red-600 dark:text-red-400">
+                  {resendError}
+                </p>
+              )}
               <button
                 onClick={handleNavigateToLanding}
                 className="w-full py-2 font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
@@ -203,6 +214,11 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
               >
                 {resendLoading ? t('verifyEmail.resending') : resendSuccess ? t('verifyEmail.resent') : t('verifyEmail.resend')}
               </button>
+              {resendError && (
+                <p className="font-body text-sm text-red-600 dark:text-red-400">
+                  {resendError}
+                </p>
+              )}
               <button
                 onClick={handleNavigateToLanding}
                 className="w-full py-2 font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"

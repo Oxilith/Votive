@@ -5,6 +5,7 @@
  * - Implements IAuthService interface for auth API calls
  * - Handles user registration and login
  * - Manages token refresh via httpOnly cookies
+ * - Configures automatic 401 handling with token refresh
  * - Handles password reset and email verification flows
  * - Manages user profile operations
  * - Handles assessment CRUD (save, list, get by ID)
@@ -363,3 +364,18 @@ export class AuthService implements IAuthService {
 
 // Default auth service instance using the default API client
 export const authService = new AuthService(apiClient);
+
+// Configure token refresh interceptor
+// When a 401 error occurs, this handler will be called to refresh the token
+apiClient.setUnauthorizedHandler(async () => {
+  try {
+    const response = await authService.refreshToken();
+    // Update the auth store with the new access token
+    useAuthStore.getState().setAccessToken(response.accessToken);
+    return response.accessToken;
+  } catch {
+    // Refresh failed - clear auth state to force re-login
+    useAuthStore.getState().clearAuth();
+    return null;
+  }
+});

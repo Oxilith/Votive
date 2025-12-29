@@ -6,6 +6,7 @@
  * - Provides typed request/response handling
  * - Enables dependency injection for testing
  * - Supports request configuration options
+ * - Supports 401 unauthorized handling with token refresh
  * @dependencies
  * - None (pure TypeScript interface)
  */
@@ -30,6 +31,11 @@ export interface ApiError {
   details?: unknown;
 }
 
+/**
+ * Handler for 401 errors - refreshes token and returns new access token
+ */
+export type UnauthorizedHandler = () => Promise<string | null>;
+
 export interface IApiClient {
   /**
    * Performs a GET request
@@ -50,4 +56,10 @@ export interface IApiClient {
    * Performs a DELETE request
    */
   delete<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
+
+  /**
+   * Set handler for 401 unauthorized errors
+   * The handler should refresh the token and return the new access token
+   */
+  setUnauthorizedHandler?(handler: UnauthorizedHandler): void;
 }

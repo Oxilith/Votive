@@ -5,6 +5,7 @@
  * - Exports enum value arrays for Zod schema construction in backend
  * - Exports REQUIRED_FIELDS array for completion validation
  * - Exports field categorization (array, number, string fields)
+ * - Exports password validation constants and utilities
  * - Ensures backend and frontend validation stays in sync
  * @dependencies
  * - ./assessment.types for AssessmentResponses type
@@ -111,3 +112,29 @@ export const STRING_FIELDS: (keyof AssessmentResponses)[] = [
   'natural_strengths',
   'resistance_patterns',
 ];
+
+// Password validation constants
+/** Minimum password length */
+export const PASSWORD_MIN_LENGTH = 8;
+
+/** Maximum password length */
+export const PASSWORD_MAX_LENGTH = 128;
+
+/**
+ * Password strength regex pattern.
+ * Requires: at least 1 lowercase letter, 1 uppercase letter, 1 digit, minimum 8 characters.
+ */
+export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+/**
+ * Validates password against strength requirements.
+ * @param password - Password to validate
+ * @returns true if password meets requirements
+ */
+export function isValidPassword(password: string): boolean {
+  return (
+    password.length >= PASSWORD_MIN_LENGTH &&
+    password.length <= PASSWORD_MAX_LENGTH &&
+    PASSWORD_REGEX.test(password)
+  );
+}

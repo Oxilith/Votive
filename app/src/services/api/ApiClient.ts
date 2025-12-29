@@ -8,6 +8,8 @@
  * - Transforms errors into consistent format
  * - Supports request/response interceptors pattern
  * - Automatically includes CSRF token for state-changing requests
+ * - Handles 401 errors with automatic token refresh using Promise singleton pattern
+ * - Auto-retries original request after successful token refresh
  * @dependencies
  * - @/services/interfaces (IApiClient, RequestConfig, ApiResponse, ApiError)
  */
@@ -80,9 +82,16 @@ async function fetchWithTimeout(
   }
 }
 
+/**
+ * Handler for 401 errors - refreshes token and returns new access token
+ */
+export type UnauthorizedHandler = () => Promise<string | null>;
+
 export class ApiClient implements IApiClient {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
+  private refreshPromise: Promise<string | null> | null = null;
+  private onUnauthorized: UnauthorizedHandler | null = null;
 
   constructor(baseUrl: string, defaultHeaders: Record<string, string> = {}) {
     this.baseUrl = baseUrl;
@@ -92,16 +101,52 @@ export class ApiClient implements IApiClient {
     };
   }
 
+  /**
+   * Set handler for 401 unauthorized errors
+   * The handler should refresh the token and return the new access token
+   */
+  setUnauthorizedHandler(handler: UnauthorizedHandler): void {
+    this.onUnauthorized = handler;
+  }
+
+  /**
+   * Handle token refresh using Promise singleton pattern
+   * Ensures only one refresh request is in flight at a time
+   */
+  private async handleTokenRefresh(): Promise<string | null> {
+    if (!this.onUnauthorized) {
+      return null;
+    }
+
+    // Reuse existing refresh promise if one is in flight
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    // Create new refresh promise
+    this.refreshPromise = (async () => {
+      try {
+        return await this.onUnauthorized!();
+      } finally {
+        // Clear the promise when done (success or failure)
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
+  }
+
   private async request<T>(
     method: string,
     url: string,
     body?: unknown,
-    config?: RequestConfig
+    config?: RequestConfig & { _isRetryAfterRefresh?: boolean }
   ): Promise<ApiResponse<T>> {
     const fullUrl = `${this.baseUrl}${url}`;
     const timeout = config?.timeout ?? DEFAULT_TIMEOUT;
     const maxRetries = config?.retries ?? DEFAULT_RETRIES;
     const retryDelay = config?.retryDelay ?? DEFAULT_RETRY_DELAY;
+    const isRetryAfterRefresh = config?._isRetryAfterRefresh ?? false;
 
     const headers: Record<string, string> = {
       ...this.defaultHeaders,
@@ -159,6 +204,30 @@ export class ApiClient implements IApiClient {
         };
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
+
+        // Handle 401 errors with token refresh (unless this is already a retry after refresh)
+        if (
+          error instanceof ApiClientError &&
+          error.status === 401 &&
+          !isRetryAfterRefresh &&
+          this.onUnauthorized
+        ) {
+          const newToken = await this.handleTokenRefresh();
+          if (newToken) {
+            // Retry with new token
+            const newHeaders = {
+              ...config?.headers,
+              Authorization: `Bearer ${newToken}`,
+            };
+            return this.request<T>(method, url, body, {
+              ...config,
+              headers: newHeaders,
+              _isRetryAfterRefresh: true,
+            });
+          }
+          // Refresh failed, throw the original 401 error
+          throw error;
+        }
 
         // Don't retry on client errors (4xx) except 429 (rate limit)
         if (error instanceof ApiClientError && error.status >= 400 && error.status < 500 && error.status !== 429) {

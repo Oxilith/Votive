@@ -111,6 +111,11 @@ vi.mock('@/config/index.js', () => ({
     jwtRefreshSecret: 'test-refresh-secret',
     jwtAccessExpiry: '15m',
     jwtRefreshExpiry: '7d',
+    lockout: {
+      maxAttempts: 15,
+      initialDurationMins: 15,
+      maxDurationMins: 1440,
+    },
   },
 }));
 
@@ -167,6 +172,10 @@ describe('UserService', () => {
     emailVerifiedAt: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
+    // Account lockout fields
+    failedLoginAttempts: 0,
+    lockoutUntil: null,
+    lastFailedLoginAt: null,
   };
 
   const sampleRefreshToken: RefreshToken = {

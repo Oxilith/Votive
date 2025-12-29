@@ -1,25 +1,32 @@
+# Backend Dockerfile
+# API proxy for Votive
+
 # Stage 1: Build
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy shared package first
+# Copy and build shared package first
 COPY shared/package.json ./shared/
 COPY shared/src ./shared/src
 COPY shared/tsconfig.json ./shared/
 
-# Install shared package dependencies
 WORKDIR /app/shared
 RUN npm install
+RUN npx tsc
+
+# Create production package.json for the built output and pack it
+RUN echo '{"name":"shared","version":"1.0.0","type":"module","main":"./index.js","exports":{".":"./index.js","./*.js":"./*.js","./*":"./*.js"}}' > dist/package.json
+RUN cd dist && npm pack
 
 WORKDIR /app
 
 # Copy backend package files
 COPY backend/package*.json ./backend/
 
-# Install backend dependencies (use npm install since workspaces don't have individual lockfiles)
+# Install backend dependencies, replacing shared with the packed tarball
 WORKDIR /app/backend
-RUN npm install
+RUN npm pkg delete dependencies.shared && npm install && npm install ../shared/dist/shared-1.0.0.tgz
 
 # Copy backend source code
 COPY backend/src ./src
@@ -45,13 +52,6 @@ COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/node_modules ./node_modules
 COPY --from=builder /app/backend/package.json ./
 
-# Make shared package resolvable at runtime (compiled code is in dist/shared/src/)
-# Remove the broken symlink created by npm during install, then create the real package
-RUN rm -rf node_modules/shared && \
-    mkdir -p node_modules/shared && \
-    echo '{"name":"shared","type":"module","exports":{"./*":"./src/*"}}' > node_modules/shared/package.json && \
-    cp -r dist/shared/src node_modules/shared/
-
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 expressjs && \
@@ -67,4 +67,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
 # Start server
-CMD ["node", "dist/backend/src/index.js"]
+CMD ["node", "dist/index.js"]

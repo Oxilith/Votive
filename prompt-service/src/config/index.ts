@@ -9,6 +9,7 @@
  * - Displays prominent warning when DEV_AUTH_BYPASS is enabled at startup
  * - Validates JWT secrets are present and different in production
  * - Configures SMTP email settings for password reset and verification emails
+ * - Configures account lockout settings for progressive login lockout
  * @dependencies
  * - dotenv for environment variable loading
  * - zod for schema validation
@@ -88,6 +89,15 @@ const configSchema = z.object({
       tokenRefresh: z.coerce.number().default(20), // 20 req/min - normal auth flow
       userData: z.coerce.number().default(30), // 30 req/min - assessment/analysis
       profile: z.coerce.number().default(15), // 15 req/min - profile operations
+    })
+    .default({}),
+
+  // Account Lockout Configuration (progressive lockout after failed login attempts)
+  lockout: z
+    .object({
+      maxAttempts: z.coerce.number().default(15), // Lock after 15 failures
+      initialDurationMins: z.coerce.number().default(15), // First lockout: 15 minutes
+      maxDurationMins: z.coerce.number().default(1440), // Max lockout: 24 hours
     })
     .default({}),
 });
@@ -190,6 +200,12 @@ function loadConfig(): Config {
       tokenRefresh: process.env['RATE_LIMIT_TOKEN_REFRESH'],
       userData: process.env['RATE_LIMIT_USER_DATA'],
       profile: process.env['RATE_LIMIT_PROFILE'],
+    },
+    // Account Lockout
+    lockout: {
+      maxAttempts: process.env['LOCKOUT_MAX_ATTEMPTS'],
+      initialDurationMins: process.env['LOCKOUT_INITIAL_DURATION_MINS'],
+      maxDurationMins: process.env['LOCKOUT_MAX_DURATION_MINS'],
     },
   });
 
