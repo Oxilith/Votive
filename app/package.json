@@ -19,7 +19,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.0",
-    "shared": "file:../shared",
+    "shared": "*",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

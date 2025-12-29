@@ -45,7 +45,7 @@ import {
   generateEmailVerificationToken,
 } from '@/utils/token.js';
 import { emailService } from '@/services/email.service.js';
-import type { Gender } from 'shared/auth.types.js';
+import type { Gender } from 'shared';
 
 // Re-export Gender for backward compatibility
 export type { Gender };
@@ -314,11 +314,9 @@ export class UserService {
     if (user?.lockoutUntil && user.lockoutUntil > new Date()) {
       // Use timing-safe hash even in lockout path
       await hashPassword('dummy-password-for-timing');
-      const minutesRemaining = Math.ceil(
-        (user.lockoutUntil.getTime() - Date.now()) / 60000
-      );
+      // Use generic message to prevent timing-based account enumeration
       throw new AuthenticationError(
-        `Account temporarily locked. Try again in ${minutesRemaining} minute(s).`
+        'Account temporarily locked due to too many failed attempts. Please try again later.'
       );
     }
 

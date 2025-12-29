@@ -38,13 +38,17 @@
     "loading": "Ładowanie...",
     "empty": "Brak ocen. Ukończ ocenę, aby rozpocząć.",
     "fromDate": "Ocena z {{date}}",
-    "responses": "{{count}} odpowiedzi"
+    "responses": "{{count}} odpowiedzi",
+    "loadError": "Nie udało się załadować ocen. Spróbuj ponownie.",
+    "retry": "Ponów"
   },
   "analysesTab": {
     "title": "Poprzednie analizy",
     "loading": "Ładowanie...",
     "empty": "Brak analiz. Ukończ ocenę, aby uzyskać pierwszą analizę.",
-    "fromDate": "Analiza z {{date}}"
+    "fromDate": "Analiza z {{date}}",
+    "loadError": "Nie udało się załadować analiz. Spróbuj ponownie.",
+    "retry": "Ponów"
   },
   "dangerTab": {
     "title": "Strefa niebezpieczna",

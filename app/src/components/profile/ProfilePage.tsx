@@ -31,12 +31,13 @@ import FormInput from '@/components/auth/forms/FormInput';
 import FormButton from '@/components/auth/forms/FormButton';
 import PageNavigation from '@/components/shared/PageNavigation';
 import FooterSection from '@/components/landing/sections/FooterSection';
-import { CheckIcon, LoadingSpinnerIcon } from '@/components/shared/icons';
+import { CheckIcon, LoadingSpinnerIcon, ErrorCircleIcon, RefreshIcon } from '@/components/shared/icons';
 import InkBrushDecoration from '@/components/shared/InkBrushDecoration';
 import { useAuthStore, useCurrentUser } from '@/stores/useAuthStore';
 import { useUIStore, useAssessmentStore, useAnalysisStore } from '@/stores';
 import { authService } from '@/services/api/AuthService';
 import type { Gender, ProfileUpdateRequest, PasswordChangeRequest } from '@/types/auth.types';
+import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH } from 'shared/index';
 
 /**
  * Profile tab type
@@ -46,11 +47,6 @@ type ProfileTab = 'profile' | 'password' | 'assessments' | 'analyses' | 'danger'
 const currentYear = new Date().getFullYear();
 const minYear = 1900;
 const maxYear = currentYear - 13;
-
-/**
- * Password strength regex: at least 1 uppercase, 1 lowercase, 1 number
- */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 /**
  * ProfilePage props
@@ -103,9 +99,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     setAnalysesList,
   } = useAuthStore();
 
-  // Loading states (local)
+  // Loading and error states (local)
   const [assessmentsLoading, setAssessmentsLoading] = useState(false);
   const [analysesLoading, setAnalysesLoading] = useState(false);
+  const [assessmentsError, setAssessmentsError] = useState<string | null>(null);
+  const [analysesError, setAnalysesError] = useState<string | null>(null);
 
   // Delete account state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -124,29 +122,33 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   // Load functions wrapped in useCallback
   const loadAssessments = useCallback(async () => {
     setAssessmentsLoading(true);
+    setAssessmentsError(null);
     try {
       const data = await authService.getAssessments();
       setAssessmentsList(data);
-    } catch {
-      // Silently fail - empty list will be shown
+    } catch (error) {
+      console.error('Failed to load assessments:', error);
+      setAssessmentsError(t('assessmentsTab.loadError'));
       setAssessmentsList([]);
     } finally {
       setAssessmentsLoading(false);
     }
-  }, [setAssessmentsList]);
+  }, [setAssessmentsList, t]);
 
   const loadAnalyses = useCallback(async () => {
     setAnalysesLoading(true);
+    setAnalysesError(null);
     try {
       const data = await authService.getAnalyses();
       setAnalysesList(data);
-    } catch {
-      // Silently fail - empty list will be shown
+    } catch (error) {
+      console.error('Failed to load analyses:', error);
+      setAnalysesError(t('analysesTab.loadError'));
       setAnalysesList([]);
     } finally {
       setAnalysesLoading(false);
     }
-  }, [setAnalysesList]);
+  }, [setAnalysesList, t]);
 
   // Load assessments when tab changes (only if cache is stale or empty)
   useEffect(() => {
@@ -228,7 +230,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       return;
     }
 
-    if (newPassword.length < 8) {
+    if (newPassword.length < PASSWORD_MIN_LENGTH) {
       setPasswordError(t('auth:validation.passwordTooShort'));
       return;
     }
@@ -494,6 +496,18 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                       <LoadingSpinnerIcon size="lg" className="text-[var(--accent)] mx-auto mb-4" />
                       <p className="font-body text-[var(--text-secondary)]">{t('assessmentsTab.loading')}</p>
                     </div>
+                  ) : assessmentsError ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12">
+                      <ErrorCircleIcon size="lg" className="text-red-500 dark:text-red-400" />
+                      <p className="font-body text-red-600 dark:text-red-400">{assessmentsError}</p>
+                      <button
+                        onClick={loadAssessments}
+                        className="flex items-center gap-2 font-body text-sm text-[var(--accent)] hover:underline"
+                      >
+                        <RefreshIcon size="sm" />
+                        {t('assessmentsTab.retry')}
+                      </button>
+                    </div>
                   ) : !assessmentsList || assessmentsList.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="font-body text-[var(--text-secondary)]">
@@ -532,6 +546,18 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                     <div className="text-center py-12">
                       <LoadingSpinnerIcon size="lg" className="text-[var(--accent)] mx-auto mb-4" />
                       <p className="font-body text-[var(--text-secondary)]">{t('analysesTab.loading')}</p>
+                    </div>
+                  ) : analysesError ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-12">
+                      <ErrorCircleIcon size="lg" className="text-red-500 dark:text-red-400" />
+                      <p className="font-body text-red-600 dark:text-red-400">{analysesError}</p>
+                      <button
+                        onClick={loadAnalyses}
+                        className="flex items-center gap-2 font-body text-sm text-[var(--accent)] hover:underline"
+                      >
+                        <RefreshIcon size="sm" />
+                        {t('analysesTab.retry')}
+                      </button>
                     </div>
                   ) : !analysesList || analysesList.length === 0 ? (
                     <div className="text-center py-12">

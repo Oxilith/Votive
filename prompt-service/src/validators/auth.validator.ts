@@ -11,33 +11,16 @@
  * - Provides type-safe request body parsing
  * @dependencies
  * - zod for schema validation
+ * - shared/index for password validation constants
  */
 
 import { z } from 'zod';
-
-/**
- * Minimum password length as per security requirements
- * @see spec.md - "Validation: Email format, password minimum 8 characters"
- */
-export const MIN_PASSWORD_LENGTH = 8;
-
-/**
- * Maximum password length to prevent DoS via bcrypt
- * bcrypt has a 72-byte limit, but we set a reasonable max
- */
-export const MAX_PASSWORD_LENGTH = 128;
-
-/**
- * Password strength regex: at least 1 uppercase, 1 lowercase, 1 number
- * Special characters are NOT required for moderate security level
- */
-export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-/**
- * Human-readable password requirements message
- */
-export const PASSWORD_REQUIREMENTS_MESSAGE =
-  'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_REGEX,
+  PASSWORD_REQUIREMENTS_MESSAGE,
+} from 'shared/index';
 
 /**
  * Maximum email length to prevent abuse
@@ -73,8 +56,8 @@ export const registerSchema = z.object({
     .email('Invalid email format'),
   password: z
     .string()
-    .min(MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
-    .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`)
+    .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
+    .max(PASSWORD_MAX_LENGTH, `Password must be at most ${PASSWORD_MAX_LENGTH} characters`)
     .regex(PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE),
   name: z
     .string()
@@ -103,7 +86,7 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'Password is required')
-    .max(MAX_PASSWORD_LENGTH),
+    .max(PASSWORD_MAX_LENGTH),
 });
 
 /**
@@ -128,8 +111,8 @@ export const passwordResetConfirmSchema = z.object({
     .min(1, 'Token is required'),
   newPassword: z
     .string()
-    .min(MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
-    .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`)
+    .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
+    .max(PASSWORD_MAX_LENGTH, `Password must be at most ${PASSWORD_MAX_LENGTH} characters`)
     .regex(PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE),
 });
 
@@ -186,11 +169,11 @@ export const passwordChangeSchema = z.object({
   currentPassword: z
     .string()
     .min(1, 'Current password is required')
-    .max(MAX_PASSWORD_LENGTH),
+    .max(PASSWORD_MAX_LENGTH),
   newPassword: z
     .string()
-    .min(MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
-    .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`)
+    .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`)
+    .max(PASSWORD_MAX_LENGTH, `Password must be at most ${PASSWORD_MAX_LENGTH} characters`)
     .regex(PASSWORD_REGEX, PASSWORD_REQUIREMENTS_MESSAGE),
 });
 

@@ -7,10 +7,11 @@
  * - Tests successful deletion of expired/used email verification tokens
  * - Tests correct metrics calculation
  * - Tests error handling for database failures
+ * - Tests proper connection cleanup with $disconnect
  * @dependencies
  * - vitest for testing framework
  * - tokenCleanupJob under test
- * - Mocked Prisma client and config
+ * - Mocked Prisma client factory and config
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
@@ -26,10 +27,11 @@ const mockPrisma = vi.hoisted(() => ({
   emailVerifyToken: {
     deleteMany: vi.fn(),
   },
+  $disconnect: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@/prisma/client.js', () => ({
-  prisma: mockPrisma,
+  createFreshPrismaClient: () => mockPrisma,
 }));
 
 // Mock config with hoisting

@@ -24,10 +24,10 @@ export type {
   IdentitySynthesis,
   AIAnalysisResult,
   AnalysisLanguage,
-} from 'shared/index.js';
+} from 'shared';
 
 // Import for local use
-import type { AssessmentResponses, AIAnalysisResult, AnalysisLanguage } from 'shared/index.js';
+import type { AssessmentResponses, AIAnalysisResult, AnalysisLanguage } from 'shared';
 
 // Analysis request
 export interface AnalyzeRequest {

@@ -12,8 +12,10 @@
   "scripts": {
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
-    "type-check": "npm run type-check --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
+    "type-check": "tsc --build",
+    "build": "tsc --build && npm run build --workspaces --if-present",
+    "build:shared": "npm run build -w shared",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
     "test": "npm run test --workspaces --if-present",
     "test:run": "npm run test:run --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",

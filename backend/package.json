@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc && tsc-alias",
+    "build": "tsc --build && tsc-alias",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "start": "node dist/index.js",
     "lint": "eslint src/",
     "type-check": "tsc --noEmit",
@@ -26,7 +27,7 @@
     "opossum": "^9.0.0",
     "pino": "^9.0.0",
     "pino-http": "^10.0.0",
-    "shared": "file:../shared",
+    "shared": "*",
     "zod": "^3.23.0"
   },
   "devDependencies": {

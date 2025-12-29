@@ -9,35 +9,31 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy and build shared package first
-COPY shared/package.json ./shared/
-COPY shared/src ./shared/src
-COPY shared/tsconfig.json ./shared/
+# Copy root package files for workspace resolution
+COPY package.json package-lock.json ./
+
+# Copy all workspace package.json files
+COPY shared/package.json shared/
+COPY worker/package.json worker/
+
+# Install all workspaces
+RUN npm ci --workspaces --include-workspace-root
+
+# Copy shared source and build it first
+COPY shared/src shared/src
+COPY shared/tsconfig.json shared/
 
 WORKDIR /app/shared
-RUN npm install
-RUN npx tsc
+RUN npm run build
 
-# Create production package.json for the built output and pack it
-RUN echo '{"name":"shared","version":"1.0.0","type":"module","main":"./index.js","exports":{".":"./index.js","./*.js":"./*.js","./*":"./*.js"}}' > dist/package.json
-RUN cd dist && npm pack
-
-WORKDIR /app
-
-# Copy worker package files
-COPY worker/package*.json ./worker/
-COPY worker/prisma ./worker/prisma/
-
-# Install worker dependencies, replacing shared with the packed tarball
+# Copy worker source, prisma schema, and build
 WORKDIR /app/worker
-RUN npm pkg delete dependencies.shared && npm install && npm install ../shared/dist/shared-1.0.0.tgz
+COPY worker/prisma ./prisma/
+COPY worker/src ./src
+COPY worker/tsconfig.json ./
 
 # Generate Prisma client
 RUN npx prisma generate
-
-# Copy source code
-COPY worker/src ./src
-COPY worker/tsconfig.json ./
 
 # Build TypeScript
 RUN npm run build
@@ -52,16 +48,28 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Copy root package files
+COPY package.json package-lock.json ./
+COPY shared/package.json shared/
+COPY worker/package.json worker/
+
+# Install production dependencies only
+RUN npm ci --workspaces --include-workspace-root --omit=dev
+
+# Copy built shared package
+COPY --from=builder /app/shared/dist shared/dist
+
+# Copy built worker and prisma
+COPY --from=builder /app/worker/dist worker/dist
+COPY --from=builder /app/worker/prisma worker/prisma
+COPY --from=builder /app/worker/node_modules/.prisma worker/node_modules/.prisma
+
+WORKDIR /app/worker
+
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 workerjs
-
-# Copy built files and production dependencies
-COPY --from=builder /app/worker/dist ./dist
-COPY --from=builder /app/worker/node_modules ./node_modules
-COPY --from=builder /app/worker/prisma ./prisma
-
-RUN chown -R workerjs:nodejs /app
+    adduser --system --uid 1001 workerjs && \
+    chown -R workerjs:nodejs /app
 
 USER workerjs
 

@@ -26,7 +26,7 @@ export type {
   CoreValue,
   WillpowerPattern,
   AssessmentResponses,
-} from './assessment.types.js';
+} from './assessment.types';
 
 // AI Analysis Types
 export type {
@@ -37,11 +37,11 @@ export type {
   AnalysisRisk,
   IdentitySynthesis,
   AIAnalysisResult,
-} from './analysis.types.js';
+} from './analysis.types';
 
 // API Types
-export type { AnalysisLanguage } from './api.types.js';
-export { SUPPORTED_LANGUAGES } from './api.types.js';
+export type { AnalysisLanguage } from './api.types';
+export { SUPPORTED_LANGUAGES } from './api.types';
 
 // Labels
 export {
@@ -49,7 +49,7 @@ export {
   triggerLabels,
   valueLabels,
   willpowerLabels,
-} from './labels.js';
+} from './labels';
 
 // Validation Constants
 export {
@@ -64,11 +64,12 @@ export {
   PASSWORD_MIN_LENGTH,
   PASSWORD_MAX_LENGTH,
   PASSWORD_REGEX,
+  PASSWORD_REQUIREMENTS_MESSAGE,
   isValidPassword,
-} from './validation.js';
+} from './validation';
 
 // Prompt Types
-export { ClaudeModel } from './prompt.types.js';
+export { ClaudeModel } from './prompt.types';
 export type {
   ClaudeModel as ClaudeModelType,
   ThinkingConfigParam,
@@ -76,13 +77,13 @@ export type {
   PromptConfigKey,
   ThinkingVariant,
   PromptConfigDefinition,
-} from './prompt.types.js';
+} from './prompt.types';
 
 // Response Formatter
-export { formatResponsesForPrompt } from './responseFormatter.js';
+export { formatResponsesForPrompt } from './responseFormatter';
 
 // Auth Types
-export type { Gender, SafeUserResponse } from './auth.types.js';
+export type { Gender, SafeUserResponse } from './auth.types';
 
 // Tracing (W3C Trace Context)
 export {
@@ -93,5 +94,5 @@ export {
   createTraceparent,
   parseTraceparent,
   extractOrCreateTrace,
-} from './tracing.js';
-export type { TraceContext, TraceInfo } from './tracing.js';
+} from './tracing';
+export type { TraceContext, TraceInfo } from './tracing';

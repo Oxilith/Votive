@@ -15,7 +15,7 @@
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { PromptCacheService } from '@/services/prompt-cache.service.js';
-import type { PromptConfig } from 'shared/index.js';
+import type { PromptConfig } from 'shared';
 
 // Mock config with test values
 vi.mock('@/config/index.js', () => ({

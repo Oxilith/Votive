@@ -6,13 +6,14 @@
  * - Deletes expired or used password reset tokens
  * - Deletes expired or used email verification tokens
  * - Reports cleanup metrics for monitoring
+ * - Uses fresh database connection per execution to avoid stale connections
  * @dependencies
- * - @/prisma/client for database access
+ * - @/prisma/client for database access (factory function)
  * - @/config for job configuration
  * - @/jobs for Job interface
  */
 
-import { prisma } from '@/prisma/client.js';
+import { createFreshPrismaClient } from '@/prisma/client.js';
 import { config } from '@/config/index.js';
 import type { Job, JobResult } from '@/jobs/index.js';
 
@@ -28,6 +29,8 @@ export const tokenCleanupJob: Job = {
 
   async run(): Promise<JobResult> {
     const now = new Date();
+    // Create fresh connection for each job execution to avoid stale connection issues
+    const prisma = createFreshPrismaClient();
 
     try {
       // Delete expired refresh tokens
@@ -75,6 +78,9 @@ export const tokenCleanupJob: Job = {
           totalDeleted: 0,
         },
       };
+    } finally {
+      // Always disconnect to clean up resources
+      await prisma.$disconnect();
     }
   },
 };

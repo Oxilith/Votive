@@ -30,7 +30,7 @@ import {
   BackgroundRefreshManager,
   type BackgroundTask,
 } from '@/utils/background-refresh-manager.js';
-import type { PromptConfig } from 'shared/index.js';
+import type { PromptConfig } from 'shared';
 
 const REQUEST_TIMEOUT_MS = 5000;
 

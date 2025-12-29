@@ -22,8 +22,8 @@ import type { MessageCreateParamsNonStreaming } from '@anthropic-ai/sdk/resource
 import { config } from '@/config/index.js';
 import { logger } from '@/utils/logger.js';
 import type { AssessmentResponses, AIAnalysisResult } from '@/types/claude.types.js';
-import type { AnalysisLanguage, PromptConfig, PromptConfigKey } from 'shared/index.js';
-import { formatResponsesForPrompt } from 'shared/index.js';
+import type { AnalysisLanguage, PromptConfig, PromptConfigKey } from 'shared';
+import { formatResponsesForPrompt } from 'shared';
 import { extractTextFromMessage, parseAnalysisResponse } from '@/services/claude/response-parser.js';
 import { promptClientService } from '@/services/prompt-client.service.js';
 

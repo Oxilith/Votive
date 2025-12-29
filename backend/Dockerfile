@@ -6,33 +6,28 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy and build shared package first
-COPY shared/package.json ./shared/
-COPY shared/src ./shared/src
-COPY shared/tsconfig.json ./shared/
+# Copy root package files for workspace resolution
+COPY package.json package-lock.json ./
+
+# Copy all workspace package.json files
+COPY shared/package.json shared/
+COPY backend/package.json backend/
+
+# Install all workspaces
+RUN npm ci --workspaces --include-workspace-root
+
+# Copy shared source and build it first
+COPY shared/src shared/src
+COPY shared/tsconfig.json shared/
 
 WORKDIR /app/shared
-RUN npm install
-RUN npx tsc
+RUN npm run build
 
-# Create production package.json for the built output and pack it
-RUN echo '{"name":"shared","version":"1.0.0","type":"module","main":"./index.js","exports":{".":"./index.js","./*.js":"./*.js","./*":"./*.js"}}' > dist/package.json
-RUN cd dist && npm pack
-
-WORKDIR /app
-
-# Copy backend package files
-COPY backend/package*.json ./backend/
-
-# Install backend dependencies, replacing shared with the packed tarball
+# Copy backend source and build
 WORKDIR /app/backend
-RUN npm pkg delete dependencies.shared && npm install && npm install ../shared/dist/shared-1.0.0.tgz
-
-# Copy backend source code
 COPY backend/src ./src
 COPY backend/tsconfig.json ./
 
-# Build TypeScript
 RUN npm run build
 
 # Stage 2: Production
@@ -47,10 +42,21 @@ ENV NODE_ENV=production
 RUN npm install -g npm@latest && \
     apk add --no-cache wget
 
-# Copy built files and production dependencies
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/node_modules ./node_modules
-COPY --from=builder /app/backend/package.json ./
+# Copy root package files
+COPY package.json package-lock.json ./
+COPY shared/package.json shared/
+COPY backend/package.json backend/
+
+# Install production dependencies only
+RUN npm ci --workspaces --include-workspace-root --omit=dev
+
+# Copy built shared package
+COPY --from=builder /app/shared/dist shared/dist
+
+# Copy built backend
+COPY --from=builder /app/backend/dist backend/dist
+
+WORKDIR /app/backend
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \

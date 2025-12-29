@@ -18,7 +18,7 @@ import {
   WILLPOWER_PATTERN_VALUES,
   CORE_VALUE_VALUES,
   SUPPORTED_LANGUAGES,
-} from 'shared/index.js';
+} from 'shared';
 
 const timeOfDaySchema = z.enum(TIME_OF_DAY_VALUES);
 const moodTriggerSchema = z.enum(MOOD_TRIGGER_VALUES);

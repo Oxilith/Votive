@@ -19,7 +19,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach, type Mock } from 'vitest';
 import { PromptClientService, PromptServiceUnavailableError } from '@/services/prompt-client.service.js';
 import { promptCacheService } from '@/services/prompt-cache.service.js';
-import type { PromptConfig } from 'shared/index.js';
+import type { PromptConfig } from 'shared';
 
 // Cast to mocked type for type safety
 const mockCacheService = vi.mocked(promptCacheService);
