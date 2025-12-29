@@ -2,7 +2,7 @@
  * @file src/components/shared/icons/index.ts
  * @purpose Centralized icon component library with consistent sizing and accessibility
  * @functionality
- * - Provides 15+ reusable SVG icon components with shared styling patterns
+ * - Provides 20+ reusable SVG icon components with shared styling patterns
  * - Supports four size variants: xs (12px), sm (16px), md (20px), lg (24px)
  * - All icons use 24x24 viewBox for consistent scaling
  * - Icons inherit text color via currentColor for seamless theming
@@ -42,6 +42,11 @@ export { default as DownloadIcon } from './DownloadIcon';
 // Feedback icons
 export { default as ErrorCircleIcon } from './ErrorCircleIcon';
 export { default as CheckIcon } from './CheckIcon';
+export { default as AlertTriangleIcon } from './AlertTriangleIcon';
+
+// Action icons
+export { default as SearchIcon } from './SearchIcon';
+export { default as RefreshIcon } from './RefreshIcon';
 
 // Brand icons
 export { default as GitHubIcon } from './GitHubIcon';
@@ -52,3 +57,5 @@ export { default as SwitchHorizontalIcon } from './SwitchHorizontalIcon';
 export { default as EyeIcon } from './EyeIcon';
 export { default as LightningBoltIcon } from './LightningBoltIcon';
 export { default as LightbulbIcon } from './LightbulbIcon';
+export { default as TargetIcon } from './TargetIcon';
+export { default as MirrorIcon } from './MirrorIcon';

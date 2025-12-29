@@ -4,7 +4,6 @@
  * @functionality
  * - Uses Zustand stores for state management
  * - Coordinates view transitions between landing, assessment, and insights
- * - Provides persistent header with navigation and data management (assessment/insights views)
  * - Handles navigation between views including landing page sections
  * - Provides theme context to component tree for dark/light mode
  * - Displays landing page as default entry point
@@ -14,7 +13,6 @@
  * - @/components/landing/LandingPage
  * - @/components/assessment/IdentityFoundationsAssessment
  * - @/components/insights/IdentityInsightsAI
- * - @/components/shared/Header
  * - @/types/assessment.types
  * - @/utils/fileUtils
  * - @/components/providers/ThemeProvider
@@ -24,7 +22,6 @@ import { useCallback } from 'react';
 import { LandingPage } from '@/components/landing';
 import IdentityFoundationsAssessment from '@/components/assessment/IdentityFoundationsAssessment';
 import IdentityInsightsAI from '@/components/insights/IdentityInsightsAI';
-import Header from '@/components/shared/Header';
 import type { AssessmentResponses } from '@/types/assessment.types';
 import { exportToJson } from '@/utils/fileUtils';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
@@ -33,7 +30,7 @@ import { useAssessmentStore, useUIStore, useAnalysisStore } from '@/stores';
 function App() {
   // Zustand stores
   const { responses, setResponses } = useAssessmentStore();
-  const { currentView, setView, assessmentKey, incrementAssessmentKey, startAtSynthesis, setStartAtSynthesis, hasReachedSynthesis } = useUIStore();
+  const { currentView, setView, assessmentKey, incrementAssessmentKey, startAtSynthesis, setStartAtSynthesis } = useUIStore();
   const { analysis, exportAnalysisToJson } = useAnalysisStore();
 
   const handleAssessmentComplete = useCallback(
@@ -77,14 +74,7 @@ function App() {
     setView('assessment');
   }, [setView]);
 
-  const handleNavigateToInsights = useCallback(() => {
-    if (hasReachedSynthesis) {
-      setView('insights');
-    }
-  }, [setView, hasReachedSynthesis]);
-
-  const hasResponses = Object.keys(responses).length > 0;
-  const hasAnalysis = !!analysis;
+  const hasAnalysisResults = !!analysis;
 
   // Landing page has its own navigation and styling
   if (currentView === 'landing') {
@@ -95,37 +85,35 @@ function App() {
     );
   }
 
-  // Assessment and Insights views use the shared Header
-  return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-[var(--bg-primary)]">
-        <Header
-          currentView={currentView}
-          hasResponses={hasResponses}
-          hasReachedSynthesis={hasReachedSynthesis}
+  // Assessment view has its own navigation
+  if (currentView === 'assessment') {
+    return (
+      <ThemeProvider>
+        <IdentityFoundationsAssessment
+          key={assessmentKey}
+          initialResponses={responses}
+          onComplete={handleAssessmentComplete}
+          startAtSynthesis={startAtSynthesis}
           onImport={handleImportResponses}
           onExport={handleExportResponses}
-          onExportAnalysis={hasAnalysis ? exportAnalysisToJson : undefined}
-          hasAnalysis={hasAnalysis}
           onNavigateToLanding={handleNavigateToLanding}
-          onNavigateToAssessment={handleNavigateToAssessment}
-          onNavigateToInsights={handleNavigateToInsights}
         />
+      </ThemeProvider>
+    );
+  }
 
-        {currentView === 'assessment' ? (
-          <IdentityFoundationsAssessment
-            key={assessmentKey}
-            initialResponses={responses}
-            onComplete={handleAssessmentComplete}
-            startAtSynthesis={startAtSynthesis}
-          />
-        ) : (
-          <IdentityInsightsAI
-            responses={responses as AssessmentResponses}
-            onExport={handleExportResponses}
-          />
-        )}
-      </div>
+  // Insights view has its own navigation
+  return (
+    <ThemeProvider>
+      <IdentityInsightsAI
+        responses={responses as AssessmentResponses}
+        onExport={handleExportResponses}
+        onImport={handleImportResponses}
+        onExportAnalysis={hasAnalysisResults ? exportAnalysisToJson : undefined}
+        hasAnalysis={hasAnalysisResults}
+        onNavigateToLanding={handleNavigateToLanding}
+        onNavigateToAssessment={handleNavigateToAssessment}
+      />
     </ThemeProvider>
   );
 }

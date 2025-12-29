@@ -834,19 +834,78 @@ function setTheme(isDark) {
 
 ## Application to Other Pages
 
+### Consistent Page Structure
+
+**All pages** (Landing, Assessment, Insights) must include these core elements for visual consistency:
+
+1. **Background**: `bg-[var(--bg-primary)]` (Rice Paper light / Night Ink dark)
+2. **Ink Brush SVG Decoration**: Fixed position, right side, 80vh height
+3. **Floating Navigation**: Logo, nav links, language toggle (EN|PL), theme toggle
+4. **Footer**: VotiveLogo, copyright, GitHub link, author credit
+
+```tsx
+// Required page structure
+<div className="min-h-screen bg-[var(--bg-primary)] flex flex-col relative">
+  {/* Fixed Ink Brush Decoration - Right side */}
+  <svg
+    className="fixed right-0 top-[10%] h-[80vh] w-auto max-w-[500px] opacity-[0.06] dark:opacity-[0.08] pointer-events-none z-[1] hidden lg:block"
+    viewBox="0 0 400 800"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M200 0 Q 250 200 180 400 Q 120 600 220 800"
+      stroke="currentColor"
+      strokeWidth="80"
+      strokeLinecap="round"
+      style={{
+        strokeDasharray: 2000,
+        strokeDashoffset: 2000,
+        animation: 'ink-draw 3s var(--ease-out) 0.5s forwards',
+      }}
+    />
+    <circle cx="200" cy="150" r="60" fill="currentColor" style={{ opacity: 0, animation: 'ink-splash 0.8s var(--ease-out) 2s forwards' }} />
+    <circle cx="180" cy="450" r="40" fill="currentColor" style={{ opacity: 0, animation: 'ink-splash 0.8s var(--ease-out) 2.5s forwards' }} />
+  </svg>
+
+  {/* Floating Navigation */}
+  <nav className="fixed top-4 left-4 right-4 lg:top-6 lg:left-10 lg:right-10 z-[100] flex justify-between items-center px-4 py-3 lg:px-6 bg-[var(--bg-primary)]/85 backdrop-blur-[12px] border border-[var(--border)] transition-colors">
+    {/* Logo + Brand | Nav Links | EN|PL toggle | Theme toggle */}
+  </nav>
+
+  {/* Page Content - with top padding for floating nav */}
+  <div className="flex-1 pt-20 lg:pt-24">
+    {/* ... */}
+  </div>
+
+  {/* Footer */}
+  <FooterSection />
+</div>
+```
+
+### Navigation Links per Page
+
+| Page | Nav Links |
+|------|-----------|
+| Landing | Philosophy, Journey, Insights (anchor links) |
+| Assessment | Import, Export (when responses exist) |
+| Insights | Assessment, Import, Export, Export Analysis (when available) |
+
 ### Assessment Pages
 
 - **Calm during input**: Clean forms with generous whitespace
-- **Progress visualization**: Subtle ink strokes filling in
+- **Progress visualization**: Sticky progress bar below navigation
 - **Milestone celebrations**: Vermilion accents appear
 - **Question cards**: Stone-like placement with gentle reveals
+- **Navigation controls**: Sticky bottom bar with Back/Continue buttons
 
-### Analysis Pages
+### Insights Pages
 
 - **Data presentation**: Stone-like cards with asymmetric layouts
 - **Insight reveals**: Staggered animations for each insight category
 - **Identity synthesis**: Large quote-style display with serif typography
-- **Pattern visualization**: Minimal charts with vermilion highlights
+- **Tab interface**: Vermilion active state with icon components
+- **Icons**: Use shared icon components (no emojis) with `text-[var(--accent)]`
 
 ---
 
@@ -859,10 +918,19 @@ function setTheme(isDark) {
 - [x] Golden ratio spacing system
 - [x] Reduced motion support
 
+### Consistent Page Structure
+- [x] All pages use `bg-[var(--bg-primary)]` background
+- [x] All pages include fixed ink brush SVG decoration
+- [x] All pages have floating navigation with backdrop blur
+- [x] All pages include FooterSection component
+- [x] Navigation includes EN|PL language toggle
+- [x] Navigation includes theme toggle (sun/moon icons)
+
 ### Navigation
 - [x] Floating navigation with backdrop blur
-- [x] Calligraphic underline on links
+- [x] Calligraphic underline on links (nav-link class)
 - [x] Button hover lift + active shrink
+- [x] Context-aware nav links per page
 
 ### Hero Section
 - [x] Staggered word reveal animation
@@ -881,6 +949,13 @@ function setTheme(isDark) {
 - [x] Ink splatter hover effect on cards
 - [x] Organic rotation on card reveal
 - [x] Insights section with sample card
+- [x] Tabbed interface with icon components
+
+### Icons
+- [x] Shared icon components in `@/components/shared/icons/`
+- [x] All icons use `currentColor` for theming flexibility
+- [x] Apply `text-[var(--accent)]` for vermilion accent when needed
+- [x] No emoji icons in production UI
 
 ### Interactive Elements
 - [x] Button hover: lift (-2px) + shadow
@@ -895,4 +970,4 @@ function setTheme(isDark) {
 ---
 
 *Last updated: December 2024*
-*Design system version: 1.1.0 (Ink & Stone)*
+*Design system version: 1.2.0 (Ink & Stone - Consistent Page Structure)*

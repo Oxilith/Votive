@@ -1,3 +1,24 @@
+## [1.0.5] - 2025-12-29
+
+### Added
+- Consistent page structure across Landing, Assessment, and Insights pages (ink brush SVG, floating navigation, footer)
+- New icon components: SearchIcon, TargetIcon, MirrorIcon, AlertTriangleIcon, RefreshIcon
+- Navigation link from Insights back to Assessment for response editing
+- Extended NavigationControls to support synthesis step with `isSynthesis` and `onComplete` props
+- Extended InsightsProps interface with `onNavigateToLanding` and `onNavigateToAssessment` callbacks
+- Design system documentation for consistent page structure requirements
+
+### Changed
+- Replaced all emoji icons with proper SVG icon components in IdentityInsightsAI
+- Tab icons now use ReactNode type for flexibility
+- SynthesisStep no longer handles its own navigation (delegated to NavigationControls)
+- Removed Header component from App.tsx (navigation now inline per page)
+- Design system version bumped to 1.2.0
+
+### Fixed
+- Insights page now matches Assessment page styling (background, decorations, navigation)
+- Consistent icon color theming using `currentColor` pattern across all icon components
+
 ## [1.0.4] - 2025-12-28
 
 ### Added

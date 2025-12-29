@@ -8,19 +8,19 @@
       "beginDiscovery": "Rozpocznij odkrywanie",
       "begin": "Rozpocznij",
       "language": {
-        "en": "English",
-        "pl": "Polski"
+        "en": "EN",
+        "pl": "PL"
       }
     },
     "hero": {
+      "eyebrow": "Zmiana oparta na tożsamości",
       "tagline1": "Każde działanie to",
-      "tagline2Prefix": "",
       "tagline2Highlight": "głos za tym, kim",
       "tagline3": "się stajesz",
       "subtitle": "Większość aplikacji do nawyków zawodzi, bo pomija fundament: zrozumienie kim już jesteś. Votive prowadzi Cię przez samopoznanie wspierane AI, zanim przejdziesz do celów.",
       "cta": "Rozpocznij odkrywanie",
-      "learnMore": "Poznaj filozofię",
-      "votesLabel": "Głosów oddanych ku lepszym wersjom siebie"
+      "votesLabel": "Oddanych głosów",
+      "votesDesc": "ku lepszym wersjom siebie"
     },
     "philosophy": {
       "label": "Problem",
@@ -75,14 +75,13 @@
       "types": {
         "patterns": "Ukryte wzorce behawioralne",
         "contradictions": "Wewnętrzne sprzeczności",
-        "blindSpots": "Martwe punkty i założenia",
+        "blindSpots": "Martwe punkty",
         "leverage": "Możliwości wysokiej dźwigni"
       },
       "sampleCard": {
         "label": "Przykładowa analiza",
         "category": "Synteza tożsamości",
-        "quote": "\"Opisujesz siebie jako zdyscyplinowanego, ale spadki energii i wyzwalacze nastroju sugerują, że działasz wyłącznie na sile woli — ograniczonym zasobie. Twoje kluczowe zachowanie, poranne ćwiczenia, może stać się kotwicą, która regeneruje zamiast wyczerpywać, jeśli przejdziesz od wymuszania wydajności do szanowania rytmu.\"",
-        "analysis": "To nie hipokryzja, to luka między Twoją aspiracyjną a rzeczywistą tożsamością. Nawyk z telefonem może zaspokajać niezaspokojoną potrzebę kontaktu lub nowości. Zrozumienie tego napięcia to pierwszy krok do jego pokonania.",
+        "analysis": "To nie hipokryzja — to luka między Twoją aspiracyjną a rzeczywistą tożsamością. Zrozumienie tego napięcia to pierwszy krok do jego pokonania.",
         "poweredBy": "Wspierane przez Claude AI"
       }
     },
@@ -90,14 +89,12 @@
       "title": "Gotowy by zrozumieć siebie?",
       "subtitle": "Ocena zajmuje około 15 minut. Bez kont, bez śledzenia, tylko szczera refleksja.",
       "button": "Rozpocznij odkrywanie",
-      "timeEstimate": "~15 minut szczerej refleksji",
-      "openSource": "Darmowe · Bez rejestracji · Open source"
+      "timeEstimate": "~15 minut szczerej refleksji"
     },
     "footer": {
       "brand": "Votive",
       "copyright": "© {{year}} Votive. Każde działanie to głos.",
       "github": "GitHub",
-      "license": "Licencja MIT",
       "author": "Konrad Jagusiak"
     }
   },

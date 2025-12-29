@@ -33,11 +33,19 @@ export interface AssessmentProps {
   initialResponses?: Partial<AssessmentResponses>;
   onComplete: (responses: AssessmentResponses) => void;
   startAtSynthesis?: boolean;
+  onImport?: (data: AssessmentResponses) => void;
+  onExport?: () => void;
+  onNavigateToLanding?: () => void;
 }
 
 export interface InsightsProps {
   responses: AssessmentResponses;
   onExport?: () => void;
+  onImport?: (data: AssessmentResponses) => void;
+  onExportAnalysis?: () => void;
+  hasAnalysis?: boolean;
+  onNavigateToLanding?: () => void;
+  onNavigateToAssessment?: () => void;
 }
 
 // App state

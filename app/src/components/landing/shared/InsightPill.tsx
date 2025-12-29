@@ -2,10 +2,10 @@
  * @file src/components/landing/shared/InsightPill.tsx
  * @purpose Interactive pill component for displaying AI insight categories
  * @functionality
- * - Displays insight type with icon and label
- * - Includes hover animation with horizontal translation
+ * - Displays insight type with vermilion dot and label
+ * - Includes hover animation with subtle lift
  * - Supports custom icon rendering via children prop
- * - Adapts styling for light and dark themes
+ * - Uses Ink & Stone stone card styling
  * @dependencies
  * - React (ReactNode)
  */
@@ -21,12 +21,12 @@ interface InsightPillProps {
 const InsightPill: FC<InsightPillProps> = ({ icon, label, className = '' }) => {
   return (
     <div
-      className={`insight-pill flex items-center gap-3 px-4 py-3  border border-[var(--border-subtle)] dark:border-white/5 ${className}`.trim()}
+      className={`flex items-center gap-3 px-4 py-3 rounded-sm border border-[var(--border)] bg-[var(--bg-secondary)] hover:translate-y-[-2px] transition-transform duration-200 ${className}`.trim()}
     >
-      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center  bg-[var(--color-electric)]/10 text-[var(--color-electric)]">
+      <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-sm bg-[var(--accent)]/10 text-[var(--accent)]">
         {icon}
       </span>
-      <span className="text-sm font-medium text-[var(--text-primary)]">{label}</span>
+      <span className="font-body text-sm font-medium text-[var(--text-primary)]">{label}</span>
     </div>
   );
 };

@@ -1,13 +1,12 @@
 /**
  * @file src/components/landing/shared/PhaseCard.tsx
- * @purpose Reusable card component for displaying journey phase information
+ * @purpose Stone card component for displaying journey phase information
  * @functionality
- * - Displays phase number and name on same row
- * - Shows Coming Soon badge in top-right corner for inactive phases
- * - Includes feature bullet point list
- * - Supports active and coming-soon states with visual differentiation
- * - Includes hover animations with gradient top border reveal
- * - Adapts styling for light and dark themes
+ * - Displays large phase number in vermilion (low opacity)
+ * - Shows Coming Soon badge with vermilion accent for inactive phases
+ * - Includes feature bullet points with vermilion dots
+ * - Uses stone-card class with ink splatter hover effect
+ * - Organic rotation on reveal (-0.5deg/0.5deg alternating)
  * @dependencies
  * - React
  * - react-i18next (useTranslation)
@@ -37,55 +36,59 @@ const PhaseCard: FC<PhaseCardProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  // Organic rotation alternates between cards
+  const rotation = phaseNumber % 2 === 0 ? 'rotate-[0.5deg]' : '-rotate-[0.5deg]';
+
   return (
     <div
-      className={`phase-card relative  p-8 bg-[var(--bg-card)] border border-white/5 dark:card-glow ${
-        isActive ? 'opacity-100' : 'opacity-70'
+      className={`stone-card relative p-8 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-sm scroll-reveal ${rotation} ${
+        isActive ? '' : 'coming-soon'
       } ${className}`.trim()}
+      style={{ animationDelay: `${(phaseNumber - 1) * 100}ms` }}
     >
       {/* Coming Soon badge - absolute top right */}
       {!isActive && (
         <div className="absolute top-4 right-4">
-          <span className="text-[10px] uppercase tracking-wider px-2 py-1 bg-[var(--color-violet)]/20 text-[var(--color-violet)]">
+          <span className="font-mono text-[9px] uppercase tracking-[0.08em] px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20">
             {t('landing.journey.comingSoon')}
           </span>
         </div>
       )}
 
-      {/* Phase number badge + Phase name on same row */}
-      <div className="flex items-center gap-3 mb-6">
+      {/* Large phase number + Phase name */}
+      <div className="flex items-end gap-4 mb-6">
         <span
-          className={`w-10 h-10 flex items-center justify-center font-sans text-sm font-bold ${
+          className={`font-display text-5xl font-medium leading-none ${
             isActive
-              ? 'tech-gradient text-white'
-              : 'bg-[var(--color-ash)] text-[var(--color-fog)]'
+              ? 'text-[var(--accent)] opacity-30'
+              : 'text-[var(--text-muted)] opacity-20'
           }`}
         >
           {phaseNumber.toString().padStart(2, '0')}
         </span>
-        <span className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+        <span className="font-mono text-xs uppercase tracking-[0.15em] text-[var(--text-muted)] pb-1">
           {phaseName}
         </span>
       </div>
 
       {/* Title */}
-      <h3 className="font-serif text-xl font-medium text-[var(--text-primary)] mb-3">
+      <h3 className="font-display text-xl font-medium text-[var(--text-primary)] mb-3">
         {title}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
+      <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
         {description}
       </p>
 
-      {/* Feature bullet points */}
+      {/* Feature bullet points with vermilion dots */}
       {features.length > 0 && (
-        <ul className={`space-y-2 text-sm ${isActive ? 'text-[var(--text-secondary)]/80' : 'text-[var(--text-secondary)]/60'}`}>
+        <ul className={`space-y-2 font-body text-sm ${isActive ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)]'}`}>
           {features.map((feature, index) => (
-            <li key={index} className="flex items-center gap-2">
+            <li key={index} className="flex items-start gap-3">
               <span
-                className={`w-1.5 h-1.5  flex-shrink-0 ${
-                  isActive ? 'bg-[var(--color-electric)]' : 'bg-[var(--text-muted)]/30'
+                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
+                  isActive ? 'bg-[var(--accent)]' : 'bg-[var(--text-muted)] opacity-30'
                 }`}
               />
               {feature}
