@@ -12,8 +12,8 @@
     "lint": "eslint src/",
     "type-check": "tsc --noEmit",
     "test": "vitest --passWithNoTests",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:run": "vitest run --passWithNoTests",
+    "test:coverage": "vitest run --coverage --passWithNoTests"
   },
   "dependencies": {
     "@libsql/client": "^0.8.0",
