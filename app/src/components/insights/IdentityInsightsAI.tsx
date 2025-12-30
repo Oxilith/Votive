@@ -45,9 +45,11 @@ import type {
   AnalysisLeveragePoint,
   AnalysisRisk,
 } from '@/types';
-import { useAnalysisStore, useIsAuthenticated, useCurrentUser } from '@/stores';
+// Direct imports for code-splitting - avoids circular chunk dependencies
+import { useAnalysisStore } from '@/stores/useAnalysisStore';
+import { useIsAuthenticated, useCurrentUser } from '@/stores/useAuthStore';
 import type { UserProfileForAnalysis } from 'shared';
-import { authService } from '@/services';
+import { authService } from '@/services/api/AuthService';
 import { cardStyles, textStyles } from '@/styles';
 import InsightCard from './InsightCard';
 import SavePromptModal from './SavePromptModal';

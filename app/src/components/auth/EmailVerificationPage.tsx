@@ -22,8 +22,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import AuthLayout from './AuthLayout';
 import { CheckIcon, LoadingSpinnerIcon, ErrorCircleIcon } from '@/components';
-import { useAuthStore } from '@/stores';
-import { authService } from '@/services';
+import { useAuthStore } from '@/stores/useAuthStore';
+// Direct import for code-splitting - avoids circular chunk dependencies
+import { authService } from '@/services/api/AuthService';
 import { useRouting } from '@/hooks';
 
 /**

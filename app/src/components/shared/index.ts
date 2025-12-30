@@ -6,6 +6,7 @@
  * - Exports ExportDropdown component
  * - Exports InkBrushDecoration component
  * - Exports LanguageToggle component
+ * - Exports LoadingFallback component for Suspense boundaries
  * - Exports PageNavigation component
  * - Exports ThemeToggle component
  * - Exports UserAvatarDropdown component
@@ -15,6 +16,7 @@
  * - ./ExportDropdown
  * - ./InkBrushDecoration
  * - ./LanguageToggle
+ * - ./LoadingFallback
  * - ./PageNavigation
  * - ./ThemeToggle
  * - ./UserAvatarDropdown
@@ -25,6 +27,7 @@ export { default as DateBadge } from './DateBadge';
 export { default as ExportDropdown } from './ExportDropdown';
 export { default as InkBrushDecoration } from './InkBrushDecoration';
 export { default as LanguageToggle } from './LanguageToggle';
+export { default as LoadingFallback } from './LoadingFallback';
 export { default as PageNavigation } from './PageNavigation';
 export { default as ThemeToggle } from './ThemeToggle';
 export { default as UserAvatarDropdown } from './UserAvatarDropdown';
