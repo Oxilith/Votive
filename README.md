@@ -30,6 +30,8 @@ A 5-phase identity-based approach to sustainable change:
 - **Frontend**: React 19 + TypeScript + Vite + Zustand
 - **Backend**: Node.js + Express + TypeScript
 - **Prompt Service**: Express + Prisma + SQLite (encrypted with libsql)
+- **Worker**: Background job scheduler (node-cron)
+- **Build**: tsup (server packages) + Vite (frontend)
 - **Styling**: Tailwind CSS v4
 - **Internationalization**: i18next (English & Polish)
 - **AI Analysis**: Claude API via backend proxy
@@ -38,13 +40,13 @@ A 5-phase identity-based approach to sustainable change:
 ## Getting Started
 
 ### Prerequisites
-- Node.js >= 20.0.0
+- Docker and Docker Compose
 - Anthropic API key
-- mkcert (for local HTTPS)
+- mkcert (for HTTPS certificates)
 
-### HTTPS Setup (Local Development)
+### HTTPS Certificates Setup
 
-Generate locally-trusted certificates using mkcert:
+Generate locally-trusted certificates using mkcert (required for Docker):
 
 ```bash
 # Install mkcert (macOS)
@@ -55,14 +57,8 @@ mkcert -install
 choco install mkcert
 mkcert -install
 
-# Generate certificates (macOS/Linux)
+# Generate certificates
 mkdir -p certs
-cd certs
-mkcert localhost 127.0.0.1 ::1
-cd ..
-
-# Generate certificates (Windows PowerShell)
-New-Item -ItemType Directory -Force -Path certs
 cd certs
 mkcert localhost 127.0.0.1 ::1
 cd ..
@@ -70,34 +66,46 @@ cd ..
 
 ### Quick Start
 
+Run the full stack using Docker:
+
 ```bash
-# Install all dependencies (from project root)
-npm install
+# macOS/Linux
+ANTHROPIC_API_KEY=<YOUR_KEY> \
+DATABASE_KEY=<32+_CHAR_SECRET> \
+ADMIN_API_KEY=<32+_CHAR_SECRET> \
+SESSION_SECRET=<32+_CHAR_SECRET> \
+JWT_ACCESS_SECRET=<32+_CHAR_SECRET> \
+JWT_REFRESH_SECRET=<32+_CHAR_SECRET> \
+  docker compose up --build
 
-# Backend setup
-cp backend/.env.example backend/.env  # Add your ANTHROPIC_API_KEY
-npm run dev:backend                    # Starts on https://localhost:3001
-
-# Frontend setup (new terminal)
-npm run dev:app                        # Starts on https://localhost:3000
+# Windows (PowerShell)
+$env:ANTHROPIC_API_KEY="<YOUR_KEY>"
+$env:DATABASE_KEY="<32+_CHAR_SECRET>"
+$env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
+$env:SESSION_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_ACCESS_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_REFRESH_SECRET="<32+_CHAR_SECRET>"
+docker compose up --build
 ```
 
-### Environment Setup
+Once running:
+- **Frontend**: https://localhost (via nginx)
+- **Backend API**: https://localhost/api/v1
+- **Admin UI**: http://localhost:3002/admin
 
-**Backend** (`/backend/.env`):
-```
-ANTHROPIC_API_KEY=sk-ant-...  # Required
-PORT=3001
-NODE_ENV=development
-HTTPS_ENABLED=true
-CORS_ORIGIN=https://localhost:3000
-THINKING_ENABLED=true         # Enable/disable Claude extended thinking mode
+For pre-built images (faster startup):
+
+```bash
+docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
-**Frontend** (`/app/.env`):
-```
-VITE_API_URL=https://localhost:3001
-```
+See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation including:
+- Local build instructions
+- HTTPS configuration
+- Multi-arch image publishing (maintainers)
+- Troubleshooting guide
+
+See [Production Deployment](docs/production-deployment.md#environment-variables) for the complete environment variable reference.
 
 ## Project Structure
 
@@ -124,6 +132,10 @@ VITE_API_URL=https://localhost:3001
 │       ├── admin/          # React admin UI
 │       ├── routes/         # REST API endpoints
 │       └── services/       # Prompt CRUD, A/B testing, resolver
+├── worker/                 # Background job scheduler
+│   └── src/
+│       ├── jobs/           # Job implementations (token cleanup)
+│       └── scheduler/      # Generic cron scheduler
 ├── shared/                 # Shared TypeScript types
 │   └── src/                # Types, validation, utilities
 ├── docs/                   # Documentation
@@ -134,25 +146,13 @@ VITE_API_URL=https://localhost:3001
 
 This repository uses **npm workspaces** for unified dependency management. Run commands from the project root.
 
-### Root Commands (Recommended)
 ```bash
 npm install              # Install all workspaces
 npm run lint             # Lint all projects
 npm run type-check       # Type-check all projects
-npm run build            # Build all projects
+npm run build            # Build all projects (shared first)
 npm run test:run         # Run all tests (once)
 npm run test:coverage    # Run all tests with coverage
-
-# Development servers
-npm run dev:app                  # Start frontend (https://localhost:3000)
-npm run dev:backend              # Start backend (https://localhost:3001)
-npm run dev:prompt-service       # Start prompt-service API (http://localhost:3002)
-npm run dev:prompt-service:all   # Start prompt-service API + admin UI
-
-# Production
-npm run start:backend            # Run compiled backend
-npm run start:prompt-service     # Run compiled prompt-service
-npm run preview:app              # Preview frontend build
 
 # Database (prompt-service)
 npm run db:migrate       # Run database migrations
@@ -161,58 +161,72 @@ npm run db:seed          # Seed initial data
 npm run db:studio        # Open Prisma Studio
 ```
 
-### Workspace-Specific Commands
-
-Commands can also be run per-workspace using `-w <workspace>`:
-
-```bash
-npm run dev -w app              # Same as npm run dev:app
-npm run test -w backend         # Run backend tests only
-npm run lint:fix -w shared      # Fix lint issues in shared
-```
-
-Or by navigating to the workspace directory:
-
-```bash
-cd app && npm run dev           # Start frontend dev server
-cd backend && npm run test      # Run backend tests
-```
-
-### Docker
-
-Quick deployment using pre-built multi-arch images:
-
-```bash
-# macOS/Linux
-ANTHROPIC_API_KEY=<YOUR_KEY> DATABASE_KEY=<32+_CHAR_SECRET> \
-  docker compose -f oci://oxilith/votive-oci:latest up
-
-# Windows (PowerShell)
-$env:ANTHROPIC_API_KEY="<YOUR_KEY>"; $env:DATABASE_KEY="<32+_CHAR_SECRET>"
-docker compose -f oci://oxilith/votive-oci:latest up
-```
-
-See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation including:
-- Local build instructions
-- HTTPS configuration
-- Multi-arch image publishing (maintainers)
-- Troubleshooting guide
-
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/architecture.md) | System design, diagrams, and technical decisions |
+| [AI Agent Codebase Instructions](docs/AI-Agent-Codebase-Instructions.md) | Module system, imports, build, and coding conventions |
+| [Ink & Stone Design System](docs/votive-ink-design-system.md) | Visual language, component patterns, and animation guidelines |
+| [Internationalization Guide](docs/InternationalizationGuide.md) | i18n setup, namespaces, and translation patterns |
+| [Production Deployment](docs/production-deployment.md) | Environment variables, security, and deployment best practices |
 | [Docker Hub Workflow](docs/docker-hub.md) | Container deployment, publishing, and troubleshooting |
-| [Production Deployment](docs/ClaudeDocs/production-deployment.md) | Security, configuration, and deployment best practices |
+| [Known Limitations](docs/known-limitations.md) | Cache behavior, scaling considerations, and operational details |
 | [Motivation](docs/Motivation.md) | Theoretical framework and psychology principles |
 
 ## API Endpoints
+
+### Backend Service (port 3001)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/claude/analyze` | Submit assessment for AI analysis |
 | GET | `/health` | Backend health check |
+
+### Prompt Service - User Authentication (port 3002)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/user-auth/register` | - | Create new user account |
+| POST | `/api/user-auth/login` | - | Authenticate and get tokens |
+| POST | `/api/user-auth/refresh` | - | Refresh access token |
+| POST | `/api/user-auth/refresh-with-user` | - | Refresh token + get user data |
+| POST | `/api/user-auth/logout` | CSRF | Invalidate refresh token |
+| POST | `/api/user-auth/logout-all` | JWT+CSRF | Invalidate all sessions |
+| POST | `/api/user-auth/password-reset` | - | Request password reset email |
+| POST | `/api/user-auth/password-reset/confirm` | - | Confirm password reset |
+| GET | `/api/user-auth/verify-email/:token` | - | Verify email address |
+| POST | `/api/user-auth/resend-verification` | JWT+CSRF | Resend verification email |
+| GET | `/api/user-auth/me` | JWT | Get current user profile |
+| PUT | `/api/user-auth/profile` | JWT+CSRF | Update user profile |
+| PUT | `/api/user-auth/password` | JWT+CSRF | Change password |
+| DELETE | `/api/user-auth/account` | JWT+CSRF | Delete account |
+
+### Prompt Service - User Data (port 3002)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/user-auth/assessment` | JWT+CSRF | Save assessment |
+| GET | `/api/user-auth/assessment` | JWT | List user's assessments |
+| GET | `/api/user-auth/assessment/:id` | JWT | Get specific assessment |
+| POST | `/api/user-auth/analysis` | JWT+CSRF | Save analysis |
+| GET | `/api/user-auth/analyses` | JWT | List user's analyses |
+| GET | `/api/user-auth/analysis/:id` | JWT | Get specific analysis |
+
+### Prompt Service - Admin (port 3002)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/login` | - | Admin login (API key) |
+| POST | `/api/auth/logout` | - | Admin logout |
+| GET | `/api/auth/verify` | - | Check admin auth status |
+| GET | `/api/prompts` | Admin | List all prompts |
+| POST | `/api/prompts` | Admin | Create prompt |
+| GET | `/api/ab-tests` | Admin | List A/B tests |
+| POST | `/api/ab-tests` | Admin | Create A/B test |
+| POST | `/api/resolve` | - | Resolve prompt config (internal) |
+
+**Auth Legend:** JWT = Access token required, CSRF = CSRF token required, Admin = API key or session cookie
 
 ## Test Data
 

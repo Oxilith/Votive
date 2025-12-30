@@ -4,6 +4,7 @@
  * @functionality
  * - Handles analyze request processing
  * - Validates request body using Zod schema
+ * - Passes optional user profile for demographic context
  * - Calls Claude service and formats response
  * - Handles errors appropriately
  * @dependencies
@@ -16,11 +17,11 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { analyzeRequestSchema } from '../validators/claude.validator.js';
-import { analyzeAssessment } from '../services/claude.service.js';
-import { createAppError } from '@/middleware/index.js';
-import { logger } from '../utils/logger.js';
-import type { AnalyzeResponse } from '../types/claude.types.js';
+import { analyzeRequestSchema } from '@/validators';
+import { analyzeAssessment } from '@/services';
+import { createAppError } from '@/middleware';
+import { logger } from '@/utils';
+import type { AnalyzeResponse } from '@/types';
 
 export async function analyze(
   req: Request,
@@ -46,11 +47,11 @@ export async function analyze(
       return;
     }
 
-    const { responses, language } = validationResult.data;
+    const { responses, language, userProfile } = validationResult.data;
 
-    logger.info({ language }, 'Processing analysis request');
+    logger.info({ language, hasUserProfile: !!userProfile }, 'Processing analysis request');
 
-    const { analysis, rawResponse } = await analyzeAssessment(responses, language);
+    const { analysis, rawResponse } = await analyzeAssessment(responses, language, userProfile);
 
     res.status(StatusCodes.OK).json({
       success: true,

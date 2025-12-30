@@ -8,13 +8,13 @@
  * - Provides refetch functions for data refresh
  * @dependencies
  * - react for useState, useEffect, useCallback
- * - ../api/promptApi for API calls
- * - ../types for type definitions
+ * - @/admin/api/promptApi for API calls
+ * - @/admin/types for type definitions
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { promptApi } from '../api/promptApi.js';
-import type { PromptDTO, PromptVersionDTO } from '../types.js';
+import { promptApi } from '@/admin';
+import type { PromptDTO, PromptVersionDTO } from '@/admin';
 
 interface UsePromptsResult {
   prompts: PromptDTO[];

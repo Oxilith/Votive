@@ -26,34 +26,24 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import pino from 'pino';
 import pinoHttp from 'pino-http';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { config } from '@/config/index.js';
-import { apiRouter } from '@/routes/index.js';
-import { prisma } from '@/prisma/client.js';
-import { adminAuthMiddleware } from '@/middleware/admin-auth.middleware.js';
+import { config } from './config';
+import { apiRouter } from './routes';
+import { prisma } from './prisma';
+import { adminAuthMiddleware, tracingMiddleware } from './middleware';
+import { logger } from './utils';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize logger
-const logger = pino({
-  level: config.logLevel,
-  transport:
-    config.nodeEnv === 'development'
-      ? {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-          },
-        }
-      : undefined,
-});
-
 // Initialize Express app
 const app = express();
+
+// Trust proxy (nginx) for correct client IP detection and rate limiting
+// Required when running behind reverse proxy
+app.set('trust proxy', 1);
 
 // Security middleware with CSP headers
 app.use(
@@ -85,14 +75,21 @@ app.use(
 // Compression
 app.use(compression());
 
-// Request logging
+// W3C Trace Context (before pino-http for logging integration)
+app.use(tracingMiddleware);
+
+// Request logging with trace context
 app.use(
-  // @ts-expect-error - pino-http types have ESM interop issues
   pinoHttp({
     logger,
     autoLogging: {
       ignore: (req: { url?: string }) => req.url === '/health',
     },
+    // Include trace context in all log entries
+    customProps: (req: express.Request) => ({
+      traceId: req.traceContext?.traceId,
+      spanId: req.traceContext?.spanId,
+    }),
   })
 );
 
@@ -101,7 +98,16 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Cookie parsing with signing secret for secure session cookies
-const cookieSecret = config.sessionSecret ?? config.adminApiKey ?? 'dev-secret-key';
+// Config validation ensures either SESSION_SECRET or ADMIN_API_KEY is set
+// Defensive runtime check as a safety net for the type assertion
+if (!config.sessionSecret) {
+  throw new Error('FATAL: Cookie signing secret is not configured. This should not happen if config validation passed.');
+}
+const cookieSecret = config.sessionSecret;
+// codeql[js/missing-token-validation]: CSRF protection is applied at the route level via csrfMiddleware.
+// All state-changing endpoints (POST/PUT/DELETE) in user-auth.routes.ts use the double-submit cookie
+// pattern implemented in middleware/csrf.middleware.ts. Global CSRF is not appropriate as it would
+// block legitimate cross-origin requests to public API endpoints like /api/resolve.
 app.use(cookieParser(cookieSecret));
 
 // Health check endpoint with database connectivity verification

@@ -1,53 +1,62 @@
-# Build stage
+# Prompt Service Dockerfile
 FROM node:20-alpine AS builder
 
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY prisma ./prisma/
+# Copy workspace config
+COPY package.json package-lock.json ./
+COPY tsconfig.base.json ./
+COPY shared/package.json shared/
+COPY prompt-service/package.json prompt-service/
 
-# Install dependencies
-RUN npm ci
+# Install all dependencies
+RUN npm ci --workspaces --include-workspace-root
 
-# Generate Prisma client
-RUN npx prisma generate
+# Build shared
+COPY shared/src shared/src
+COPY shared/tsconfig.json shared/
+COPY shared/tsup.config.ts shared/
+RUN npm run build -w shared
 
-# Copy source code
-COPY . .
+# Build prompt-service
+COPY prompt-service/src prompt-service/src
+COPY prompt-service/prisma prompt-service/prisma
+COPY prompt-service/scripts prompt-service/scripts
+COPY prompt-service/tsconfig.json prompt-service/
+COPY prompt-service/tsup.config.ts prompt-service/
+COPY prompt-service/vite.config.ts prompt-service/
+RUN npm run db:generate -w prompt-service
+RUN npm run build -w prompt-service
 
-# Build the application
-RUN npm run build:server
-RUN npm run build:admin
-
-# Production stage
+# Production
 FROM node:20-alpine
 
+RUN apk add --no-cache openssl
+
 WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy built files
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./
+COPY package.json package-lock.json ./
+COPY shared/package.json shared/
+COPY prompt-service/package.json prompt-service/
 
-# Create data directory for SQLite
+RUN npm ci --workspaces --include-workspace-root --omit=dev
+
+COPY --from=builder /app/shared/dist shared/dist
+COPY --from=builder /app/prompt-service/dist prompt-service/dist
+COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
+COPY --from=builder /app/node_modules/.prisma node_modules/.prisma
+
 RUN mkdir -p /app/data
 
-ENV NODE_ENV=production
+WORKDIR /app/prompt-service
 ENV DATABASE_URL=file:/app/data/prompts.db
 
 EXPOSE 3002
 
-# Health check configuration:
-# - Uses Node.js fetch since wget/curl are not available in Alpine by default
-# - Explicitly checks response.ok (HTTP 200-299) for success
-# - interval: Check every 30s after container is running
-# - timeout: Fail if health check takes longer than 10s
-# - start-period: Allow 10s for service to initialize before counting failures
-# - retries: Mark unhealthy after 3 consecutive failures
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:3002/health').then(r => { if (!r.ok) throw new Error('Health check failed: ' + r.status); }).catch(e => { console.error(e.message); process.exit(1); })"
+  CMD node -e "fetch('http://localhost:3002/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
 
-# Run migrations and start server
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "if [ -n \"$DATABASE_KEY\" ]; then node dist/scripts/migrate.js; else npx prisma migrate deploy; fi && node dist/prisma/seed.js && node dist/src/index.js"]

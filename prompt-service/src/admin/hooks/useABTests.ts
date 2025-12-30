@@ -7,13 +7,13 @@
  * - Provides refetch functions for data refresh
  * @dependencies
  * - react for useState, useEffect, useCallback
- * - ../api/abTestApi for API calls
- * - ../types for type definitions
+ * - @/admin/api/abTestApi for API calls
+ * - @/admin/types for type definitions
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { abTestApi } from '../api/abTestApi.js';
-import type { ABTestDTO } from '../types.js';
+import { abTestApi } from '@/admin';
+import type { ABTestDTO } from '@/admin';
 
 interface UseABTestsResult {
   abTests: ABTestDTO[];

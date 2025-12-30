@@ -14,9 +14,14 @@
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { abTestApi } from '../api/abTestApi.js';
-import { usePrompts } from '../hooks/usePrompts.js';
-import type { CreateABTestInput, PromptDTO } from '../types.js';
+import {
+  abTestApi,
+  usePrompts,
+  colors,
+  shadows,
+  fonts,
+} from '@/admin';
+import type { CreateABTestInput, PromptDTO } from '@/admin';
 
 export function ABTestCreatePage() {
   const navigate = useNavigate();
@@ -166,7 +171,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '2rem',
   },
   backLink: {
-    color: '#6b7280',
+    color: colors.textMuted,
     textDecoration: 'none',
     fontSize: '0.875rem',
     display: 'inline-block',
@@ -175,15 +180,15 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: '1.75rem',
     fontWeight: 700,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: 0,
   },
   error: {
     padding: '1rem',
-    backgroundColor: '#fee2e2',
-    border: '1px solid #fecaca',
+    backgroundColor: colors.dangerBg,
+    border: `1px solid ${colors.dangerBorder}`,
     borderRadius: '0.5rem',
-    color: '#dc2626',
+    color: colors.dangerText,
     marginBottom: '1.5rem',
   },
   form: {
@@ -192,15 +197,16 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '1.5rem',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
     padding: '1.5rem',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    boxShadow: shadows.sm,
+    border: `1px solid ${colors.border}`,
   },
   sectionTitle: {
     fontSize: '1.125rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: '0 0 1rem 0',
   },
   formGroup: {
@@ -211,28 +217,33 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'block',
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: '#374151',
+    color: colors.textSecondary,
     marginBottom: '0.375rem',
   },
   input: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    resize: 'vertical',
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
+    resize: 'vertical' as const,
   },
   select: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    backgroundColor: '#fff',
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
   },
   hint: {
     fontSize: '0.75rem',
-    color: '#6b7280',
+    color: colors.textMuted,
     marginTop: '0.25rem',
   },
   row: {
@@ -247,17 +258,17 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cancelButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.5rem',
-    color: '#374151',
+    color: colors.textSecondary,
     textDecoration: 'none',
     fontWeight: 500,
     fontSize: '0.875rem',
   },
   saveButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     border: 'none',
     borderRadius: '0.5rem',
     color: '#fff',

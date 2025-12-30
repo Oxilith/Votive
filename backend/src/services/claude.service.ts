@@ -4,6 +4,7 @@
  * @functionality
  * - Sends prompts to Claude API using official SDK
  * - Resolves prompt configuration from prompt-service (no local fallback - IP protection)
+ * - Includes optional user profile for demographic context in analysis
  * - Implements retry logic with exponential backoff
  * - Supports extended thinking when configured
  * - Records A/B test conversions on successful analysis
@@ -14,18 +15,17 @@
  * - @/utils/logger for logging
  * - @/services/claude/response-parser for response handling
  * - @/services/prompt-client.service for prompt-service communication (with circuit breaker)
- * - shared/index for prompt config and response formatter
+ * - shared for prompt config, response formatter, and UserProfileForAnalysis type
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { MessageCreateParamsNonStreaming } from '@anthropic-ai/sdk/resources/messages';
-import { config } from '@/config/index.js';
-import { logger } from '@/utils/logger.js';
-import type { AssessmentResponses, AIAnalysisResult } from '@/types/claude.types.js';
-import type { AnalysisLanguage, PromptConfig, PromptConfigKey } from 'shared/index.js';
-import { formatResponsesForPrompt } from 'shared/index.js';
-import { extractTextFromMessage, parseAnalysisResponse } from '@/services/claude/response-parser.js';
-import { promptClientService } from '@/services/prompt-client.service.js';
+import { config } from '@/config';
+import { logger } from '@/utils';
+import type { AssessmentResponses, AIAnalysisResult } from '@/types';
+import type { AnalysisLanguage, PromptConfig, PromptConfigKey, UserProfileForAnalysis } from 'shared';
+import { formatResponsesForPrompt } from 'shared';
+import { extractTextFromMessage, parseAnalysisResponse, promptClientService } from '@/services';
 
 const anthropic = new Anthropic({
   apiKey: config.anthropicApiKey,
@@ -82,20 +82,27 @@ async function resolvePromptConfig(
 
 export async function analyzeAssessment(
   responses: AssessmentResponses,
-  language: AnalysisLanguage
+  language: AnalysisLanguage,
+  userProfile?: UserProfileForAnalysis
 ): Promise<{ analysis: AIAnalysisResult; rawResponse: string }> {
   const { promptConfig, variantId } = await resolvePromptConfig(
     'IDENTITY_ANALYSIS',
     config.thinkingEnabled
   );
-  const fullPrompt = promptConfig.prompt + formatResponsesForPrompt(responses, language);
+  const fullPrompt = promptConfig.prompt + formatResponsesForPrompt(responses, language, userProfile);
   const requestParams = buildRequestParams(fullPrompt, promptConfig);
 
   let lastError: Error | undefined;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     logger.info(
-      { attempt, maxRetries: MAX_RETRIES, model: promptConfig.model },
+      {
+        attempt,
+        maxRetries: MAX_RETRIES,
+        model: promptConfig.model,
+        thinkingEnabled: requestParams.thinking?.type === 'enabled',
+        thinkingBudget: requestParams.thinking?.type === 'enabled' ? requestParams.thinking.budget_tokens : null,
+      },
       'Calling Claude API'
     );
 

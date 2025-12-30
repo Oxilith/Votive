@@ -10,8 +10,8 @@
  * - @/validators/prompt.validator for MAX_PROMPT_CONTENT_LENGTH
  */
 
-import { ValidationError } from '@/errors/index.js';
-import { MAX_PROMPT_CONTENT_LENGTH } from '@/validators/prompt.validator.js';
+import { ValidationError } from '@/errors';
+import { MAX_PROMPT_CONTENT_LENGTH } from '@/validators';
 
 /**
  * Patterns that indicate potential script injection attempts
@@ -64,4 +64,18 @@ export function validatePromptKey(key: string): void {
       'Prompt key must start with an uppercase letter and contain only uppercase letters, numbers, and underscores (e.g., IDENTITY_ANALYSIS)'
     );
   }
+}
+
+/**
+ * Escapes HTML special characters to prevent XSS
+ * @param str - The string to escape
+ * @returns The escaped string safe for HTML insertion
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

@@ -18,9 +18,23 @@ services:
       - DATABASE_URL=file:/app/data/prompts.db
       - DATABASE_KEY=${DATABASE_KEY}
       - ADMIN_API_KEY=${ADMIN_API_KEY}
-      - SESSION_SECRET=${SESSION_SECRET}  # Must differ from ADMIN_API_KEY in production
+      - SESSION_SECRET=${SESSION_SECRET}
       - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://backend:3001
       - LOG_LEVEL=info
+      # JWT Authentication
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=7d
+      # Password Hashing
+      - BCRYPT_SALT_ROUNDS=10
+      # SMTP Email Configuration (optional - for email verification/password reset)
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-}
     volumes:
       - prompt-data:/app/data
     healthcheck:
@@ -50,11 +64,19 @@ services:
       - HTTPS_ENABLED=false
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - CORS_ORIGIN=https://localhost
+      # Rate Limiting
       - RATE_LIMIT_WINDOW_MS=60000
       - RATE_LIMIT_MAX_REQUESTS=10
+      # Claude API Rate Limiting (stricter for expensive API calls)
+      - CLAUDE_RATE_LIMIT_WINDOW_MS=60000
+      - CLAUDE_RATE_LIMIT_MAX_REQUESTS=5
       - LOG_LEVEL=info
-      - THINKING_ENABLED=true
+      - THINKING_ENABLED=${THINKING_ENABLED:-true}
       - PROMPT_SERVICE_URL=http://prompt-service:3002
+      # Circuit Breaker
+      - CIRCUIT_BREAKER_TIMEOUT=10000
+      - CIRCUIT_BREAKER_RESET_TIMEOUT=30000
+      - CIRCUIT_BREAKER_ERROR_THRESHOLD=50
     depends_on:
       prompt-service:
         condition: service_healthy
@@ -64,6 +86,41 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  worker:
+    image: oxilith/votive-worker:latest
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    container_name: votive-worker
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/prompts.db
+      - DATABASE_KEY=${DATABASE_KEY}
+      - LOG_LEVEL=info
+      # Job Configuration
+      - JOB_TOKEN_CLEANUP_ENABLED=true
+      - JOB_TOKEN_CLEANUP_SCHEDULE=0 * * * *
+      # Rate Limiting Configuration (optional - for reference)
+      # - RATE_LIMIT_WINDOW_MS=60000
+      # - RATE_LIMIT_LOGIN=5
+      # - RATE_LIMIT_REGISTER=5
+      # - RATE_LIMIT_PASSWORD_RESET=3
+      # - RATE_LIMIT_FORGOT_PASSWORD=3
+      # - RATE_LIMIT_TOKEN_REFRESH=20
+      # - RATE_LIMIT_USER_DATA=30
+      # - RATE_LIMIT_PROFILE=15
+    volumes:
+      - prompt-data:/app/data
+    depends_on:
+      prompt-service:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - app-network

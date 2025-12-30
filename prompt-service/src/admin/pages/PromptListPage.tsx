@@ -6,16 +6,16 @@
  * - Links to create new prompt
  * - Links to edit existing prompts
  * - Shows loading and error states
+ * - Uses Ink & Stone design system colors
  * @dependencies
  * - react-router-dom for navigation
  * - ../hooks/usePrompts for data fetching
- * - ../components/Button for action buttons
- * - ../components/Card for container
+ * - ../styles/theme for colors
  */
 
 import { Link } from 'react-router-dom';
-import { usePrompts } from '../hooks/usePrompts.js';
-import type { PromptDTO } from '../types.js';
+import { usePrompts, colors, shadows, fonts } from '@/admin';
+import type { PromptDTO } from '@/admin';
 
 export function PromptListPage() {
   const { prompts, loading, error, refetch } = usePrompts();
@@ -81,8 +81,8 @@ export function PromptListPage() {
                     <span
                       style={{
                         ...styles.status,
-                        backgroundColor: prompt.isActive ? '#d1fae5' : '#fee2e2',
-                        color: prompt.isActive ? '#065f46' : '#991b1b',
+                        backgroundColor: prompt.isActive ? colors.successBg : colors.dangerBg,
+                        color: prompt.isActive ? colors.successText : colors.dangerText,
                       }}
                     >
                       {prompt.isActive ? 'Active' : 'Inactive'}
@@ -120,14 +120,14 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: '1.75rem',
     fontWeight: 700,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: 0,
   },
   createButton: {
     display: 'inline-flex',
     alignItems: 'center',
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     color: '#fff',
     borderRadius: '0.5rem',
     textDecoration: 'none',
@@ -135,9 +135,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.875rem',
   },
   tableContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    boxShadow: shadows.sm,
+    border: `1px solid ${colors.border}`,
     overflow: 'hidden',
   },
   table: {
@@ -147,32 +148,33 @@ const styles: Record<string, React.CSSProperties> = {
   th: {
     textAlign: 'left',
     padding: '1rem',
-    backgroundColor: '#f9fafb',
-    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: colors.bgSecondary,
+    borderBottom: `1px solid ${colors.border}`,
     fontSize: '0.75rem',
     fontWeight: 600,
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   tr: {
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: `1px solid ${colors.border}`,
   },
   td: {
     padding: '1rem',
     fontSize: '0.875rem',
-    color: '#374151',
+    color: colors.textSecondary,
   },
   code: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.bgTertiary,
     padding: '0.25rem 0.5rem',
     borderRadius: '0.25rem',
     fontSize: '0.8125rem',
-    fontFamily: 'monospace',
+    fontFamily: fonts.mono,
+    color: colors.textPrimary,
   },
   model: {
     fontSize: '0.8125rem',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   status: {
     display: 'inline-block',
@@ -182,7 +184,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 500,
   },
   editLink: {
-    color: '#3b82f6',
+    color: colors.accent,
     textDecoration: 'none',
     fontWeight: 500,
     fontSize: '0.875rem',
@@ -190,17 +192,17 @@ const styles: Record<string, React.CSSProperties> = {
   loading: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   error: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    color: '#dc2626',
+    color: colors.danger,
   },
   retryButton: {
     marginTop: '1rem',
     padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     color: '#fff',
     border: 'none',
     borderRadius: '0.375rem',
@@ -209,8 +211,9 @@ const styles: Record<string, React.CSSProperties> = {
   empty: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
-    color: '#6b7280',
+    border: `1px solid ${colors.border}`,
+    color: colors.textMuted,
   },
 };
