@@ -43,6 +43,7 @@ import {
   generateFamilyId,
   generatePasswordResetToken,
   generateEmailVerificationToken,
+  hashToken,
   logger,
   type JwtConfig,
 } from '@/utils';
@@ -223,7 +224,7 @@ export class UserService {
     const hashedPassword = await hashPassword(input.password);
 
     // Create user and tokens in a transaction
-    const { user, refreshTokenRecord, emailVerifyToken } = await prisma.$transaction(async (tx) => {
+    const { user, refreshTokenRecord, rawVerificationToken } = await prisma.$transaction(async (tx) => {
       // Create user with profile fields
       const newUser = await tx.user.create({
         data: {
@@ -252,14 +253,14 @@ export class UserService {
         },
       });
 
-      // Generate and store email verification token
+      // Generate and store email verification token (hash for defense-in-depth)
       const verificationToken = generateEmailVerificationToken();
       const verifyExpiresAt = new Date(Date.now() + EMAIL_VERIFY_TOKEN_EXPIRY_MS);
 
-      const newEmailVerifyToken = await tx.emailVerifyToken.create({
+      await tx.emailVerifyToken.create({
         data: {
           userId: newUser.id,
-          token: verificationToken,
+          token: hashToken(verificationToken),
           expiresAt: verifyExpiresAt,
         },
       });
@@ -267,7 +268,7 @@ export class UserService {
       return {
         user: newUser,
         refreshTokenRecord: { ...newRefreshToken, tokenValue: refreshTokenValue },
-        emailVerifyToken: newEmailVerifyToken,
+        rawVerificationToken: verificationToken,
       };
     });
 
@@ -275,7 +276,7 @@ export class UserService {
     // This is optional - the system works without SMTP configured
     const emailResult = await emailService.sendEmailVerificationEmail({
       to: user.email,
-      verificationToken: emailVerifyToken.token,
+      verificationToken: rawVerificationToken,
     });
 
     // Log email result but don't fail registration
@@ -775,11 +776,11 @@ export class UserService {
     const resetToken = generatePasswordResetToken();
     const expiresAt = new Date(Date.now() + PASSWORD_RESET_TOKEN_EXPIRY_MS);
 
-    // Store token in database
+    // Store hashed token in database (defense-in-depth)
     const tokenRecord = await prisma.passwordResetToken.create({
       data: {
         userId: user.id,
-        token: resetToken,
+        token: hashToken(resetToken),
         expiresAt,
       },
     });
@@ -831,9 +832,9 @@ export class UserService {
    * @throws TokenError if token is invalid or expired
    */
   async confirmPasswordReset(token: string, newPassword: string, ctx?: RequestContext): Promise<void> {
-    // Find the reset token
+    // Find the reset token by hash
     const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
+      where: { token: hashToken(token) },
       include: { user: true },
     });
 
@@ -887,9 +888,9 @@ export class UserService {
    * @throws TokenError if token is invalid or expired
    */
   async verifyEmail(token: string, ctx?: RequestContext): Promise<SafeUser> {
-    // Find the verification token
+    // Find the verification token by hash
     const verifyToken = await prisma.emailVerifyToken.findUnique({
-      where: { token },
+      where: { token: hashToken(token) },
       include: { user: true },
     });
 
@@ -983,14 +984,14 @@ export class UserService {
       throw new ValidationError('Too many verification email requests. Please try again later.');
     }
 
-    // Generate new verification token
+    // Generate new verification token (hash for defense-in-depth)
     const verificationToken = generateEmailVerificationToken();
     const expiresAt = new Date(Date.now() + EMAIL_VERIFY_TOKEN_EXPIRY_MS);
 
     const tokenRecord = await prisma.emailVerifyToken.create({
       data: {
         userId: user.id,
-        token: verificationToken,
+        token: hashToken(verificationToken),
         expiresAt,
       },
     });

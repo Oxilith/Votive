@@ -36,6 +36,7 @@ export {
   generateEmailVerificationToken,
   generateTokenId,
   generateFamilyId,
+  hashToken,
 } from './token';
 export {
   generateAccessToken,

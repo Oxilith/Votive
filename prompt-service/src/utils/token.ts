@@ -1,8 +1,9 @@
 /**
  * @file prompt-service/src/utils/token.ts
- * @purpose Token generation utilities for authentication flows
+ * @purpose Token generation and hashing utilities for authentication flows
  * @functionality
  * - Generates cryptographically secure random tokens
+ * - Hashes tokens with SHA-256 for secure database storage
  * - Used for password reset and email verification tokens
  * - Generates token IDs for refresh tokens
  * - Generates family IDs for token chain tracking
@@ -89,4 +90,23 @@ export function generateTokenId(): string {
  */
 export function generateFamilyId(): string {
   return generateSecureToken(16);
+}
+
+/**
+ * Hash a token using SHA-256 for secure database storage.
+ * Used for password reset and email verification tokens.
+ *
+ * This provides defense-in-depth: if the database is compromised,
+ * attackers cannot use the stored hashes to forge valid tokens.
+ *
+ * @param token - The plaintext token to hash
+ * @returns A 64-character hex-encoded SHA-256 hash
+ *
+ * @example
+ * const token = generatePasswordResetToken();
+ * const hashedToken = hashToken(token);
+ * // Store hashedToken in database, send token to user
+ */
+export function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
 }

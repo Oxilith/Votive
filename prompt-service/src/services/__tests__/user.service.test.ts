@@ -41,6 +41,7 @@ const mockTokenFunctions = vi.hoisted(() => ({
   generatePasswordResetToken: vi.fn(() => 'reset_token'),
   generateEmailVerificationToken: vi.fn(() => 'email_verify_token'),
   generateFamilyId: vi.fn(() => 'family_id_123'),
+  hashToken: vi.fn((token: string) => `hashed_${token}`),
 }));
 
 const mockPasswordFunctions = vi.hoisted(() => ({
