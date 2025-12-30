@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "assessment": "Ocena",
+    "insights": "Analizy"
+  },
+  "buttons": {
+    "import": "Importuj",
+    "export": "Eksportuj",
+    "exportAssessment": "Eksportuj ocenę",
+    "exportInsights": "Eksportuj analizy"
+  },
+  "viewOnly": {
+    "badge": "Tylko podgląd",
+    "savedAssessment": "Zapisana ocena",
+    "savedAnalysis": "Zapisana analiza"
+  },
+  "errors": {
+    "importFailed": "Nie udało się zaimportować pliku"
+  },
+  "theme": {
+    "toggleDark": "Przełącz na tryb ciemny",
+    "toggleLight": "Przełącz na tryb jasny"
+  }
+}

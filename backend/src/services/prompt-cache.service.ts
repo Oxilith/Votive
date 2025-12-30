@@ -16,8 +16,8 @@
  *       (default 1 hour) to propagate across all instances.
  */
 
-import type { PromptConfig } from 'shared/index.js';
-import { config } from '@/config/index.js';
+import type { PromptConfig } from 'shared';
+import { config } from '@/config';
 
 interface CacheEntry {
   config: PromptConfig;

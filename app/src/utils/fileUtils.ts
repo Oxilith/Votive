@@ -10,13 +10,13 @@
  * - @shared/index (REQUIRED_FIELDS, ARRAY_FIELDS, NUMBER_FIELDS, STRING_FIELDS)
  */
 
-import type { AssessmentResponses } from '@/types/assessment.types';
+import type { AssessmentResponses } from '@/types';
 import {
   REQUIRED_FIELDS,
   ARRAY_FIELDS,
   NUMBER_FIELDS,
   STRING_FIELDS,
-} from 'shared/index';
+} from 'shared';
 
 export const exportToJson = (
   data: AssessmentResponses,

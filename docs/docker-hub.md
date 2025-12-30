@@ -9,6 +9,7 @@ This guide covers Docker Hub deployment and publishing for Votive. For container
 | `oxilith/votive-backend` | Express API proxy (multi-arch) |
 | `oxilith/votive-frontend` | Nginx + React SPA (multi-arch) |
 | `oxilith/votive-prompt-service` | Prompt management microservice (multi-arch) |
+| `oxilith/votive-worker` | Background job scheduler (multi-arch) |
 | `oxilith/votive-oci` | OCI compose artifact for single-command deployment |
 
 All images support `linux/amd64` and `linux/arm64` platforms.
@@ -28,6 +29,8 @@ ANTHROPIC_API_KEY=<YOUR_KEY> \
 DATABASE_KEY=<32+_CHAR_SECRET> \
 ADMIN_API_KEY=<32+_CHAR_SECRET> \
 SESSION_SECRET=<32+_CHAR_SECRET> \
+JWT_ACCESS_SECRET=<32+_CHAR_SECRET> \
+JWT_REFRESH_SECRET=<32+_CHAR_SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 
 # Windows (PowerShell)
@@ -35,6 +38,8 @@ $env:ANTHROPIC_API_KEY="<YOUR_KEY>"
 $env:DATABASE_KEY="<32+_CHAR_SECRET>"
 $env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
 $env:SESSION_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_ACCESS_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_REFRESH_SECRET="<32+_CHAR_SECRET>"
 docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -42,6 +47,7 @@ This starts:
 - **Frontend**: https://localhost (port 443)
 - **Backend**: http://localhost:3001 (proxied through nginx)
 - **Prompt Service**: http://localhost:3002 (internal)
+- **Worker**: Background job scheduler (no exposed port)
 
 ### Required Environment Variables
 
@@ -51,6 +57,21 @@ This starts:
 | `DATABASE_KEY` | 32+ character encryption key for SQLite |
 | `ADMIN_API_KEY` | 32+ character admin authentication key |
 | `SESSION_SECRET` | 32+ character cookie signing secret (must differ from ADMIN_API_KEY) |
+| `JWT_ACCESS_SECRET` | 32+ character secret for signing access tokens |
+| `JWT_REFRESH_SECRET` | 32+ character secret for signing refresh tokens (must differ from JWT_ACCESS_SECRET) |
+
+### Optional Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SMTP_HOST` | - | SMTP server hostname (for email verification/password reset) |
+| `SMTP_PORT` | 587 | SMTP server port |
+| `SMTP_SECURE` | false | Use SSL/TLS for SMTP |
+| `SMTP_USER` | - | SMTP authentication username |
+| `SMTP_PASSWORD` | - | SMTP authentication password |
+| `SMTP_FROM` | - | Default sender email address |
+| `JOB_TOKEN_CLEANUP_ENABLED` | true | Enable/disable token cleanup job |
+| `JOB_TOKEN_CLEANUP_SCHEDULE` | `0 * * * *` | Cron schedule for token cleanup (hourly) |
 
 Generate secure secrets with:
 ```bash
@@ -68,11 +89,13 @@ Build from source instead of using pre-built images:
 git clone https://github.com/Oxilith/votive.git
 cd votive
 
-# Build and run (requires all 4 environment variables)
+# Build and run (requires all 6 environment variables)
 ANTHROPIC_API_KEY=<KEY> \
 DATABASE_KEY=<SECRET> \
 ADMIN_API_KEY=<SECRET> \
 SESSION_SECRET=<SECRET> \
+JWT_ACCESS_SECRET=<SECRET> \
+JWT_REFRESH_SECRET=<SECRET> \
   docker compose up --build
 ```
 
@@ -112,6 +135,8 @@ ANTHROPIC_API_KEY=<KEY> \
 DATABASE_KEY=<SECRET> \
 ADMIN_API_KEY=<SECRET> \
 SESSION_SECRET=<SECRET> \
+JWT_ACCESS_SECRET=<SECRET> \
+JWT_REFRESH_SECRET=<SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -131,13 +156,14 @@ For security architecture details, see [Architecture > Security](architecture.md
 docker rmi oxilith/votive-frontend:latest 2>/dev/null
 docker rmi oxilith/votive-backend:latest 2>/dev/null
 docker rmi oxilith/votive-prompt-service:latest 2>/dev/null
+docker rmi oxilith/votive-worker:latest 2>/dev/null
 docker buildx prune -f
 
 # Build and push all images (linux/amd64 + linux/arm64)
 docker buildx bake --push --no-cache
 ```
 
-The `docker-bake.hcl` file defines build targets for all three services.
+The `docker-bake.hcl` file defines build targets for all four services.
 
 ### Publish OCI Compose Artifact
 
@@ -174,6 +200,8 @@ ANTHROPIC_API_KEY=<KEY> \
 DATABASE_KEY=<SECRET> \
 ADMIN_API_KEY=<SECRET> \
 SESSION_SECRET=<SECRET> \
+JWT_ACCESS_SECRET=<SECRET> \
+JWT_REFRESH_SECRET=<SECRET> \
   docker compose -f oci://oxilith/votive-oci:latest up
 ```
 
@@ -212,13 +240,15 @@ docker exec votive-backend node -e "fetch('http://localhost:3001/health').then(r
 
 Containers start in order with health check dependencies:
 1. `prompt-service` starts first
-2. `backend` waits for prompt-service to be healthy
-3. `frontend` waits for backend to be healthy
+2. `worker` waits for prompt-service to be healthy (shares database)
+3. `backend` waits for prompt-service to be healthy
+4. `frontend` waits for backend to be healthy
 
 If startup fails, check logs:
 
 ```bash
 docker compose logs prompt-service
+docker compose logs worker
 docker compose logs backend
 docker compose logs frontend
 ```
@@ -231,6 +261,7 @@ docker compose logs frontend
 | Permission denied | Run Docker Desktop as admin, or add user to docker group |
 | Image not found | Clear OCI cache and retry |
 | Health check failing | Verify env vars are set, check container logs |
+| Worker not running | Check `JOB_TOKEN_CLEANUP_ENABLED` env var, review worker logs |
 
 ## Related Documentation
 

@@ -1,104 +1,101 @@
 /**
  * @file src/components/landing/sections/InsightsSection.tsx
- * @purpose AI Insights preview section showcasing analysis capabilities
+ * @purpose AI Insights preview section with warm paper background
  * @functionality
- * - Displays two-column layout: LEFT has header text + insight pills, RIGHT has sample card
- * - Shows four insight type pills with icons (patterns, contradictions, blind spots, leverage)
- * - Features sample insight card with glow effect demonstrating AI synthesis output
- * - Highlights key phrases with colored emphasis (electric/violet)
- * - Adapts styling for light and dark themes
+ * - Displays section marker with vermilion line prefix
+ * - Shows four insight feature items with vermilion dots
+ * - Features sample insight card with vermilion accent line
+ * - Uses asymmetric grid layout (0.4fr / 0.6fr)
+ * - Highlights key phrases in vermilion
  * @dependencies
  * - React
  * - react-i18next (useTranslation)
- * - @/components/landing/shared/InsightPill
- * - @/components/shared/icons (ChartBarIcon, SwitchHorizontalIcon, EyeIcon, LightningBoltIcon, LightbulbIcon)
  */
 
 import type { FC } from 'react';
-import { useTranslation } from 'react-i18next';
-import InsightPill from '@/components/landing/shared/InsightPill';
-import {
-  ChartBarIcon,
-  SwitchHorizontalIcon,
-  EyeIcon,
-  LightningBoltIcon,
-  LightbulbIcon,
-} from '@/components/shared/icons';
+import { Trans, useTranslation } from 'react-i18next';
 
 const InsightsSection: FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('landing');
 
-  const insightTypes = [
-    {
-      key: 'patterns',
-      icon: <ChartBarIcon size="sm" />,
-    },
-    {
-      key: 'contradictions',
-      icon: <SwitchHorizontalIcon size="sm" />,
-    },
-    {
-      key: 'blindSpots',
-      icon: <EyeIcon size="sm" />,
-    },
-    {
-      key: 'leverage',
-      icon: <LightningBoltIcon size="sm" />,
-    },
+  const features = [
+    t('insights.types.patterns'),
+    t('insights.types.contradictions'),
+    t('insights.types.blindSpots'),
+    t('insights.types.leverage'),
   ];
 
   return (
-    <section id="insights" className="py-24 px-6 bg-[var(--bg-primary)]">
-      <div className="max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Column: Header + Insight Pills */}
-          <div>
-            <span className="inline-block text-xs uppercase tracking-[0.3em] tech-gradient-text mb-4">
-              {t('landing.insights.label')}
+    <section id="insights" className="py-28 bg-[var(--bg-secondary)]">
+      <div className="grid grid-cols-1 lg:grid-cols-[0.4fr_0.6fr] gap-12 lg:gap-20 max-w-[1200px] mx-auto px-6 lg:px-10 items-start">
+        {/* Left Column: Header + Features */}
+        <div className="max-w-[400px] reveal">
+          {/* Section Marker */}
+          <div className="flex items-center gap-4 mb-4">
+            <span className="w-6 h-px bg-[var(--accent)]" />
+            <span className="font-mono text-[0.6875rem] tracking-[0.15em] uppercase text-[var(--text-muted)]">
+              {t('insights.label')}
             </span>
-            <h2 className="font-serif text-3xl md:text-4xl font-medium leading-tight text-[var(--text-primary)] mb-6">
-              {t('landing.insights.title')}
-            </h2>
-            <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
-              {t('landing.insights.subtitle')}
-            </p>
-            <div className="space-y-3">
-              {insightTypes.map((insight) => (
-                <InsightPill
-                  key={insight.key}
-                  icon={insight.icon}
-                  label={t(`landing.insights.types.${insight.key}`)}
-                />
-              ))}
-            </div>
           </div>
 
-          {/* Right Column: Sample Insight Card with Glow Effect */}
-          <div className="relative">
-            {/* Glow layer */}
-            <div className="absolute -inset-4 bg-gradient-to-br from-[var(--color-electric)]/10 via-transparent to-[var(--color-violet)]/10  blur-xl" />
+          <h2 className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-medium leading-[1.3] mb-4">
+            {t('insights.title')}
+          </h2>
 
-            {/* Card */}
-            <div className="relative bg-[var(--bg-card)]  p-8 border border-[var(--border-subtle)] shadow-xl">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-xs uppercase tracking-[0.2em] tech-gradient-text">
-                  {t('landing.insights.sampleCard.label')}
-                </span>
-                <span className="text-xs text-[var(--text-muted)]">
-                  {t('landing.insights.sampleCard.category')}
-                </span>
+          <p className="font-body text-base text-[var(--text-secondary)] leading-[1.8] mb-10">
+            {t('insights.subtitle')}
+          </p>
+
+          {/* Feature list with vermilion dots */}
+          <div className="flex flex-col gap-2">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-4 p-4 border border-transparent hover:border-[var(--border)] hover:bg-[var(--bg-tertiary)] transition-all"
+              >
+                <span className="w-1.5 h-1.5 bg-[var(--accent)] flex-shrink-0" />
+                <span className="font-body text-[0.9375rem] text-[var(--text-primary)]">{feature}</span>
               </div>
-              <p className="font-serif text-lg text-[var(--text-primary)]/90 leading-relaxed mb-6">
-                "You describe yourself as disciplined, yet your energy crashes and mood triggers suggest you're running on willpower alone, a finite resource. Your keystone behavior of morning exercise could be the anchor that replenishes rather than depletes, if you shift from{' '}
-                <em className="text-[var(--color-electric)] font-medium">forcing performance</em>
-                {' '}to{' '}
-                <em className="text-[var(--color-violet)] font-medium">honoring rhythm</em>."
-              </p>
-              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                <LightbulbIcon size="sm" className="text-[var(--color-violet)]" />
-                <span>{t('landing.insights.sampleCard.poweredBy')}</span>
-              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Column: Sample Insight Card */}
+        <div className="reveal" style={{ animationDelay: '100ms' }}>
+          <div className="relative bg-[var(--bg-primary)] border border-[var(--border)] p-10">
+            {/* Vermilion accent line */}
+            <div className="absolute top-0 left-10 w-10 h-0.5 bg-[var(--accent)]" />
+
+            {/* Card Header */}
+            <div className="flex justify-between items-center mb-6">
+              <span className="font-mono text-[0.625rem] tracking-[0.1em] uppercase text-[var(--text-faint)]">
+                {t('insights.sampleCard.label')}
+              </span>
+              <span className="font-mono text-[0.625rem] tracking-[0.05em] uppercase text-[var(--accent)] px-2 py-1 border border-[var(--accent)]">
+                {t('insights.sampleCard.category')}
+              </span>
             </div>
+
+            {/* Quote */}
+            <p className="font-display text-[1.125rem] italic leading-[1.8] text-[var(--text-primary)] mb-6">
+              <Trans
+                i18nKey="insights.sampleCard.quote"
+                ns="landing"
+                components={{
+                  highlight: <span className="text-[var(--accent)] font-semibold not-italic" />,
+                }}
+              />
+            </p>
+
+            {/* Analysis */}
+            <p className="font-body text-[0.9375rem] text-[var(--text-secondary)] leading-[1.8] pt-6 border-t border-[var(--border)] mb-6">
+              {t('insights.sampleCard.analysis')}
+            </p>
+
+            {/* Footer */}
+            <p className="font-mono text-[0.625rem] tracking-[0.05em] text-[var(--text-faint)] uppercase">
+              {t('insights.sampleCard.poweredBy')}
+            </p>
           </div>
         </div>
       </div>

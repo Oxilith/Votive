@@ -9,21 +9,23 @@
  * - Provides navigation between admin sections
  * @dependencies
  * - react-router-dom for routing
- * - ./components/Layout for page layout
- * - ./components/ProtectedRoute for auth protection
- * - ./pages/* for page components
+ * - @/admin/components/Layout for page layout
+ * - @/admin/components/ProtectedRoute for auth protection
+ * - @/admin/pages/* for page components
  */
 
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from './components/Layout.js';
-import { ProtectedRoute } from './components/ProtectedRoute.js';
-import { LoginPage } from './pages/LoginPage.js';
-import { PromptListPage } from './pages/PromptListPage.js';
-import { PromptEditPage } from './pages/PromptEditPage.js';
-import { PromptCreatePage } from './pages/PromptCreatePage.js';
-import { ABTestListPage } from './pages/ABTestListPage.js';
-import { ABTestEditPage } from './pages/ABTestEditPage.js';
-import { ABTestCreatePage } from './pages/ABTestCreatePage.js';
+import {
+  Layout,
+  ProtectedRoute,
+  LoginPage,
+  PromptListPage,
+  PromptEditPage,
+  PromptCreatePage,
+  ABTestListPage,
+  ABTestEditPage,
+  ABTestCreatePage,
+} from '@/admin';
 
 export function App() {
   return (

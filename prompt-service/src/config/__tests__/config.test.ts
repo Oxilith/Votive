@@ -15,6 +15,11 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Mock dotenv to prevent loading .env file values during tests
+vi.mock('dotenv', () => ({
+  config: vi.fn(),
+}));
+
 describe('config validation', () => {
   // Store original environment variables
   const originalEnv: Record<string, string | undefined> = {};
@@ -24,10 +29,11 @@ describe('config validation', () => {
     'ADMIN_API_KEY',
     'DATABASE_URL',
     'DATABASE_KEY',
-    'DEV_AUTH_BYPASS',
     'PORT',
     'CORS_ORIGINS',
     'LOG_LEVEL',
+    'JWT_ACCESS_SECRET',
+    'JWT_REFRESH_SECRET',
   ];
 
   beforeEach(() => {
@@ -60,41 +66,64 @@ describe('config validation', () => {
       Reflect.deleteProperty(process.env, 'ADMIN_API_KEY');
       // Clear DATABASE_KEY to avoid unrelated validation
       Reflect.deleteProperty(process.env, 'DATABASE_KEY');
+      // Clear JWT secrets to avoid unrelated validation
+      Reflect.deleteProperty(process.env, 'JWT_ACCESS_SECRET');
+      Reflect.deleteProperty(process.env, 'JWT_REFRESH_SECRET');
     });
 
     it('should throw an error when neither SESSION_SECRET nor ADMIN_API_KEY is set', async () => {
-      // Arrange: Both secrets are cleared in beforeEach
+      // Arrange: Provide JWT secrets to test cookie validation
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
-        await import('../index.js');
+        await import('..');
       }).rejects.toThrow('Cookie signing secret is required');
     });
 
     it('should include helpful instructions in the error message', async () => {
-      // Arrange: Both secrets are cleared in beforeEach
+      // Arrange: Provide JWT secrets to test cookie validation
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
-        await import('../index.js');
+        await import('..');
       }).rejects.toThrow(/SESSION_SECRET.*ADMIN_API_KEY/s);
     });
 
     it('should include an example in the error message', async () => {
-      // Arrange: Both secrets are cleared in beforeEach
+      // Arrange: Provide JWT secrets to test cookie validation
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
-        await import('../index.js');
+        await import('..');
       }).rejects.toThrow('Example:');
+    });
+
+    it('should throw an error when JWT secrets are missing', async () => {
+      // Arrange: JWT secrets are cleared in beforeEach
+      // Provide cookie secret so we're specifically testing JWT validation
+      process.env['SESSION_SECRET'] = 'test-session-secret-at-least-32-characters-long';
+
+      // Act & Assert - Zod reports required fields as "Required" when missing
+      await expect(async () => {
+        await import('..');
+      }).rejects.toThrow(/jwtAccessSecret: Required/);
     });
 
     it('should not throw an error when SESSION_SECRET is set', async () => {
       // Arrange
       process.env['SESSION_SECRET'] = 'test-session-secret-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
+      process.env['DATABASE_KEY'] = 'test-database-key-at-least-32-characters';
 
       // Act
-      const { config } = await import('../index.js');
+      const { config } = await import('..');
 
       // Assert
       expect(config).toBeDefined();
@@ -104,9 +133,12 @@ describe('config validation', () => {
     it('should not throw an error when ADMIN_API_KEY is set as fallback', async () => {
       // Arrange
       process.env['ADMIN_API_KEY'] = 'test-admin-api-key-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
+      process.env['DATABASE_KEY'] = 'test-database-key-at-least-32-characters';
 
       // Act
-      const { config } = await import('../index.js');
+      const { config } = await import('..');
 
       // Assert
       expect(config).toBeDefined();
@@ -118,9 +150,12 @@ describe('config validation', () => {
       // Arrange
       process.env['SESSION_SECRET'] = 'primary-session-secret-at-least-32-characters';
       process.env['ADMIN_API_KEY'] = 'fallback-admin-key-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
+      process.env['DATABASE_KEY'] = 'test-database-key-at-least-32-characters';
 
       // Act
-      const { config } = await import('../index.js');
+      const { config } = await import('..');
 
       // Assert
       expect(config.sessionSecret).toBe('primary-session-secret-at-least-32-characters');
@@ -130,9 +165,12 @@ describe('config validation', () => {
       // Arrange
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       process.env['ADMIN_API_KEY'] = 'test-admin-api-key-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
+      process.env['DATABASE_KEY'] = 'test-database-key-at-least-32-characters';
 
       // Act
-      await import('../index.js');
+      await import('..');
 
       // Assert
       expect(warnSpy).toHaveBeenCalledWith(
@@ -145,10 +183,12 @@ describe('config validation', () => {
     it('should reject SESSION_SECRET shorter than 32 characters', async () => {
       // Arrange
       process.env['SESSION_SECRET'] = 'short-secret'; // Only 12 characters
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
-        await import('../index.js');
+        await import('..');
       }).rejects.toThrow(/at least 32 character/i);
     });
   });
@@ -162,34 +202,44 @@ describe('config validation', () => {
       // Clear secrets
       Reflect.deleteProperty(process.env, 'SESSION_SECRET');
       Reflect.deleteProperty(process.env, 'ADMIN_API_KEY');
+      // Clear JWT secrets
+      Reflect.deleteProperty(process.env, 'JWT_ACCESS_SECRET');
+      Reflect.deleteProperty(process.env, 'JWT_REFRESH_SECRET');
     });
 
     it('should throw an error when SESSION_SECRET is not set in production', async () => {
       // Arrange
       process.env['ADMIN_API_KEY'] = 'test-admin-key-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
-        await import('../index.js');
+        await import('..');
       }).rejects.toThrow('SESSION_SECRET is required in production');
     });
 
     it('should explain why ADMIN_API_KEY fallback is not allowed in production', async () => {
       // Arrange
       process.env['ADMIN_API_KEY'] = 'test-admin-key-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
-        await import('../index.js');
+        await import('..');
       }).rejects.toThrow(/security risk/i);
     });
 
     it('should not throw an error when SESSION_SECRET is set in production', async () => {
       // Arrange
       process.env['SESSION_SECRET'] = 'production-secret-at-least-32-characters-long';
+      process.env['JWT_ACCESS_SECRET'] = 'jwt-access-secret-at-least-32-chars-here';
+      process.env['JWT_REFRESH_SECRET'] = 'jwt-refresh-secret-at-least-32-chars-here';
+      process.env['DATABASE_KEY'] = 'production-database-key-at-least-32-chars';
 
       // Act
-      const { config } = await import('../index.js');
+      const { config } = await import('..');
 
       // Assert
       expect(config).toBeDefined();

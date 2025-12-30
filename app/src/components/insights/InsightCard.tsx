@@ -1,12 +1,12 @@
 /**
  * @file src/components/insights/InsightCard.tsx
- * @purpose Reusable card component for displaying AI analysis insights
+ * @purpose Reusable card component for displaying AI analysis insights with Ink & Stone styling
  * @functionality
  * - Renders different insight types (patterns, contradictions, blind spots, leverage points, risks)
  * - Uses type-safe property access with 'in' operator checks for polymorphic rendering
  * - Displays optional fields like evidence, severity, hypothesis based on insight type
  * - Supports icons, titles, and various content sections
- * - Uses shared theme styles for consistent appearance
+ * - Uses vermilion accents for emphasis badges
  * - Supports internationalization (English/Polish)
  * @dependencies
  * - React
@@ -22,8 +22,9 @@ import type {
   AnalysisBlindSpot,
   AnalysisLeveragePoint,
   AnalysisRisk,
-} from '@/types/assessment.types';
-import { cardStyles, textStyles, badgeStyles } from '@/styles/theme';
+} from '@/types';
+import { cardStyles, textStyles, badgeStyles } from '@/styles';
+import React from "react";
 
 /**
  * Extended types for leverage points and risks that may include an icon
@@ -56,7 +57,7 @@ export interface InsightCardProps {
  * which properties exist on the insight item.
  */
 const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('insights');
 
   return (
     <div className={`p-5 ${cardStyles.base} space-y-3`}>
@@ -64,39 +65,39 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           {'icon' in item && item.icon && <span className="text-2xl">{item.icon}</span>}
-          <h4 className={`font-semibold ${textStyles.primary}`}>{item.title}</h4>
+          <h4 className={`font-display font-semibold ${textStyles.primary}`}>{item.title}</h4>
         </div>
         {'severity' in item && item.severity && (
           <span
-            className={`text-xs px-2 py-0.5  ${
-              item.severity === 'high' ? badgeStyles.emphasis : badgeStyles.default
+            className={`font-mono text-xs px-2 py-0.5 rounded-sm ${
+              item.severity === 'high' ? badgeStyles.accent : badgeStyles.default
             }`}
           >
-            {item.severity === 'high' ? t('insights.cards.highImpact') : t('insights.cards.mediumImpact')}
+            {item.severity === 'high' ? t('cards.highImpact') : t('cards.mediumImpact')}
           </span>
         )}
       </div>
 
       {/* Description (patterns, contradictions, risks) */}
       {'description' in item && item.description && (
-        <p className={`${textStyles.primary} opacity-90`}>{item.description}</p>
+        <p className={`font-body ${textStyles.primary} opacity-90`}>{item.description}</p>
       )}
 
       {/* Observation (blind spots) */}
       {'observation' in item && item.observation && (
-        <p className={`${textStyles.primary} opacity-90`}>{item.observation}</p>
+        <p className={`font-body ${textStyles.primary} opacity-90`}>{item.observation}</p>
       )}
 
       {/* Evidence as array (patterns) */}
       {'evidence' in item && item.evidence && Array.isArray(item.evidence) && item.evidence.length > 0 && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.evidence')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.evidence')}
           </p>
-          <ul className={`text-sm ${textStyles.secondary} space-y-1`}>
-            {item.evidence.map((e, i) => (
+          <ul className={`font-body text-sm ${textStyles.secondary} space-y-1`}>
+            {item.evidence.map((e: string, i: number) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="opacity-50">•</span>
+                <span className="w-1 h-1 rounded-full bg-[var(--accent)] mt-2 flex-shrink-0" />
                 <span>{e}</span>
               </li>
             ))}
@@ -107,23 +108,23 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {/* Evidence as string (blind spots) */}
       {'evidence' in item && item.evidence && typeof item.evidence === 'string' && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.evidence')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.evidence')}
           </p>
-          <p className={`text-sm ${textStyles.secondary}`}>{item.evidence}</p>
+          <p className={`font-body text-sm ${textStyles.secondary}`}>{item.evidence}</p>
         </div>
       )}
 
       {/* Sides / Tension (contradictions) */}
       {'sides' in item && item.sides && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.theTension')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.theTension')}
           </p>
-          <div className={`flex items-center gap-3 text-sm ${textStyles.secondary}`}>
-            <span className="px-3 py-1.5 bg-[var(--bg-secondary)] ">{item.sides[0]}</span>
-            <span className="opacity-50">{t('insights.cards.vs')}</span>
-            <span className="px-3 py-1.5 bg-[var(--bg-secondary)] ">{item.sides[1]}</span>
+          <div className={`flex items-center gap-3 font-body text-sm ${textStyles.secondary}`}>
+            <span className="px-3 py-1.5 bg-[var(--bg-tertiary)] rounded-sm">{item.sides[0]}</span>
+            <span className="text-[var(--text-faint)]">{t('cards.vs')}</span>
+            <span className="px-3 py-1.5 bg-[var(--bg-tertiary)] rounded-sm">{item.sides[1]}</span>
           </div>
         </div>
       )}
@@ -131,55 +132,55 @@ const InsightCard: React.FC<InsightCardProps> = ({ item }) => {
       {/* Implication (patterns) */}
       {'implication' in item && item.implication && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.whatThisMeans')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.whatThisMeans')}
           </p>
-          <p className={`text-sm ${textStyles.secondary}`}>{item.implication}</p>
+          <p className={`font-body text-sm ${textStyles.secondary}`}>{item.implication}</p>
         </div>
       )}
 
       {/* Hypothesis (contradictions) */}
       {'hypothesis' in item && item.hypothesis && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.hypothesis')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.hypothesis')}
           </p>
-          <p className={`text-sm ${textStyles.secondary}`}>{item.hypothesis}</p>
+          <p className={`font-body text-sm ${textStyles.secondary}`}>{item.hypothesis}</p>
         </div>
       )}
 
       {/* Reframe (blind spots) */}
       {'reframe' in item && item.reframe && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.reframe')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.reframe')}
           </p>
-          <p className={`text-sm font-medium ${textStyles.secondary}`}>{item.reframe}</p>
+          <p className={`font-body text-sm font-medium ${textStyles.secondary}`}>{item.reframe}</p>
         </div>
       )}
 
       {/* Leverage point (patterns) */}
       {'leverage' in item && item.leverage && (
         <div className="space-y-1">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70`}>
-            {t('insights.cards.leveragePoint')}
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted}`}>
+            {t('cards.leveragePoint')}
           </p>
-          <p className={`text-sm font-medium ${textStyles.secondary}`}>{item.leverage}</p>
+          <p className={`font-body text-sm font-medium text-[var(--accent)]`}>{item.leverage}</p>
         </div>
       )}
 
       {/* Insight (leverage points) */}
       {'insight' in item && item.insight && (
-        <p className={`${textStyles.primary} opacity-90`}>{item.insight}</p>
+        <p className={`font-body ${textStyles.primary} opacity-90`}>{item.insight}</p>
       )}
 
       {/* Reflection question (contradictions) */}
       {'question' in item && item.question && (
-        <div className="mt-3 p-3 bg-[var(--bg-secondary)] ">
-          <p className={`text-xs font-medium uppercase tracking-wide ${textStyles.secondary} opacity-70 mb-1`}>
-            {t('insights.cards.reflectionQuestion')}
+        <div className="mt-3 p-3 bg-[var(--bg-secondary)] rounded-sm border-l-2 border-[var(--accent)]">
+          <p className={`font-mono text-xs uppercase tracking-wider ${textStyles.muted} mb-1`}>
+            {t('cards.reflectionQuestion')}
           </p>
-          <p className={`text-sm italic ${textStyles.secondary}`}>{item.question}</p>
+          <p className={`font-body text-sm italic ${textStyles.secondary}`}>{item.question}</p>
         </div>
       )}
     </div>

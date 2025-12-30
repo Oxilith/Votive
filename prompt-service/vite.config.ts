@@ -7,7 +7,8 @@ export default defineConfig({
   root: 'src/admin',
   base: '/admin/',
   build: {
-    outDir: '../../dist/admin',
+    // Output to where compiled index.js expects it: path.join(__dirname, 'admin')
+    outDir: '../../dist/src/admin',
     emptyOutDir: true,
   },
   resolve: {

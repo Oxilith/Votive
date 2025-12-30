@@ -14,14 +14,24 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { PromptCacheService } from '@/services/prompt-cache.service.js';
-import type { PromptConfig } from 'shared/index.js';
+import { PromptCacheService } from '@/services';
+import type { PromptConfig } from 'shared';
 
 // Mock config with test values
-vi.mock('@/config/index.js', () => ({
+vi.mock('@/config', () => ({
   config: {
     promptCacheTtlMs: 5000, // 5 seconds for testing
     promptStaleTtlMs: 10000, // 10 seconds for testing
+  },
+}));
+
+// Mock logger to prevent pino initialization errors when config is mocked
+vi.mock('@/utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   },
 }));
 

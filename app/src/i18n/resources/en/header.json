@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "assessment": "Assessment",
+    "insights": "Insights"
+  },
+  "buttons": {
+    "import": "Import",
+    "export": "Export",
+    "exportAssessment": "Export Assessment",
+    "exportInsights": "Export Insights"
+  },
+  "viewOnly": {
+    "badge": "View Only",
+    "savedAssessment": "Saved Assessment",
+    "savedAnalysis": "Saved Analysis"
+  },
+  "errors": {
+    "importFailed": "Failed to import file"
+  },
+  "theme": {
+    "toggleDark": "Switch to dark mode",
+    "toggleLight": "Switch to light mode"
+  }
+}

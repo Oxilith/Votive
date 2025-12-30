@@ -1,110 +1,121 @@
 /**
  * @file src/components/landing/sections/HeroSection.tsx
- * @purpose Hero section with animated logo, tagline, CTA buttons, and vote counter
+ * @purpose Hero section with Ink & Stone Japanese minimalism and asymmetric layout
  * @functionality
- * - Displays animated Votive logo with glow effect
- * - Shows hero tagline with gradient text effect
- * - Provides primary CTA button to start discovery
- * - Provides secondary link to philosophy section
- * - Shows animated vote counter for social proof
- * - Includes scroll indicator animation
+ * - Displays eyebrow label with vermilion line prefix
+ * - Shows hero tagline with fade-up animation
+ * - Highlights key words in vermilion italic
+ * - Provides vermilion CTA button with lift/shrink effect
+ * - Shows vote counter in aside column (desktop only)
+ * - Includes fixed ink brush decoration SVG on right side
+ * - Uses fade-up-opacity animation pattern
  * @dependencies
  * - React
  * - react-i18next (useTranslation)
- * - @/components/landing/shared/VotiveLogo
- * - @/components/landing/shared/VoteCounter
- * - @/components/shared/icons (ArrowRightIcon, ChevronDownIcon, ArrowDownIcon)
+ * - @/components (VoteCounter, InkBrushDecoration, ArrowRightIcon, ArrowDownIcon)
  */
 
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
-import VotiveLogo from '@/components/landing/shared/VotiveLogo';
-import VoteCounter from '@/components/landing/shared/VoteCounter';
-import { ArrowRightIcon, ChevronDownIcon, ArrowDownIcon } from '@/components/shared/icons';
+import { VoteCounter, InkBrushDecoration, ArrowRightIcon, ArrowDownIcon } from '@/components';
 
 interface HeroSectionProps {
   onStartDiscovery: () => void;
 }
 
 const HeroSection: FC<HeroSectionProps> = ({ onStartDiscovery }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('landing');
 
   return (
-    <section className="min-h-screen flex items-center justify-center pt-20 pb-16 px-6 relative overflow-hidden">
-      <div className="max-w-5xl mx-auto text-center">
-        {/* Hero Logo */}
-        <div
-          className="opacity-0 animate-fade delay-100"
-          style={{ animationFillMode: 'forwards' }}
-        >
-          <div className="flex justify-center mb-8">
-            <VotiveLogo size="lg" withGlow />
-          </div>
-        </div>
+    <section className="min-h-screen flex items-center py-28 relative overflow-visible">
+      {/* Fixed Ink Brush Decoration - Right side */}
+      <InkBrushDecoration />
 
-        {/* Hero Tagline */}
-        <h1
-          className="font-serif text-5xl md:text-7xl lg:text-8xl font-medium leading-[0.9] mb-8 opacity-0 animate-rise delay-200"
-          style={{ animationFillMode: 'forwards' }}
-        >
-          {t('landing.hero.tagline1')}
-          <br />
-          {t('landing.hero.tagline2Prefix')}{' '}
-          <span className="italic text-gradient-hero">{t('landing.hero.tagline2Highlight')}</span>
-          <br />
-          {t('landing.hero.tagline3')}
-        </h1>
+      {/* Main Content - Asymmetric Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_0.6fr] gap-12 lg:gap-28 max-w-[1200px] mx-auto px-6 lg:px-10 items-end">
+        {/* Left Column - Content */}
+        <div className="relative">
+          {/* Hero Eyebrow */}
+          <p
+            className="inline-flex items-center gap-3 mb-6 font-mono text-xs tracking-[0.1em] uppercase text-[var(--text-muted)] opacity-0"
+            style={{ animation: 'fade-up 0.8s var(--ease-out) 0.2s forwards' }}
+          >
+            <span className="w-6 h-px bg-[var(--accent)]" />
+            {t('hero.eyebrow', 'Identity-First Change')}
+          </p>
 
-        {/* Subtitle */}
-        <p
-          className="text-lg md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-12 opacity-0 animate-rise delay-400"
-          style={{ animationFillMode: 'forwards' }}
-        >
-          {t('landing.hero.subtitle')}
-        </p>
+          {/* Hero Tagline */}
+          <h1 className="font-display text-[clamp(2.5rem,7vw,4.5rem)] font-medium leading-[1.15] tracking-[-0.02em] mb-10">
+            <span
+              className="inline-block opacity-0"
+              style={{ animation: 'fade-up 0.8s var(--ease-out) 0.1s forwards' }}
+            >
+              {t('hero.tagline1')}
+            </span>{' '}
+            <em
+              className="inline-block not-italic text-[var(--accent)] opacity-0"
+              style={{ animation: 'fade-up 0.8s var(--ease-out) 0.25s forwards' }}
+            >
+              {t('hero.tagline2Highlight')}
+            </em>{' '}
+            <span
+              className="inline-block opacity-0"
+              style={{ animation: 'fade-up 0.8s var(--ease-out) 0.4s forwards' }}
+            >
+              {t('hero.tagline3')}
+            </span>
+          </h1>
 
-        {/* CTA Buttons */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center opacity-0 animate-rise delay-500"
-          style={{ animationFillMode: 'forwards' }}
-        >
+          {/* Subtitle */}
+          <p
+            className="font-body text-[1.0625rem] text-[var(--text-secondary)] max-w-[480px] leading-[1.9] mb-10 opacity-0"
+            style={{ animation: 'fade-up 0.8s var(--ease-out) 0.5s forwards' }}
+          >
+            {t('hero.subtitle')}
+          </p>
+
+          {/* CTA Button */}
           <button
             onClick={onStartDiscovery}
-            className="cta-button inline-flex items-center gap-3 tech-gradient text-white px-8 py-4 text-base font-medium tracking-wide hover:opacity-90 transition-opacity shadow-lg shadow-[var(--color-electric)]/20"
+            className="cta-button inline-flex items-center gap-4 bg-[var(--accent)] text-white px-8 py-4 text-[0.9375rem] font-medium rounded-sm opacity-0"
+            style={{ animation: 'fade-up-opacity 0.8s var(--ease-out) 0.6s forwards' }}
           >
-            {t('landing.hero.cta')}
+            {t('hero.cta')}
             <ArrowRightIcon size="md" />
           </button>
-          <a
-            href="#philosophy"
-            className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-4 py-4"
-          >
-            {t('landing.hero.learnMore')}
-            <ChevronDownIcon size="sm" />
-          </a>
+
+          {/* Decorative stroke */}
+          <div
+            className="absolute bottom-[10%] right-[5%] w-[120px] h-[2px] bg-gradient-to-r from-[var(--accent)] to-transparent opacity-0 hidden lg:block"
+            style={{ animation: 'fade-up-opacity 1s var(--ease-out) 1s forwards' }}
+          />
         </div>
 
-        {/* Vote Counter */}
+        {/* Right Column - Vote Counter (Desktop only) */}
         <div
-          className="mt-20 opacity-0 animate-fade delay-700"
-          style={{ animationFillMode: 'forwards' }}
+          className="hidden lg:block opacity-0"
+          style={{ animation: 'fade-up 0.8s var(--ease-out) 0.9s forwards' }}
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3">
-            {t('landing.hero.votesLabel')}
+          <p className="font-mono text-[0.6875rem] tracking-[0.1em] uppercase text-[var(--text-faint)] mb-2">
+            {t('hero.votesLabel')}
           </p>
-          <div className="font-serif text-4xl md:text-5xl font-light tech-gradient-text">
+          <p className="font-display text-[2.5rem] font-semibold text-[var(--accent)] leading-none mb-2">
             <VoteCounter targetValue={47832} duration={2500} />
-          </div>
+          </p>
+          <p className="font-body text-sm text-[var(--text-muted)] max-w-[180px]">
+            {t('hero.votesDesc', 'toward better selves')}
+          </p>
         </div>
       </div>
 
       {/* Scroll Indicator */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 scroll-indicator opacity-0 animate-fade delay-800"
-        style={{ animationFillMode: 'forwards' }}
+      <a
+        href="#philosophy"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors animate-bounce"
+        aria-label={t('hero.scrollDown', 'Scroll down')}
       >
-        <ArrowDownIcon size="lg" className="text-[var(--text-muted)]" />
-      </div>
+        <ArrowDownIcon size="lg" />
+      </a>
     </section>
   );
 };

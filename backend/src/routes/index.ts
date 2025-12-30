@@ -6,13 +6,13 @@
  * - Provides health endpoints for Docker/K8s liveness and readiness probes
  * @dependencies
  * - express.Router
- * - ./api/v1
+ * - ./api (barrel)
  * - ./health.routes
  */
 
 import { Router } from 'express';
-import v1Routes from './api/v1/index.js';
-import healthRoutes from './health.routes.js';
+import { v1Routes } from './api';
+import healthRoutes from './health.routes';
 
 const router = Router();
 

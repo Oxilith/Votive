@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "clean": "rm -rf dist",
     "lint": "eslint .",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -b",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
@@ -19,7 +20,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^16.5.0",
-    "shared": "file:../shared",
+    "shared": "*",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

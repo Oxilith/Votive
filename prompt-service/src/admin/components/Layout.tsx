@@ -1,21 +1,23 @@
 /**
  * @file prompt-service/src/admin/components/Layout.tsx
- * @purpose Main layout component with navigation sidebar
+ * @purpose Main layout component with navigation sidebar and theme toggle
  * @functionality
  * - Provides consistent page layout with header and sidebar
  * - Navigation links to Prompts and A/B Tests sections
  * - Highlights current active section
- * - Includes logout button in footer
- * - Responsive design for different screen sizes
+ * - Includes logout button and theme toggle in footer
+ * - Uses Ink & Stone design system colors
  * @dependencies
  * - react-router-dom for navigation
- * - react for ReactNode type
+ * - react for ReactNode type and useState
  * - ../api/auth for logout functionality
+ * - ../styles/theme for toggleTheme and getTheme
  */
 
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { logout } from '../api/auth.js';
+import { logout, colors, fonts, toggleTheme, getTheme } from '@/admin';
 
 interface LayoutProps {
   children: ReactNode;
@@ -28,18 +30,26 @@ const navLinkStyles = ({ isActive }: { isActive: boolean }): React.CSSProperties
   padding: '0.75rem 1rem',
   borderRadius: '0.5rem',
   textDecoration: 'none',
-  color: isActive ? '#3b82f6' : '#4b5563',
-  backgroundColor: isActive ? '#eff6ff' : 'transparent',
+  color: isActive ? colors.accent : colors.textSecondary,
+  backgroundColor: isActive ? colors.bgTertiary : 'transparent',
   fontWeight: isActive ? 600 : 400,
   transition: 'all 0.15s ease',
 });
 
 export function Layout({ children }: LayoutProps) {
+  const [isDark, setIsDark] = useState(getTheme() === 'dark');
+
+  const handleToggleTheme = () => {
+    const newIsDark = toggleTheme();
+    setIsDark(newIsDark);
+  };
+
   return (
     <div style={styles.container}>
       {/* Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.logo}>
+          <span style={styles.logoMark}>V</span>
           <h1 style={styles.logoText}>Prompt Admin</h1>
         </div>
         <nav style={styles.nav}>
@@ -78,6 +88,31 @@ export function Layout({ children }: LayoutProps) {
         </nav>
         <div style={styles.footer}>
           <button
+            onClick={handleToggleTheme}
+            style={styles.themeButton}
+            type="button"
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            )}
+            {isDark ? 'Light Mode' : 'Dark Mode'}
+          </button>
+          <button
             onClick={() => void logout()}
             style={styles.logoutButton}
             type="button"
@@ -113,23 +148,42 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sidebar: {
     width: '250px',
-    backgroundColor: '#fff',
-    borderRight: '1px solid #e5e7eb',
+    backgroundColor: colors.bgSecondary,
+    borderRight: `1px solid ${colors.borderStrong}`,
     display: 'flex',
     flexDirection: 'column',
     position: 'fixed',
     height: '100vh',
     left: 0,
     top: 0,
+    transition: 'background-color 0.2s, border-color 0.2s',
   },
   logo: {
     padding: '1.5rem',
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: `1px solid ${colors.border}`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+  },
+  logoMark: {
+    width: '32px',
+    height: '32px',
+    backgroundColor: colors.accent,
+    color: '#fff',
+    borderRadius: '3px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: fonts.display,
+    fontWeight: 600,
+    fontSize: '1.125rem',
+    transform: 'rotate(-3deg)',
+    transition: 'transform 0.2s ease',
   },
   logoText: {
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    color: '#111827',
+    fontSize: '1.125rem',
+    fontWeight: 600,
+    color: colors.textPrimary,
     margin: 0,
   },
   nav: {
@@ -141,10 +195,25 @@ const styles: Record<string, React.CSSProperties> = {
   },
   footer: {
     padding: '1rem',
-    borderTop: '1px solid #e5e7eb',
+    borderTop: `1px solid ${colors.border}`,
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.75rem',
+    gap: '0.5rem',
+  },
+  themeButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 0.75rem',
+    backgroundColor: 'transparent',
+    border: `1px solid ${colors.border}`,
+    borderRadius: '0.375rem',
+    color: colors.textMuted,
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    width: '100%',
+    justifyContent: 'center',
   },
   logoutButton: {
     display: 'flex',
@@ -152,9 +221,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '0.5rem',
     padding: '0.5rem 0.75rem',
     backgroundColor: 'transparent',
-    border: '1px solid #e5e7eb',
+    border: `1px solid ${colors.border}`,
     borderRadius: '0.375rem',
-    color: '#6b7280',
+    color: colors.textMuted,
     fontSize: '0.875rem',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
@@ -163,14 +232,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   footerText: {
     fontSize: '0.75rem',
-    color: '#9ca3af',
+    color: colors.textFaint,
     textAlign: 'center',
+    marginTop: '0.5rem',
   },
   main: {
     flex: 1,
     marginLeft: '250px',
     padding: '2rem',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.bgPrimary,
     minHeight: '100vh',
+    transition: 'background-color 0.2s',
   },
 };
