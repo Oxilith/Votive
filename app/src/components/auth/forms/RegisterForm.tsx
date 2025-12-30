@@ -69,15 +69,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [birthYear, setBirthYear] = useState('');
-  const [gender, setGender] = useState<Gender | ''>('');
+  const [gender, setGender] = useState<Gender>('prefer-not-to-say');
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
   const { setAuth } = useAuthStore();
 
-  const genderOptions: { value: Gender | ''; label: string }[] = [
-    { value: '', label: t('register.genderOptions.default') },
+  const genderOptions: { value: Gender; label: string }[] = [
+    { value: 'prefer-not-to-say', label: t('register.genderOptions.default') },
     { value: 'male', label: t('register.genderOptions.male') },
     { value: 'female', label: t('register.genderOptions.female') },
     { value: 'other', label: t('register.genderOptions.other') },
@@ -146,7 +146,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         email: email.trim(),
         password,
         birthYear: parseInt(birthYear, 10),
-        gender: gender || undefined,
+        gender,
       });
       setAuth(response.user, response.accessToken);
       onSuccess?.();
@@ -240,7 +240,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           <select
             id="gender"
             value={gender}
-            onChange={(e) => setGender(e.target.value as Gender | '')}
+            onChange={(e) => setGender(e.target.value as Gender)}
             className={`
               w-full p-3 font-body text-base
               bg-[var(--bg-primary)] text-[var(--text-primary)]

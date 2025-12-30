@@ -33,7 +33,7 @@ const userProfileSchema = z
   .object({
     name: z.string().min(1),
     age: z.number().min(13).max(120),
-    gender: genderSchema.nullable(),
+    gender: genderSchema,
   })
   .optional();
 

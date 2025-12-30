@@ -25,5 +25,5 @@ export type AnalysisLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 export interface UserProfileForAnalysis {
   name: string;
   age: number; // Calculated from birthYear
-  gender: Gender | null; // May be null if user chose not to specify
+  gender: Gender;
 }

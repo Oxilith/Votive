@@ -63,9 +63,7 @@ export const registerSchema = z.object({
     .string()
     .min(1, 'Name is required')
     .max(MAX_NAME_LENGTH, `Name must be at most ${MAX_NAME_LENGTH} characters`),
-  gender: z
-    .enum(VALID_GENDERS)
-    .optional(),
+  gender: z.enum(VALID_GENDERS),
   birthYear: z
     .number()
     .int('Birth year must be a whole number')

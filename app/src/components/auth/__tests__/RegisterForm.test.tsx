@@ -276,12 +276,12 @@ describe('RegisterForm', () => {
           email: 'test@example.com',
           password: 'ValidPass1',
           birthYear: parseInt(validBirthYear, 10),
-          gender: undefined,
+          gender: 'prefer-not-to-say',
         });
       });
     });
 
-    it('should call register with gender when selected', async () => {
+    it('should call register with selected gender', async () => {
       const user = userEvent.setup();
       mockRegister.mockResolvedValue({
         user: { id: '1', email: 'test@example.com', name: 'Test User' },

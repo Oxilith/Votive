@@ -23,7 +23,7 @@ export interface SafeUserResponse {
   emailVerified: boolean;
   emailVerifiedAt: string | null;
   name: string;
-  gender: Gender | null;
+  gender: Gender;
   birthYear: number;
   createdAt: string;
   updatedAt: string;

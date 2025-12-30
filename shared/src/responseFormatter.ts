@@ -21,11 +21,11 @@ import { valueLabels, timeLabels, triggerLabels, willpowerLabels } from './label
 
 /**
  * Formats gender value for display in prompt
- * @param gender - The gender value or null
+ * @param gender - The gender value
  * @returns Human-readable gender string
  */
-const formatGender = (gender: Gender | null): string => {
-  if (!gender || gender === 'prefer-not-to-say') return 'Not specified';
+const formatGender = (gender: Gender): string => {
+  if (gender === 'prefer-not-to-say') return 'Not specified';
   return gender.charAt(0).toUpperCase() + gender.slice(1);
 };
 
