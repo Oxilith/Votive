@@ -66,7 +66,7 @@ export interface RegisterInput {
   email: string;
   password: string;
   name: string;
-  gender?: Gender;
+  gender: Gender;
   birthYear: number;
 }
 
