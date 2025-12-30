@@ -25,6 +25,7 @@ npm run lint                     # Lint all projects
 npm run type-check               # Type-check all projects
 npm run test:run                 # Run all tests (once)
 npm run test:coverage            # Run all tests with coverage
+npm run verify:conventions       # Verify coding conventions (imports, barrels, etc.)
 
 # Build
 npm run build                    # Build all projects (shared first)
@@ -39,6 +40,11 @@ npm run db:studio                # Open Prisma Studio
 npm run build -w shared          # Build specific workspace
 npm run test -w backend          # Run tests in specific workspace
 npm run lint:fix -w app          # Fix lint issues in specific workspace
+
+# Single test file (using Vitest)
+npx vitest run path/to/file.test.ts              # Run specific test file
+npx vitest run -w backend src/services           # Run tests matching pattern in workspace
+npx vitest run --reporter=verbose path/to/file   # Verbose output for debugging
 ```
 
 ## Contribution
@@ -142,9 +148,10 @@ Every component/service requires JSDoc header:
 Single source of truth for types, validation, and utilities used by frontend, backend, and prompt-service:
 - `assessment.types.ts` - Core domain types (TimeOfDay, MoodTrigger, CoreValue, WillpowerPattern, AssessmentResponses)
 - `analysis.types.ts` - AI analysis result types (AnalysisPattern, AnalysisContradiction, AnalysisBlindSpot, AnalysisLeveragePoint, AnalysisRisk, IdentitySynthesis, AIAnalysisResult)
-- `api.types.ts` - API types (AnalysisLanguage, SUPPORTED_LANGUAGES)
+- `api.types.ts` - API types (AnalysisLanguage, UserProfileForAnalysis, SUPPORTED_LANGUAGES)
+- `auth.types.ts` - Auth types (Gender, SafeUserResponse)
 - `labels.ts` - Human-readable label mappings for enum values
-- `validation.ts` - Enum value arrays for Zod schemas, REQUIRED_FIELDS, field categorization (ARRAY_FIELDS, NUMBER_FIELDS, STRING_FIELDS)
+- `validation.ts` - Enum value arrays for Zod schemas, REQUIRED_FIELDS, PASSWORD_REGEX, field categorization
 - `responseFormatter.ts` - Shared `formatResponsesForPrompt()` function for AI analysis
 - `prompt.types.ts` - Prompt config types (ClaudeModel, PromptConfig, ThinkingVariant, PromptConfigDefinition)
 - `tracing.ts` - W3C Trace Context utilities (OpenTelemetry compatible)
@@ -214,6 +221,7 @@ W3C Trace Context implementation (OpenTelemetry compatible):
 ### Frontend (`/app/src`)
 
 **State Management** - Zustand stores (not Redux):
+- `stores/useAuthStore.ts` - Auth state (user, tokens, CSRF token) with token refresh
 - `stores/useAssessmentStore.ts` - Assessment responses with localStorage persistence
 - `stores/useUIStore.ts` - View state, navigation, loading/error
 - `stores/useAnalysisStore.ts` - AI analysis results
@@ -221,12 +229,16 @@ W3C Trace Context implementation (OpenTelemetry compatible):
 **Service Layer**:
 - `services/api/ApiClient.ts` - HTTP client with retry logic, timeout handling
 - `services/api/ClaudeService.ts` - Backend API calls for analysis
+- `services/api/AuthService.ts` - Authentication API calls (login, register, refresh, etc.)
 - `services/interfaces/` - TypeScript interfaces for dependency injection
 
 **Key Directories**:
 - `components/assessment/` - Multi-phase questionnaire wizard (split into steps/, hooks/, navigation/)
+- `components/auth/` - Login, register, email verification, password reset flows
 - `components/insights/` - AI analysis display
-- `components/shared/` - Header, theme toggle
+- `components/landing/` - Homepage (hero, philosophy, journey, CTA sections)
+- `components/profile/` - User profile, password, assessments, analyses management
+- `components/shared/` - Header, theme toggle, navigation
 - `styles/theme.ts` - Shared Tailwind utilities (cardStyles, textStyles)
 - `i18n/resources/` - Translations (en/, pl/)
 - `config/` - Application configuration

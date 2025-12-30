@@ -168,6 +168,7 @@ npm run db:studio        # Open Prisma Studio
 | [Architecture](docs/architecture.md) | System design, diagrams, and technical decisions |
 | [AI Agent Codebase Instructions](docs/AI-Agent-Codebase-Instructions.md) | Module system, imports, build, and coding conventions |
 | [Ink & Stone Design System](docs/votive-ink-design-system.md) | Visual language, component patterns, and animation guidelines |
+| [Internationalization Guide](docs/InternationalizationGuide.md) | i18n setup, namespaces, and translation patterns |
 | [Production Deployment](docs/production-deployment.md) | Environment variables, security, and deployment best practices |
 | [Docker Hub Workflow](docs/docker-hub.md) | Container deployment, publishing, and troubleshooting |
 | [Known Limitations](docs/known-limitations.md) | Cache behavior, scaling considerations, and operational details |
@@ -175,10 +176,57 @@ npm run db:studio        # Open Prisma Studio
 
 ## API Endpoints
 
+### Backend Service (port 3001)
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/claude/analyze` | Submit assessment for AI analysis |
 | GET | `/health` | Backend health check |
+
+### Prompt Service - User Authentication (port 3002)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/user-auth/register` | - | Create new user account |
+| POST | `/api/user-auth/login` | - | Authenticate and get tokens |
+| POST | `/api/user-auth/refresh` | - | Refresh access token |
+| POST | `/api/user-auth/refresh-with-user` | - | Refresh token + get user data |
+| POST | `/api/user-auth/logout` | CSRF | Invalidate refresh token |
+| POST | `/api/user-auth/logout-all` | JWT+CSRF | Invalidate all sessions |
+| POST | `/api/user-auth/password-reset` | - | Request password reset email |
+| POST | `/api/user-auth/password-reset/confirm` | - | Confirm password reset |
+| GET | `/api/user-auth/verify-email/:token` | - | Verify email address |
+| POST | `/api/user-auth/resend-verification` | JWT+CSRF | Resend verification email |
+| GET | `/api/user-auth/me` | JWT | Get current user profile |
+| PUT | `/api/user-auth/profile` | JWT+CSRF | Update user profile |
+| PUT | `/api/user-auth/password` | JWT+CSRF | Change password |
+| DELETE | `/api/user-auth/account` | JWT+CSRF | Delete account |
+
+### Prompt Service - User Data (port 3002)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/user-auth/assessment` | JWT+CSRF | Save assessment |
+| GET | `/api/user-auth/assessment` | JWT | List user's assessments |
+| GET | `/api/user-auth/assessment/:id` | JWT | Get specific assessment |
+| POST | `/api/user-auth/analysis` | JWT+CSRF | Save analysis |
+| GET | `/api/user-auth/analyses` | JWT | List user's analyses |
+| GET | `/api/user-auth/analysis/:id` | JWT | Get specific analysis |
+
+### Prompt Service - Admin (port 3002)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/login` | - | Admin login (API key) |
+| POST | `/api/auth/logout` | - | Admin logout |
+| GET | `/api/auth/verify` | - | Check admin auth status |
+| GET | `/api/prompts` | Admin | List all prompts |
+| POST | `/api/prompts` | Admin | Create prompt |
+| GET | `/api/ab-tests` | Admin | List A/B tests |
+| POST | `/api/ab-tests` | Admin | Create A/B test |
+| POST | `/api/resolve` | - | Resolve prompt config (internal) |
+
+**Auth Legend:** JWT = Access token required, CSRF = CSRF token required, Admin = API key or session cookie
 
 ## Test Data
 
