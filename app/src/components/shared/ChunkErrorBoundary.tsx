@@ -24,6 +24,7 @@ interface ChunkErrorBoundaryProps {
 interface ChunkErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  retryCount: number;
 }
 
 /**
@@ -44,12 +45,14 @@ class ChunkErrorBoundaryBase extends Component<
   ChunkErrorBoundaryProps,
   ChunkErrorBoundaryState
 > {
+  private static readonly MAX_RETRIES = 2;
+
   constructor(props: ChunkErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, retryCount: 0 };
   }
 
-  static getDerivedStateFromError(error: Error): ChunkErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): Partial<ChunkErrorBoundaryState> {
     return { hasError: true, error };
   }
 
@@ -58,9 +61,21 @@ class ChunkErrorBoundaryBase extends Component<
     console.error('ChunkErrorBoundary caught an error:', error, errorInfo);
   }
 
+  componentDidUpdate(prevProps: ChunkErrorBoundaryProps): void {
+    // Reset error state when children change (navigation to different route)
+    if (this.state.hasError && prevProps.children !== this.props.children) {
+      this.setState({ hasError: false, error: null, retryCount: 0 });
+    }
+  }
+
   handleRetry = (): void => {
-    // Clear error state and trigger re-render
-    this.setState({ hasError: false, error: null });
+    const { retryCount } = this.state;
+    if (retryCount >= ChunkErrorBoundaryBase.MAX_RETRIES) {
+      // Too many retries - force full reload to bust cache
+      window.location.reload();
+      return;
+    }
+    this.setState({ hasError: false, error: null, retryCount: retryCount + 1 });
   };
 
   handleReload = (): void => {
