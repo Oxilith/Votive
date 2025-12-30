@@ -19,6 +19,7 @@
 /**
  * Branded type for JSON-stringified fields in database records.
  * Provides compile-time indication of what the JSON string contains.
+ * The required brand prevents bidirectional assignment with plain strings.
  *
  * @example
  * ```typescript
@@ -30,7 +31,7 @@
  * const parsed = JSON.parse(record.data) as MyDataType;
  * ```
  */
-export type JsonString<T> = string & { readonly __jsonType?: T };
+export type JsonString<T> = string & { readonly __jsonType: T };
 
 // User fixtures
 export {

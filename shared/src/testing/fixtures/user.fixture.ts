@@ -56,7 +56,7 @@ export interface MockUser {
 
 // Pre-computed bcrypt hash for 'ValidPass123!' - use in tests expecting this password
 export const MOCK_PASSWORD_HASH =
-  '$2b$10$K8GpPw9t6X9Z0vC3Y5rQxOq5b5f5h5h5h5h5h5h5h5h5h5h5h5h5';
+  '$2a$10$2tuoWcP1U6CAKF6GNx/BYuF893GuJWciKiSmZvW6jCE41BSZzpqfe';
 
 // Default test password that meets requirements
 export const MOCK_PASSWORD = 'ValidPass123!';

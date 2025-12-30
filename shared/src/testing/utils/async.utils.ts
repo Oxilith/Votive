@@ -4,6 +4,7 @@
  * @functionality
  * - Provides flushPromises to wait for pending promise resolution
  * - Provides advanceTimersAndFlush to combine timer advancement with promise flushing
+ * - Provides runAllTimersAndFlush to run all pending timers with promise flushing
  * @dependencies
  * - vitest for fake timer control
  */

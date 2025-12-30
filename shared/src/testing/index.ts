@@ -34,7 +34,9 @@ export {
   disconnectTestDb,
   setupTestDb,
   withCleanup,
+  CLEANUP_TABLE_ORDER,
   type PrismaLikeClient,
+  type TableName,
 } from './db';
 
 // Custom matchers - must be imported for side effects (extends vitest)

@@ -83,8 +83,9 @@ export function hasTestPrisma(): boolean {
 /**
  * Tables to clean up, ordered by foreign key dependencies.
  * Children (dependent tables) must be deleted before parents.
+ * Exported for use with cleanupTables type validation.
  */
-const CLEANUP_TABLE_ORDER = [
+export const CLEANUP_TABLE_ORDER = [
   // A/B test related (most dependent)
   'ABVariantConfig',
   'ABVariant',
@@ -109,6 +110,12 @@ const CLEANUP_TABLE_ORDER = [
 ] as const;
 
 /**
+ * Type for valid table names from the schema.
+ * Use with cleanupTables for compile-time validation.
+ */
+export type TableName = (typeof CLEANUP_TABLE_ORDER)[number];
+
+/**
  * Cleans up all test data from the database.
  * Deletes from tables in correct order to respect foreign key constraints.
  *
@@ -127,10 +134,17 @@ export async function cleanupTestDb(): Promise<void> {
   for (const table of CLEANUP_TABLE_ORDER) {
     try {
       await prisma.$executeRawUnsafe(`DELETE FROM "${table}"`);
-    } catch {
-      // Suppresses "table does not exist" errors for workspaces with partial schemas.
-      // Other errors (connection, permissions) are also suppressed to ensure
-      // cleanup continues for remaining tables.
+    } catch (error: unknown) {
+      // Only suppress "table does not exist" errors for workspaces with partial schemas
+      const isTableNotExist =
+        error instanceof Error &&
+        (error.message.includes('no such table') ||
+          error.message.includes('does not exist'));
+
+      if (!isTableNotExist) {
+        // Log unexpected errors (connection, permissions) but continue cleanup
+        console.error(`[cleanupTestDb] Failed to clean table "${table}":`, error);
+      }
     }
   }
 }
@@ -142,7 +156,7 @@ export async function cleanupTestDb(): Promise<void> {
  * Note: Unlike cleanupTestDb(), this function throws on errors including
  * missing tables. Use this when you need strict cleanup verification.
  *
- * @param tables - Array of table names to clean
+ * @param tables - Array of valid table names from CLEANUP_TABLE_ORDER
  * @throws Error if any table doesn't exist or deletion fails
  *
  * @example
@@ -152,7 +166,7 @@ export async function cleanupTestDb(): Promise<void> {
  * });
  * ```
  */
-export async function cleanupTables(tables: string[]): Promise<void> {
+export async function cleanupTables(tables: readonly TableName[]): Promise<void> {
   const prisma = getTestPrisma();
 
   for (const table of tables) {
@@ -175,7 +189,12 @@ export async function disconnectTestDb(): Promise<void> {
   if (testClient) {
     const client = testClient;
     testClient = null; // Clear first to prevent stale state on error
-    await client.$disconnect();
+    try {
+      await client.$disconnect();
+    } catch (error: unknown) {
+      console.error('[disconnectTestDb] Failed to disconnect:', error);
+      throw error;
+    }
   }
 }
 
@@ -220,25 +239,27 @@ export function setupTestDb(options: { cleanupBeforeEach?: boolean } = {}): void
  * All data created during the callback will be deleted after it completes.
  *
  * @param callback - Test function to run
- * @returns Promise that resolves when the test and cleanup complete
+ * @returns Promise that resolves with the callback's return value after cleanup
  *
  * @example
  * ```typescript
  * it('creates data in isolation', async () => {
- *   await withCleanup(async (prisma) => {
+ *   const result = await withCleanup(async (prisma) => {
  *     await prisma.$executeRawUnsafe('INSERT INTO "User" ...');
+ *     return { success: true };
  *     // Data is automatically cleaned up after the test
  *   });
+ *   expect(result.success).toBe(true);
  * });
  * ```
  */
 export async function withCleanup<T>(
   callback: (prisma: PrismaLikeClient) => Promise<T>
-): Promise<void> {
+): Promise<T> {
   const prisma = getTestPrisma();
 
   try {
-    await callback(prisma);
+    return await callback(prisma);
   } finally {
     await cleanupTestDb();
   }
