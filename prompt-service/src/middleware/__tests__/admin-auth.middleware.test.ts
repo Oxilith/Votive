@@ -21,6 +21,26 @@ vi.mock('@/config', () => ({
     adminApiKey: '',
     nodeEnv: 'development',
     devAuthBypass: false,
+    rateLimit: {
+      windowMs: 60000,
+      login: 5,
+      register: 5,
+      passwordReset: 3,
+      forgotPassword: 3,
+      tokenRefresh: 20,
+      userData: 30,
+      profile: 15,
+    },
+  },
+}));
+
+// Mock logger to prevent pino initialization errors when config is mocked
+vi.mock('@/utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   },
 }));
 

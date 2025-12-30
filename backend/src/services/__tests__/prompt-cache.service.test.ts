@@ -25,6 +25,16 @@ vi.mock('@/config', () => ({
   },
 }));
 
+// Mock logger to prevent pino initialization errors when config is mocked
+vi.mock('@/utils/logger', () => ({
+  logger: {
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 describe('PromptCacheService', () => {
   let cacheService: PromptCacheService;
 
