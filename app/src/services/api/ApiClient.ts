@@ -205,11 +205,13 @@ export class ApiClient implements IApiClient {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
-        // Handle 401 errors with token refresh (unless this is already a retry after refresh)
+        // Handle 401 errors with token refresh (unless skipAuthRefresh is set or this is already a retry)
+        const skipRefresh = config?.skipAuthRefresh ?? false;
         if (
           error instanceof ApiClientError &&
           error.status === 401 &&
           !isRetryAfterRefresh &&
+          !skipRefresh &&
           this.onUnauthorized
         ) {
           const newToken = await this.handleTokenRefresh();

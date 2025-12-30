@@ -16,6 +16,8 @@ export interface RequestConfig {
   timeout?: number;
   retries?: number;
   retryDelay?: number;
+  /** Skip automatic token refresh on 401 errors (use for auth endpoints) */
+  skipAuthRefresh?: boolean;
 }
 
 export interface ApiResponse<T> {

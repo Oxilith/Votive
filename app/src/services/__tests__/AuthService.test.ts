@@ -66,7 +66,8 @@ describe('AuthService', () => {
       expect(result).toEqual(mockResponse);
       expect(mockClient.post).toHaveBeenCalledWith(
         '/api/user-auth/login',
-        { email: 'test@example.com', password: 'password123' }
+        { email: 'test@example.com', password: 'password123' },
+        { skipAuthRefresh: true }
       );
     });
 
@@ -91,7 +92,8 @@ describe('AuthService', () => {
         expect.objectContaining({
           email: 'new@example.com',
           name: 'New User',
-        })
+        }),
+        { skipAuthRefresh: true }
       );
     });
 
@@ -134,7 +136,8 @@ describe('AuthService', () => {
       expect(result).toEqual(mockResponse);
       expect(mockClient.post).toHaveBeenCalledWith(
         '/api/user-auth/refresh',
-        {}
+        {},
+        { skipAuthRefresh: true }
       );
     });
   });
@@ -212,7 +215,8 @@ describe('AuthService', () => {
       expect(result).toEqual(mockResponse);
       expect(mockClient.post).toHaveBeenCalledWith(
         '/api/user-auth/password-reset',
-        { email: 'test@example.com' }
+        { email: 'test@example.com' },
+        { skipAuthRefresh: true }
       );
     });
 
@@ -225,7 +229,8 @@ describe('AuthService', () => {
       expect(result).toEqual(mockResponse);
       expect(mockClient.post).toHaveBeenCalledWith(
         '/api/user-auth/password-reset/confirm',
-        { token: 'reset-token', newPassword: 'NewPass123' }
+        { token: 'reset-token', newPassword: 'NewPass123' },
+        { skipAuthRefresh: true }
       );
     });
   });
@@ -242,7 +247,8 @@ describe('AuthService', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockClient.get).toHaveBeenCalledWith(
-        '/api/user-auth/verify-email/verification-token'
+        '/api/user-auth/verify-email/verification-token',
+        { skipAuthRefresh: true }
       );
     });
 

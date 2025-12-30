@@ -97,7 +97,8 @@ export class AuthService implements IAuthService {
   async register(data: RegisterRequest): Promise<AuthResponse> {
     const response = await this.client.post<AuthResponse, RegisterRequest>(
       `${AUTH_BASE_PATH}/register`,
-      data
+      data,
+      { skipAuthRefresh: true }
     );
     return response.data;
   }
@@ -108,7 +109,8 @@ export class AuthService implements IAuthService {
   async login(data: LoginRequest): Promise<AuthResponse> {
     const response = await this.client.post<AuthResponse, LoginRequest>(
       `${AUTH_BASE_PATH}/login`,
-      data
+      data,
+      { skipAuthRefresh: true }
     );
     return response.data;
   }
@@ -142,7 +144,8 @@ export class AuthService implements IAuthService {
   async refreshToken(): Promise<RefreshResponse> {
     const response = await this.client.post<RefreshResponse, Record<string, never>>(
       `${AUTH_BASE_PATH}/refresh`,
-      {}
+      {},
+      { skipAuthRefresh: true }
     );
     return response.data;
   }
@@ -199,7 +202,8 @@ export class AuthService implements IAuthService {
   async requestPasswordReset(email: string): Promise<MessageResponse> {
     const response = await this.client.post<MessageResponse, { email: string }>(
       `${AUTH_BASE_PATH}/password-reset`,
-      { email }
+      { email },
+      { skipAuthRefresh: true }
     );
     return response.data;
   }
@@ -214,7 +218,11 @@ export class AuthService implements IAuthService {
     const response = await this.client.post<
       MessageResponse,
       { token: string; newPassword: string }
-    >(`${AUTH_BASE_PATH}/password-reset/confirm`, { token, newPassword });
+    >(
+      `${AUTH_BASE_PATH}/password-reset/confirm`,
+      { token, newPassword },
+      { skipAuthRefresh: true }
+    );
     return response.data;
   }
 
@@ -223,7 +231,8 @@ export class AuthService implements IAuthService {
    */
   async verifyEmail(token: string): Promise<{ message: string; user: SafeUser }> {
     const response = await this.client.get<{ message: string; user: SafeUser }>(
-      `${AUTH_BASE_PATH}/verify-email/${token}`
+      `${AUTH_BASE_PATH}/verify-email/${token}`,
+      { skipAuthRefresh: true }
     );
     return response.data;
   }
