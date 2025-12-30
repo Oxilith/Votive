@@ -147,14 +147,3 @@ export function isValidPassword(password: string): boolean {
   );
 }
 
-/**
- * Type guard that validates a value is a valid gender.
- * @param value - Value to validate
- * @returns true if value is a valid gender
- */
-export function isValidGender(
-  value: string | null | undefined
-): value is (typeof GENDER_VALUES)[number] {
-  if (value == null) return false;
-  return (GENDER_VALUES as readonly string[]).includes(value);
-}

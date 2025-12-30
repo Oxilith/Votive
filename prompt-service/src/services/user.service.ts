@@ -44,7 +44,7 @@ import {
   type JwtConfig,
 } from '@/utils';
 import { emailService } from '@/services/email.service';
-import { type Gender, isValidGender } from 'shared';
+import { type Gender } from 'shared';
 
 /**
  * Token expiry constants in milliseconds
@@ -160,7 +160,7 @@ function toSafeUser(user: User): SafeUser {
     emailVerified: user.emailVerified,
     emailVerifiedAt: user.emailVerifiedAt,
     name: user.name,
-    gender: isValidGender(user.gender) ? user.gender : null,
+    gender: user.gender as Gender,
     birthYear: user.birthYear,
     failedLoginAttempts: user.failedLoginAttempts,
     lockoutUntil: user.lockoutUntil,
@@ -218,7 +218,7 @@ export class UserService {
           email: input.email.toLowerCase(),
           password: hashedPassword,
           name: input.name,
-          gender: input.gender ?? null,
+          gender: input.gender,
           birthYear: input.birthYear,
         },
       });

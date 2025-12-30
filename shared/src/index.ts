@@ -67,7 +67,6 @@ export {
   PASSWORD_REGEX,
   PASSWORD_REQUIREMENTS_MESSAGE,
   isValidPassword,
-  isValidGender,
 } from './validation';
 
 // Prompt Types
