@@ -81,10 +81,9 @@ function App() {
       setLoading(true);
 
       try {
-        // Try to refresh token and get current user
-        const refreshResponse = await authService.refreshToken();
-        const user = await authService.getCurrentUser();
-        setAuth(user, refreshResponse.accessToken);
+        // Use combined endpoint for efficient auth restoration
+        const result = await authService.refreshTokenWithUser();
+        setAuth(result.user, result.accessToken, result.csrfToken);
       } catch {
         // No valid session - clear any stale auth state
         clearAuth();

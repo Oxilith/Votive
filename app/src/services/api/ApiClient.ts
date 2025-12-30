@@ -26,23 +26,38 @@ const DEFAULT_RETRY_DELAY = 1000; // 1 second
 const CSRF_HEADER = 'x-csrf-token';
 
 /**
- * CSRF cookie name
- */
-const CSRF_COOKIE = 'csrf-token';
-
-/**
  * HTTP methods that require CSRF protection
  */
 const CSRF_METHODS = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
 /**
- * Read CSRF token from cookie
+ * CSRF token getter function type
+ */
+type CsrfTokenGetter = () => string | null;
+
+/**
+ * Global CSRF token getter, set by AuthService initialization
+ */
+let csrfTokenGetter: CsrfTokenGetter | null = null;
+
+/**
+ * Set the CSRF token getter function
+ * Called by AuthService during initialization to avoid circular dependency
+ */
+export function setCsrfTokenGetter(getter: CsrfTokenGetter): void {
+  csrfTokenGetter = getter;
+}
+
+/**
+ * Get CSRF token from auth store
  *
- * @returns CSRF token or null if not found
+ * The CSRF token is stored in memory after login/register/refresh.
+ * The httpOnly cookie is sent automatically by the browser.
+ *
+ * @returns CSRF token or null if not authenticated
  */
 function getCsrfToken(): string | null {
-  const match = document.cookie.match(new RegExp(`(^|;\\s*)${CSRF_COOKIE}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
+  return csrfTokenGetter ? csrfTokenGetter() : null;
 }
 
 export class ApiClientError extends Error implements ApiError {

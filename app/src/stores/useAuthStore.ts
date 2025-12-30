@@ -4,6 +4,7 @@
  * @functionality
  * - Manages authenticated user state
  * - Tracks access token for API requests
+ * - Tracks CSRF token for state-changing requests
  * - Tracks initialization status for auth check on app load
  * - Provides actions for login, logout, and token management
  * - Persists user info to localStorage for optimistic UI
@@ -12,14 +13,13 @@
  * - zustand for state management
  * - zustand/middleware for persistence
  * - @/types/auth.types (SafeUser, SavedAssessment, SavedAnalysis)
+ * - @/config/auth.config for cache constants
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SafeUser, SavedAssessment, SavedAnalysis } from '@/types/auth.types';
-
-/** Cache staleness threshold in milliseconds (5 minutes) */
-const CACHE_STALE_THRESHOLD_MS = 5 * 60 * 1000;
+import { AUTH_CACHE_STALE_THRESHOLD_MS } from '@/config/auth.config';
 
 /**
  * Authentication state interface
@@ -28,6 +28,7 @@ interface AuthState {
   // State
   user: SafeUser | null;
   accessToken: string | null;
+  csrfToken: string | null;
   isLoading: boolean;
   isInitialized: boolean;
   isHydrated: boolean; // Track if store has been hydrated from localStorage
@@ -45,10 +46,11 @@ interface AuthState {
   isAnalysesListStale: () => boolean;
 
   // Actions
-  setAuth: (user: SafeUser, accessToken: string) => void;
+  setAuth: (user: SafeUser, accessToken: string, csrfToken: string) => void;
   clearAuth: () => void;
   setUser: (user: SafeUser) => void;
   setAccessToken: (token: string) => void;
+  setCsrfToken: (token: string | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setInitialized: () => void;
@@ -69,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       // Initial state
       user: null,
       accessToken: null,
+      csrfToken: null,
       isLoading: false,
       isInitialized: false,
       isHydrated: false,
@@ -84,20 +87,21 @@ export const useAuthStore = create<AuthState>()(
       isAssessmentsListStale: () => {
         const loadedAt = get().assessmentsListLoadedAt;
         if (loadedAt === null) return true;
-        return Date.now() - loadedAt > CACHE_STALE_THRESHOLD_MS;
+        return Date.now() - loadedAt > AUTH_CACHE_STALE_THRESHOLD_MS;
       },
 
       isAnalysesListStale: () => {
         const loadedAt = get().analysesListLoadedAt;
         if (loadedAt === null) return true;
-        return Date.now() - loadedAt > CACHE_STALE_THRESHOLD_MS;
+        return Date.now() - loadedAt > AUTH_CACHE_STALE_THRESHOLD_MS;
       },
 
       // Actions
-      setAuth: (user, accessToken) =>
+      setAuth: (user, accessToken, csrfToken) =>
         set({
           user,
           accessToken,
+          csrfToken,
           isLoading: false,
           error: null,
         }),
@@ -106,6 +110,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           accessToken: null,
+          csrfToken: null,
           error: null,
           assessmentsList: null,
           assessmentsListLoadedAt: null,
@@ -116,6 +121,8 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user) => set({ user }),
 
       setAccessToken: (accessToken) => set({ accessToken }),
+
+      setCsrfToken: (csrfToken) => set({ csrfToken }),
 
       setLoading: (isLoading) => set({ isLoading }),
 

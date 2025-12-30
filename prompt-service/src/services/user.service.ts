@@ -141,6 +141,13 @@ export interface RefreshResult {
 }
 
 /**
+ * Result of token refresh with user data
+ */
+export interface RefreshWithUserResult extends RefreshResult {
+  user: SafeUser;
+}
+
+/**
  * Result of registration request
  * Returns generic message to prevent email enumeration
  */
@@ -499,6 +506,98 @@ export class UserService {
     return {
       accessToken,
       refreshToken: newRefreshTokenValue,
+    };
+  }
+
+  /**
+   * Refresh access token and return user data in a single operation
+   *
+   * Combines token refresh and user fetch in a single database transaction
+   * for efficient auth state restoration. This is more efficient than
+   * separate refreshTokens() + getById() calls.
+   *
+   * Security: Uses database transaction to prevent race conditions where
+   * concurrent refresh requests with the same token could both succeed.
+   *
+   * @param refreshTokenJwt - The JWT refresh token
+   * @returns New access/refresh tokens plus user data
+   * @throws TokenError if refresh token is invalid or expired
+   */
+  async refreshTokensWithUser(refreshTokenJwt: string): Promise<RefreshWithUserResult> {
+    // Verify the refresh token JWT (cryptographic verification before DB lookup)
+    const verifyResult = verifyRefreshToken(refreshTokenJwt, this.jwtConfig);
+
+    if (!verifyResult.success) {
+      const errorMessage = verifyResult.error === 'expired'
+        ? 'Refresh token expired'
+        : 'Invalid refresh token';
+      throw new TokenError(errorMessage, verifyResult.error === 'expired' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN');
+    }
+
+    // After success check, TypeScript knows payload is non-null due to discriminated union
+    const { userId, tokenId } = verifyResult.payload;
+
+    // Prepare new token values before transaction
+    const newTokenId = generateTokenId();
+    const newExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_MS);
+    const newRefreshTokenValue = generateRefreshToken(userId, newTokenId, this.jwtConfig);
+
+    // Atomic transaction: lookup, validate, rotate tokens, and fetch user in one operation
+    const user = await prisma.$transaction(
+      async (tx) => {
+        // Find the refresh token in database (inside transaction for atomicity)
+        const storedToken = await tx.refreshToken.findUnique({
+          where: { token: tokenId },
+        });
+
+        // Validate stored token
+        if (!storedToken || storedToken.userId !== userId) {
+          throw new TokenError('Invalid refresh token');
+        }
+
+        // Check if token is expired in database
+        if (storedToken.expiresAt < new Date()) {
+          // Clean up expired token
+          await tx.refreshToken.delete({
+            where: { id: storedToken.id },
+          });
+          throw new TokenError('Refresh token expired', 'TOKEN_EXPIRED');
+        }
+
+        // Delete old token and create new one atomically
+        await tx.refreshToken.delete({
+          where: { id: storedToken.id },
+        });
+
+        await tx.refreshToken.create({
+          data: {
+            userId,
+            token: newTokenId,
+            expiresAt: newExpiresAt,
+          },
+        });
+
+        // Fetch user data in the same transaction
+        const userData = await tx.user.findUnique({
+          where: { id: userId },
+        });
+
+        if (!userData) {
+          throw new TokenError('User not found');
+        }
+
+        return userData;
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
+
+    // Generate new access token
+    const accessToken = generateAccessToken(userId, this.jwtConfig);
+
+    return {
+      accessToken,
+      refreshToken: newRefreshTokenValue,
+      user: toSafeUser(user),
     };
   }
 

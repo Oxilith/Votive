@@ -14,6 +14,7 @@
  * - @/components/auth/forms (LoginForm, RegisterForm, FormInput, FormButton)
  * - @/components/shared/icons (MailIcon)
  * - @/hooks/useRouting
+ * - @/services/api/AuthService (authService)
  */
 
 import { useState, useCallback } from 'react';
@@ -22,6 +23,7 @@ import AuthLayout from '@/components/auth/AuthLayout';
 import { LoginForm, RegisterForm, FormInput, FormButton } from '@/components/auth/forms';
 import { useRouting } from '@/hooks/useRouting';
 import { MailIcon } from '@/components/shared/icons';
+import { authService } from '@/services/api/AuthService';
 
 /**
  * Authentication mode
@@ -47,11 +49,22 @@ const PasswordResetRequestForm: React.FC<{
   const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement password reset request API call
-    setSubmitted(true);
+    setIsLoading(true);
+
+    try {
+      await authService.requestPasswordReset(email);
+      setSubmitted(true);
+    } catch {
+      // Always show success to prevent email enumeration
+      // The API already returns success regardless of whether email exists
+      setSubmitted(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (submitted) {
@@ -99,7 +112,7 @@ const PasswordResetRequestForm: React.FC<{
           placeholder={t('forgotPassword.emailPlaceholder')}
         />
 
-        <FormButton>{t('forgotPassword.submit')}</FormButton>
+        <FormButton isLoading={isLoading}>{t('forgotPassword.submit')}</FormButton>
       </form>
 
       <p className="mt-6 text-center font-body text-[var(--text-secondary)]">

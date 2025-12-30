@@ -28,6 +28,7 @@ import type {
   ProfileUpdateRequest,
   PasswordChangeRequest,
   RefreshResponse,
+  RefreshWithUserResponse,
   MessageResponse,
   SavedAssessment,
   SavedAssessmentRaw,
@@ -35,7 +36,7 @@ import type {
   SavedAnalysisRaw,
 } from '@/types/auth.types';
 import type { AssessmentResponses, AIAnalysisResult } from 'shared';
-import { apiClient } from './ApiClient';
+import { apiClient, setCsrfTokenGetter } from './ApiClient';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 /**
@@ -144,6 +145,21 @@ export class AuthService implements IAuthService {
   async refreshToken(): Promise<RefreshResponse> {
     const response = await this.client.post<RefreshResponse, Record<string, never>>(
       `${AUTH_BASE_PATH}/refresh`,
+      {},
+      { skipAuthRefresh: true }
+    );
+    return response.data;
+  }
+
+  /**
+   * Refresh access token and get user data in a single request
+   *
+   * More efficient than separate refreshToken() + getCurrentUser() calls.
+   * Also sets the CSRF token for subsequent requests.
+   */
+  async refreshTokenWithUser(): Promise<RefreshWithUserResponse> {
+    const response = await this.client.post<RefreshWithUserResponse, Record<string, never>>(
+      `${AUTH_BASE_PATH}/refresh-with-user`,
       {},
       { skipAuthRefresh: true }
     );
@@ -374,8 +390,22 @@ export class AuthService implements IAuthService {
 // Default auth service instance using the default API client
 export const authService = new AuthService(apiClient);
 
-// Configure token refresh interceptor
-// When a 401 error occurs, this handler will be called to refresh the token
+/**
+ * Configure 401 unauthorized handler for automatic token refresh.
+ *
+ * IMPORTANT: This must be called during application initialization,
+ * BEFORE any authenticated API requests are made. The handler is
+ * invoked automatically when any API request receives a 401 response.
+ *
+ * The handler:
+ * 1. Attempts to refresh the access token using the refresh token cookie
+ * 2. If successful, updates the auth store with the new token and returns it
+ * 3. If failed, clears the auth state and returns null
+ *
+ * The ApiClient uses a Promise singleton pattern to ensure only one
+ * refresh request is in flight at a time, even if multiple requests
+ * fail with 401 simultaneously.
+ */
 apiClient.setUnauthorizedHandler(async () => {
   try {
     const response = await authService.refreshToken();
@@ -388,3 +418,11 @@ apiClient.setUnauthorizedHandler(async () => {
     return null;
   }
 });
+
+/**
+ * Configure CSRF token getter for the API client.
+ *
+ * The CSRF token is stored in the auth store after login/register/refresh.
+ * The ApiClient reads it from the store to include in request headers.
+ */
+setCsrfTokenGetter(() => useAuthStore.getState().csrfToken);

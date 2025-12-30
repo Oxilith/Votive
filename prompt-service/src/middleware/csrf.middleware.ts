@@ -2,8 +2,9 @@
  * @file prompt-service/src/middleware/csrf.middleware.ts
  * @purpose CSRF protection middleware using double-submit cookie pattern
  * @functionality
- * - Validates CSRF token from header against signed cookie
- * - Sets CSRF token cookie on successful authentication
+ * - Validates CSRF token from header against httpOnly cookie
+ * - Sets CSRF token in httpOnly cookie and returns token in response body
+ * - Frontend stores token from response body, not from reading cookie
  * - Skips validation for safe HTTP methods (GET, HEAD, OPTIONS)
  * - Provides defense-in-depth alongside SameSite cookie protection
  * @dependencies
@@ -16,22 +17,24 @@ import { CSRF_COOKIE, CSRF_HEADER, generateCsrfToken, validateCsrfToken } from '
 
 /**
  * CSRF cookie options
- * Note: httpOnly is FALSE so JavaScript can read and send the token in headers
- * Note: signed is FALSE because the double-submit pattern doesn't require signing -
- *       the token in the cookie must match the token in the header exactly
+ *
+ * Security: httpOnly is TRUE for defense-in-depth.
+ * The frontend gets the CSRF token from the response body (login/register/refresh),
+ * stores it in memory, and sends it in the X-CSRF-Token header.
+ * The browser automatically sends the httpOnly cookie, and the server compares both.
+ *
+ * This prevents XSS from easily exfiltrating the CSRF token via document.cookie,
+ * even though the token is also available in the initial response body.
  */
 const CSRF_COOKIE_OPTIONS = {
-  httpOnly: false, // Must be readable by JavaScript to send in header
+  httpOnly: true, // Defense-in-depth: token comes from response body, not cookie
   // In local development (NODE_ENV !== 'production'), secure is false to allow
   // HTTP without HTTPS. In production, requires HTTPS for cookie transmission.
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   path: '/',
-  // Not signed - client needs to read exact value for double-submit header.
-  // Unlike refresh tokens (which are httpOnly JWTs), CSRF tokens must be
-  // readable by JavaScript to send in the x-csrf-token header.
-  signed: false,
+  signed: false, // Not signed - exact match required for double-submit pattern
 };
 
 /**

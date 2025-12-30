@@ -92,7 +92,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
     try {
       const response = await authService.login({ email, password });
-      setAuth(response.user, response.accessToken);
+      setAuth(response.user, response.accessToken, response.csrfToken);
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {

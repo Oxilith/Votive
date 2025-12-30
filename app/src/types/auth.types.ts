@@ -46,6 +46,7 @@ export interface RegisterRequest {
 export interface AuthResponse {
   user: SafeUser;
   accessToken: string;
+  csrfToken: string;
 }
 
 /**
@@ -122,6 +123,16 @@ export interface AuthError {
  */
 export interface RefreshResponse {
   accessToken: string;
+}
+
+/**
+ * Token refresh with user data response
+ * Used for efficient auth state restoration
+ */
+export interface RefreshWithUserResponse {
+  accessToken: string;
+  user: SafeUser;
+  csrfToken: string;
 }
 
 /**

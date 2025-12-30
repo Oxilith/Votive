@@ -66,6 +66,13 @@ router.post(
   asyncHandler(userAuthController.refresh.bind(userAuthController))
 );
 
+// Token refresh with user data (20 req/min default) - for efficient auth restoration
+router.post(
+  '/refresh-with-user',
+  tokenRefreshLimiter,
+  asyncHandler(userAuthController.refreshWithUser.bind(userAuthController))
+);
+
 // Password reset - request email (3 req/min default)
 router.post(
   '/password-reset',

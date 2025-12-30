@@ -8,6 +8,7 @@
  * - Uses shared AuthLayout for consistent styling
  * @dependencies
  * - React (useCallback)
+ * - react-i18next (useTranslation)
  * - @/components/auth/AuthLayout
  * - @/components/auth/forms/PasswordResetConfirmForm
  * - @/components/shared/icons
@@ -15,6 +16,7 @@
  */
 
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import AuthLayout from '@/components/auth/AuthLayout';
 import { PasswordResetConfirmForm } from '@/components/auth/forms';
 import { ErrorCircleIcon } from '@/components/shared/icons';
@@ -32,6 +34,7 @@ export interface PasswordResetPageProps {
  * PasswordResetPage - Handles password reset confirmation from email links
  */
 const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ token }) => {
+  const { t } = useTranslation('auth');
   const { navigate } = useRouting();
 
   const handleNavigateToLanding = useCallback(() => {
@@ -56,23 +59,23 @@ const PasswordResetPage: React.FC<PasswordResetPageProps> = ({ token }) => {
             <ErrorCircleIcon size="lg" className="text-red-500" />
           </div>
           <h2 className="font-display text-2xl text-[var(--text-primary)] mb-2">
-            Invalid Reset Link
+            {t('resetPassword.invalidLink.title')}
           </h2>
           <p className="font-body text-[var(--text-secondary)] mb-6">
-            This password reset link is invalid or has expired. Please request a new one.
+            {t('resetPassword.invalidLink.description')}
           </p>
           <div className="space-y-3">
             <button
               onClick={handleNavigateToLogin}
               className="cta-button w-full py-3 px-6 font-body font-medium text-white bg-[var(--accent)]"
             >
-              Go to Sign In
+              {t('resetPassword.invalidLink.goToSignIn')}
             </button>
             <button
               onClick={handleNavigateToLanding}
               className="w-full py-2 font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
             >
-              Back to Home
+              {t('resetPassword.invalidLink.backToHome')}
             </button>
           </div>
         </div>

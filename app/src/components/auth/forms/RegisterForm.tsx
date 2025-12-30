@@ -148,7 +148,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         birthYear: parseInt(birthYear, 10),
         gender,
       });
-      setAuth(response.user, response.accessToken);
+      setAuth(response.user, response.accessToken, response.csrfToken);
       onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {

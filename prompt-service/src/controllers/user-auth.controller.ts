@@ -178,6 +178,54 @@ export class UserAuthController {
   }
 
   /**
+   * POST /api/user-auth/refresh-with-user - Refresh access token and get user data
+   *
+   * Combined endpoint for efficient auth state restoration. Returns new access token,
+   * rotates refresh token, sets CSRF token, and returns user data in a single request.
+   */
+  async refreshWithUser(req: Request, res: Response): Promise<void> {
+    // Get refresh token from signed cookie
+    const signedCookies = req.signedCookies as AuthCookies;
+    const refreshToken = signedCookies.refreshToken;
+
+    if (!refreshToken) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        error: 'No refresh token provided',
+        code: 'NO_TOKEN',
+      });
+      return;
+    }
+
+    try {
+      const result = await userService.refreshTokensWithUser(refreshToken);
+
+      // Set new refresh token in httpOnly cookie (token rotation)
+      res.cookie(REFRESH_TOKEN_COOKIE, result.refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
+
+      // Set CSRF token for subsequent requests
+      const csrfToken = setCsrfToken(res);
+
+      res.json({
+        accessToken: result.accessToken,
+        user: result.user,
+        csrfToken,
+      });
+    } catch (error) {
+      if (error instanceof TokenError) {
+        // Clear invalid cookies
+        res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
+        clearCsrfToken(res);
+        res.status(error.statusCode).json({
+          error: error.message,
+          code: error.code,
+        });
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * POST /api/user-auth/password-reset - Request password reset email
    */
   async requestPasswordReset(req: Request, res: Response): Promise<void> {
