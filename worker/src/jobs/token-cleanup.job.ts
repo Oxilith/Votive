@@ -29,14 +29,22 @@ export const tokenCleanupJob: Job = {
 
   async run(): Promise<JobResult> {
     const now = new Date();
+    // Revoked tokens older than 7 days can be safely deleted
+    // They're kept briefly for token theft detection, but don't need to persist indefinitely
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     // Create fresh connection for each job execution to avoid stale connection issues
     const prisma = createFreshPrismaClient();
 
     try {
-      // Delete expired refresh tokens
+      // Delete expired OR old revoked refresh tokens
+      // Revoked tokens are kept for 7 days to support token theft detection,
+      // after which they can be safely removed to prevent database bloat
       const refreshResult = await prisma.refreshToken.deleteMany({
         where: {
-          expiresAt: { lt: now },
+          OR: [
+            { expiresAt: { lt: now } },
+            { AND: [{ isRevoked: true }, { createdAt: { lt: sevenDaysAgo } }] },
+          ],
         },
       });
 
@@ -58,7 +66,7 @@ export const tokenCleanupJob: Job = {
 
       return {
         success: true,
-        message: `Token cleanup completed. Deleted ${totalDeleted} expired/used tokens.`,
+        message: `Token cleanup completed. Deleted ${totalDeleted} expired/used/revoked tokens.`,
         metrics: {
           refreshTokensDeleted: refreshResult.count,
           passwordResetTokensDeleted: passwordResult.count,

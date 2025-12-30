@@ -104,6 +104,10 @@ if (!config.sessionSecret) {
   throw new Error('FATAL: Cookie signing secret is not configured. This should not happen if config validation passed.');
 }
 const cookieSecret = config.sessionSecret;
+// codeql[js/missing-token-validation]: CSRF protection is applied at the route level via csrfMiddleware.
+// All state-changing endpoints (POST/PUT/DELETE) in user-auth.routes.ts use the double-submit cookie
+// pattern implemented in middleware/csrf.middleware.ts. Global CSRF is not appropriate as it would
+// block legitimate cross-origin requests to public API endpoints like /api/resolve.
 app.use(cookieParser(cookieSecret));
 
 // Health check endpoint with database connectivity verification

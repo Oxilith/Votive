@@ -82,7 +82,7 @@ describe('tokenCleanupJob', () => {
       const result = await tokenCleanupJob.run();
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Token cleanup completed. Deleted 10 expired/used tokens.');
+      expect(result.message).toBe('Token cleanup completed. Deleted 10 expired/used/revoked tokens.');
       expect(result.metrics).toEqual({
         refreshTokensDeleted: 5,
         passwordResetTokensDeleted: 3,
@@ -99,7 +99,7 @@ describe('tokenCleanupJob', () => {
       const result = await tokenCleanupJob.run();
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Token cleanup completed. Deleted 0 expired/used tokens.');
+      expect(result.message).toBe('Token cleanup completed. Deleted 0 expired/used/revoked tokens.');
       expect(result.metrics).toEqual({
         refreshTokensDeleted: 0,
         passwordResetTokensDeleted: 0,
@@ -108,16 +108,25 @@ describe('tokenCleanupJob', () => {
       });
     });
 
-    it('should use correct filter for refresh tokens (expired only)', async () => {
+    it('should use correct filter for refresh tokens (expired OR old revoked)', async () => {
       mockPrisma.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
       mockPrisma.passwordResetToken.deleteMany.mockResolvedValue({ count: 0 });
       mockPrisma.emailVerifyToken.deleteMany.mockResolvedValue({ count: 0 });
 
       await tokenCleanupJob.run();
 
+      // Should delete expired tokens OR revoked tokens older than 7 days
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({
         where: {
-          expiresAt: { lt: new Date('2024-01-15T12:00:00.000Z') },
+          OR: [
+            { expiresAt: { lt: new Date('2024-01-15T12:00:00.000Z') } },
+            {
+              AND: [
+                { isRevoked: true },
+                { createdAt: { lt: new Date('2024-01-08T12:00:00.000Z') } }, // 7 days ago
+              ],
+            },
+          ],
         },
       });
     });

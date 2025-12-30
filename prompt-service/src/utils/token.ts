@@ -99,7 +99,13 @@ export function generateFamilyId(): string {
  * This provides defense-in-depth: if the database is compromised,
  * attackers cannot use the stored hashes to forge valid tokens.
  *
- * @param token - The plaintext token to hash
+ * NOTE: SHA-256 is appropriate here because we're hashing cryptographically
+ * random tokens with 256 bits of entropy (from crypto.randomBytes), NOT
+ * user passwords. bcrypt/scrypt are designed for low-entropy passwords where
+ * attackers can perform dictionary attacks. For high-entropy random tokens,
+ * SHA-256 provides sufficient security without the computational overhead.
+ *
+ * @param token - The plaintext token to hash (must be cryptographically random)
  * @returns A 64-character hex-encoded SHA-256 hash
  *
  * @example
@@ -108,5 +114,7 @@ export function generateFamilyId(): string {
  * // Store hashedToken in database, send token to user
  */
 export function hashToken(token: string): string {
+  // codeql[js/insufficient-password-hash]: This hashes high-entropy random tokens (256 bits),
+  // not user passwords. SHA-256 is appropriate for cryptographically random values.
   return crypto.createHash('sha256').update(token).digest('hex');
 }

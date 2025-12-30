@@ -22,7 +22,8 @@
       "other": "Other"
     },
     "saveChanges": "Save Changes",
-    "updated": "Profile updated successfully"
+    "updated": "Profile updated successfully",
+    "updateFailed": "Failed to update profile. Please try again."
   },
   "passwordTab": {
     "title": "Change Password",
@@ -31,7 +32,8 @@
     "newPasswordPlaceholder": "Min 8 chars, uppercase, lowercase, number",
     "confirmPassword": "Confirm New Password",
     "changePassword": "Change Password",
-    "changed": "Password changed successfully"
+    "changed": "Password changed successfully",
+    "changeFailed": "Failed to change password. Please try again."
   },
   "assessmentsTab": {
     "title": "Past Assessments",

@@ -503,19 +503,117 @@ export class UserService {
   }
 
   /**
-   * Refresh access token using a valid refresh token
+   * Common token rotation logic used by refresh methods
    *
-   * Security: Uses database transaction to prevent race conditions where
-   * concurrent refresh requests with the same token could both succeed.
-   * The lookup, validation, and rotation all happen atomically.
+   * Performs atomic token rotation with theft detection:
+   * 1. Validates stored token matches JWT claims
+   * 2. Detects token theft (reuse of revoked token)
+   * 3. Revokes old token (soft delete for theft detection)
+   * 4. Creates new token with same family chain
+   * 5. Optionally fetches user data in same transaction
    *
-   * @param refreshTokenJwt - The JWT refresh token
-   * @param ctx - Optional request context for audit logging (IP, userAgent)
-   * @returns New access and refresh tokens
-   * @throws TokenError if refresh token is invalid or expired
+   * @param tx - Prisma transaction client
+   * @param userId - User ID from JWT claims
+   * @param tokenId - Token ID from JWT claims
+   * @param newTokenId - New token ID to create
+   * @param newExpiresAt - Expiration date for new token
+   * @param ctx - Optional request context for audit logging
+   * @param fetchUser - Whether to fetch and return user data
+   * @returns User data if fetchUser is true, undefined otherwise
    */
-  async refreshTokens(refreshTokenJwt: string, ctx?: RequestContext): Promise<RefreshResult> {
-    // Verify the refresh token JWT (cryptographic verification before DB lookup)
+  private async rotateTokenInTransaction(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    tokenId: string,
+    newTokenId: string,
+    newExpiresAt: Date,
+    ctx?: RequestContext,
+    fetchUser: boolean = false
+  ): Promise<User | undefined> {
+    // Find the refresh token in database (inside transaction for atomicity)
+    const storedToken = await tx.refreshToken.findUnique({
+      where: { token: tokenId },
+    });
+
+    // Validate stored token
+    if (!storedToken || storedToken.userId !== userId) {
+      throw new TokenError('Invalid refresh token');
+    }
+
+    // TOKEN THEFT DETECTION: If token is already revoked, someone reused an old token
+    // This indicates potential token theft - revoke entire family
+    if (storedToken.isRevoked) {
+      // Revoke entire token family for security
+      await tx.refreshToken.updateMany({
+        where: { familyId: storedToken.familyId },
+        data: { isRevoked: true },
+      });
+      // Audit log potential token theft
+      auditLog({
+        eventType: 'AUTH_TOKEN_THEFT_DETECTED',
+        userId,
+        ip: ctx?.ip,
+        userAgent: ctx?.userAgent,
+        metadata: { familyId: storedToken.familyId },
+      });
+      throw new TokenError('Session invalidated for security', 'TOKEN_REVOKED');
+    }
+
+    // Check if token is expired in database
+    if (storedToken.expiresAt < new Date()) {
+      // Clean up expired token
+      await tx.refreshToken.delete({
+        where: { id: storedToken.id },
+      });
+      throw new TokenError('Refresh token expired', 'TOKEN_EXPIRED');
+    }
+
+    // Mark old token as revoked (soft delete for theft detection)
+    await tx.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { isRevoked: true },
+    });
+
+    // Create new token with same family
+    await tx.refreshToken.create({
+      data: {
+        userId,
+        token: newTokenId,
+        expiresAt: newExpiresAt,
+        familyId: storedToken.familyId, // Preserve family chain
+        deviceInfo: ctx?.userAgent,
+        ipAddress: ctx?.ip,
+      },
+    });
+
+    // Optionally fetch user data in the same transaction
+    if (fetchUser) {
+      const userData = await tx.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!userData) {
+        throw new TokenError('User not found');
+      }
+
+      return userData;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Verify refresh token JWT and handle failure audit logging
+   *
+   * @param refreshTokenJwt - The JWT refresh token to verify
+   * @param ctx - Optional request context for audit logging
+   * @returns Verified payload with userId and tokenId
+   * @throws TokenError if verification fails
+   */
+  private verifyRefreshTokenWithAudit(
+    refreshTokenJwt: string,
+    ctx?: RequestContext
+  ): { userId: string; tokenId: string } {
     const verifyResult = verifyRefreshToken(refreshTokenJwt, this.jwtConfig);
 
     if (!verifyResult.success) {
@@ -532,8 +630,24 @@ export class UserService {
       throw new TokenError(errorMessage, verifyResult.error === 'expired' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN');
     }
 
-    // After success check, TypeScript knows payload is non-null due to discriminated union
-    const { userId, tokenId } = verifyResult.payload;
+    return verifyResult.payload;
+  }
+
+  /**
+   * Refresh access token using a valid refresh token
+   *
+   * Security: Uses database transaction to prevent race conditions where
+   * concurrent refresh requests with the same token could both succeed.
+   * The lookup, validation, and rotation all happen atomically.
+   *
+   * @param refreshTokenJwt - The JWT refresh token
+   * @param ctx - Optional request context for audit logging (IP, userAgent)
+   * @returns New access and refresh tokens
+   * @throws TokenError if refresh token is invalid or expired
+   */
+  async refreshTokens(refreshTokenJwt: string, ctx?: RequestContext): Promise<RefreshResult> {
+    // Verify the refresh token JWT (cryptographic verification before DB lookup)
+    const { userId, tokenId } = this.verifyRefreshTokenWithAudit(refreshTokenJwt, ctx);
 
     // Prepare new token values before transaction
     const newTokenId = generateTokenId();
@@ -541,65 +655,9 @@ export class UserService {
     const newRefreshTokenValue = generateRefreshToken(userId, newTokenId, this.jwtConfig);
 
     // Atomic transaction: lookup, validate, detect theft, and rotate in one operation
-    // This prevents race conditions where concurrent requests could both succeed
-    // Explicit Serializable isolation for future-proofing if migrating to PostgreSQL
     await prisma.$transaction(
       async (tx) => {
-        // Find the refresh token in database (inside transaction for atomicity)
-        const storedToken = await tx.refreshToken.findUnique({
-          where: { token: tokenId },
-        });
-
-        // Validate stored token
-        if (!storedToken || storedToken.userId !== userId) {
-          throw new TokenError('Invalid refresh token');
-        }
-
-        // TOKEN THEFT DETECTION: If token is already revoked, someone reused an old token
-        // This indicates potential token theft - revoke entire family
-        if (storedToken.isRevoked) {
-          // Revoke entire token family for security
-          await tx.refreshToken.updateMany({
-            where: { familyId: storedToken.familyId },
-            data: { isRevoked: true },
-          });
-          // Audit log potential token theft
-          auditLog({
-            eventType: 'AUTH_TOKEN_THEFT_DETECTED',
-            userId,
-            ip: ctx?.ip,
-            userAgent: ctx?.userAgent,
-            metadata: { familyId: storedToken.familyId },
-          });
-          throw new TokenError('Session invalidated for security', 'TOKEN_REVOKED');
-        }
-
-        // Check if token is expired in database
-        if (storedToken.expiresAt < new Date()) {
-          // Clean up expired token
-          await tx.refreshToken.delete({
-            where: { id: storedToken.id },
-          });
-          throw new TokenError('Refresh token expired', 'TOKEN_EXPIRED');
-        }
-
-        // Mark old token as revoked (soft delete for theft detection)
-        await tx.refreshToken.update({
-          where: { id: storedToken.id },
-          data: { isRevoked: true },
-        });
-
-        // Create new token with same family
-        await tx.refreshToken.create({
-          data: {
-            userId,
-            token: newTokenId,
-            expiresAt: newExpiresAt,
-            familyId: storedToken.familyId, // Preserve family chain
-            deviceInfo: ctx?.userAgent,
-            ipAddress: ctx?.ip,
-          },
-        });
+        await this.rotateTokenInTransaction(tx, userId, tokenId, newTokenId, newExpiresAt, ctx, false);
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
@@ -638,24 +696,7 @@ export class UserService {
    */
   async refreshTokensWithUser(refreshTokenJwt: string, ctx?: RequestContext): Promise<RefreshWithUserResult> {
     // Verify the refresh token JWT (cryptographic verification before DB lookup)
-    const verifyResult = verifyRefreshToken(refreshTokenJwt, this.jwtConfig);
-
-    if (!verifyResult.success) {
-      const errorMessage = verifyResult.error === 'expired'
-        ? 'Refresh token expired'
-        : 'Invalid refresh token';
-      // Audit log failed refresh
-      auditLog({
-        eventType: 'AUTH_TOKEN_REFRESH_FAILED',
-        ip: ctx?.ip,
-        userAgent: ctx?.userAgent,
-        metadata: { reason: verifyResult.error },
-      });
-      throw new TokenError(errorMessage, verifyResult.error === 'expired' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN');
-    }
-
-    // After success check, TypeScript knows payload is non-null due to discriminated union
-    const { userId, tokenId } = verifyResult.payload;
+    const { userId, tokenId } = this.verifyRefreshTokenWithAudit(refreshTokenJwt, ctx);
 
     // Prepare new token values before transaction
     const newTokenId = generateTokenId();
@@ -665,72 +706,9 @@ export class UserService {
     // Atomic transaction: lookup, validate, detect theft, rotate tokens, and fetch user
     const user = await prisma.$transaction(
       async (tx) => {
-        // Find the refresh token in database (inside transaction for atomicity)
-        const storedToken = await tx.refreshToken.findUnique({
-          where: { token: tokenId },
-        });
-
-        // Validate stored token
-        if (!storedToken || storedToken.userId !== userId) {
-          throw new TokenError('Invalid refresh token');
-        }
-
-        // TOKEN THEFT DETECTION: If token is already revoked, someone reused an old token
-        // This indicates potential token theft - revoke entire family
-        if (storedToken.isRevoked) {
-          // Revoke entire token family for security
-          await tx.refreshToken.updateMany({
-            where: { familyId: storedToken.familyId },
-            data: { isRevoked: true },
-          });
-          // Audit log potential token theft
-          auditLog({
-            eventType: 'AUTH_TOKEN_THEFT_DETECTED',
-            userId,
-            ip: ctx?.ip,
-            userAgent: ctx?.userAgent,
-            metadata: { familyId: storedToken.familyId },
-          });
-          throw new TokenError('Session invalidated for security', 'TOKEN_REVOKED');
-        }
-
-        // Check if token is expired in database
-        if (storedToken.expiresAt < new Date()) {
-          // Clean up expired token
-          await tx.refreshToken.delete({
-            where: { id: storedToken.id },
-          });
-          throw new TokenError('Refresh token expired', 'TOKEN_EXPIRED');
-        }
-
-        // Mark old token as revoked (soft delete for theft detection)
-        await tx.refreshToken.update({
-          where: { id: storedToken.id },
-          data: { isRevoked: true },
-        });
-
-        // Create new token with same family
-        await tx.refreshToken.create({
-          data: {
-            userId,
-            token: newTokenId,
-            expiresAt: newExpiresAt,
-            familyId: storedToken.familyId, // Preserve family chain
-            deviceInfo: ctx?.userAgent,
-            ipAddress: ctx?.ip,
-          },
-        });
-
-        // Fetch user data in the same transaction
-        const userData = await tx.user.findUnique({
-          where: { id: userId },
-        });
-
-        if (!userData) {
-          throw new TokenError('User not found');
-        }
-
-        return userData;
+        const userData = await this.rotateTokenInTransaction(tx, userId, tokenId, newTokenId, newExpiresAt, ctx, true);
+        // TypeScript: fetchUser=true guarantees userData is defined
+        return userData as User;
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
@@ -1134,10 +1112,11 @@ export class UserService {
    *
    * @param userId - User ID
    * @param input - Profile update data
+   * @param ctx - Optional request context for audit logging (IP, userAgent)
    * @returns Updated user without sensitive fields
    * @throws NotFoundError if user not found
    */
-  async updateProfile(userId: string, input: ProfileUpdateInput): Promise<SafeUser> {
+  async updateProfile(userId: string, input: ProfileUpdateInput, ctx?: RequestContext): Promise<SafeUser> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
@@ -1146,13 +1125,41 @@ export class UserService {
       throw new NotFoundError('User', userId);
     }
 
+    // Build update data from provided fields
+    const updateData: Prisma.UserUpdateInput = {};
+    const changedFields: string[] = [];
+
+    if (input.name !== undefined && input.name !== user.name) {
+      updateData.name = input.name;
+      changedFields.push('name');
+    }
+    if (input.gender !== undefined && input.gender !== user.gender) {
+      updateData.gender = input.gender;
+      changedFields.push('gender');
+    }
+    if (input.birthYear !== undefined && input.birthYear !== user.birthYear) {
+      updateData.birthYear = input.birthYear;
+      changedFields.push('birthYear');
+    }
+
+    // Skip update if no changes
+    if (Object.keys(updateData).length === 0) {
+      return toSafeUser(user);
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: {
-        ...(input.name !== undefined && { name: input.name }),
-        ...(input.gender !== undefined && { gender: input.gender }),
-        ...(input.birthYear !== undefined && { birthYear: input.birthYear }),
-      },
+      data: updateData,
+    });
+
+    // Audit log profile update
+    auditLog({
+      eventType: 'AUTH_PROFILE_UPDATE',
+      userId,
+      email: user.email,
+      ip: ctx?.ip,
+      userAgent: ctx?.userAgent,
+      metadata: { changedFields },
     });
 
     return toSafeUser(updatedUser);

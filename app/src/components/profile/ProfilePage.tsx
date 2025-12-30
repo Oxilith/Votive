@@ -36,6 +36,7 @@ import {
 import { useAuthStore, useCurrentUser, useUIStore, useAssessmentStore, useAnalysisStore } from '@/stores';
 import { authService } from '@/services';
 import type { Gender, ProfileUpdateRequest, PasswordChangeRequest } from '@/types';
+import { logger } from '@/utils';
 import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH } from 'shared';
 
 /**
@@ -126,7 +127,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       const data = await authService.getAssessments();
       setAssessmentsList(data);
     } catch (error) {
-      console.error('Failed to load assessments:', error);
+      logger.error('Failed to load assessments', error);
       setAssessmentsError(t('assessmentsTab.loadError'));
       setAssessmentsList([]);
     } finally {
@@ -141,7 +142,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       const data = await authService.getAnalyses();
       setAnalysesList(data);
     } catch (error) {
-      console.error('Failed to load analyses:', error);
+      logger.error('Failed to load analyses', error);
       setAnalysesError(t('analysesTab.loadError'));
       setAnalysesList([]);
     } finally {
@@ -213,7 +214,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } catch (error) {
-      setProfileError(error instanceof Error ? error.message : 'Failed to update profile');
+      // Use translated error message to avoid leaking internal details
+      logger.error('Profile update failed', error);
+      setProfileError(t('profileTab.updateFailed'));
     } finally {
       setProfileLoading(false);
     }
@@ -253,7 +256,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       setConfirmPassword('');
       setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (error) {
-      setPasswordError(error instanceof Error ? error.message : 'Failed to change password');
+      // Use translated error message to avoid leaking internal details
+      logger.error('Password change failed', error);
+      setPasswordError(t('passwordTab.changeFailed'));
     } finally {
       setPasswordLoading(false);
     }
@@ -267,7 +272,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       clearAuth();
       setView('landing');
     } catch (error) {
-      setDeleteError(error instanceof Error ? error.message : t('dangerTab.deleteFailed'));
+      // Use translated error message to avoid leaking internal details
+      logger.error('Account deletion failed', error);
+      setDeleteError(t('dangerTab.deleteFailed'));
       setDeleteLoading(false);
       setShowDeleteConfirm(false);
     }

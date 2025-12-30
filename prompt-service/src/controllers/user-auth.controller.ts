@@ -490,7 +490,8 @@ export class UserAuthController {
     }
 
     try {
-      const user = await userService.updateProfile(userId, parseResult.data);
+      const ctx = getRequestContext(req);
+      const user = await userService.updateProfile(userId, parseResult.data, ctx);
       res.json(user);
     } catch (error) {
       if (isAppError(error)) {

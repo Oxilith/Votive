@@ -22,7 +22,8 @@
       "other": "Inna"
     },
     "saveChanges": "Zapisz zmiany",
-    "updated": "Profil zaktualizowany pomyślnie"
+    "updated": "Profil zaktualizowany pomyślnie",
+    "updateFailed": "Nie udało się zaktualizować profilu. Spróbuj ponownie."
   },
   "passwordTab": {
     "title": "Zmień hasło",
@@ -31,7 +32,8 @@
     "newPasswordPlaceholder": "Min 8 znaków, wielka i mała litera, cyfra",
     "confirmPassword": "Potwierdź nowe hasło",
     "changePassword": "Zmień hasło",
-    "changed": "Hasło zmienione pomyślnie"
+    "changed": "Hasło zmienione pomyślnie",
+    "changeFailed": "Nie udało się zmienić hasła. Spróbuj ponownie."
   },
   "assessmentsTab": {
     "title": "Poprzednie oceny",
