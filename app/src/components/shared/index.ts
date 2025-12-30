@@ -2,6 +2,7 @@
  * @file src/components/shared/index.ts
  * @purpose Barrel export for shared UI components
  * @functionality
+ * - Exports ChunkErrorBoundary component for lazy-load error handling
  * - Exports DateBadge component
  * - Exports ExportDropdown component
  * - Exports InkBrushDecoration component
@@ -12,6 +13,7 @@
  * - Exports UserAvatarDropdown component
  * - Re-exports all icons from icons sub-barrel
  * @dependencies
+ * - ./ChunkErrorBoundary
  * - ./DateBadge
  * - ./ExportDropdown
  * - ./InkBrushDecoration
@@ -23,6 +25,7 @@
  * - ./icons
  */
 
+export { default as ChunkErrorBoundary } from './ChunkErrorBoundary';
 export { default as DateBadge } from './DateBadge';
 export { default as ExportDropdown } from './ExportDropdown';
 export { default as InkBrushDecoration } from './InkBrushDecoration';

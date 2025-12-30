@@ -25,18 +25,18 @@ const LoadingFallback: FC<LoadingFallbackProps> = ({ variant = 'fullscreen' }) =
   return (
     <div className={`${containerClasses} flex items-center justify-center`}>
       <div className="flex flex-col items-center gap-3">
-        {/* Animated dots */}
+        {/* Animated dots - synchronized wave effect */}
         <div className="flex gap-1">
           <span
-            className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-pulse"
+            className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-staggered-pulse"
             style={{ animationDelay: '0ms' }}
           />
           <span
-            className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-pulse"
+            className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-staggered-pulse"
             style={{ animationDelay: '150ms' }}
           />
           <span
-            className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-pulse"
+            className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-staggered-pulse"
             style={{ animationDelay: '300ms' }}
           />
         </div>

@@ -22,6 +22,7 @@
  * - @/components/insights/IdentityInsightsAI (lazy)
  * - @/components/auth (AuthPage, AuthGuard, EmailVerificationPage, PasswordResetPage - lazy)
  * - @/components/profile (ProfilePage - lazy)
+ * - @/components/shared/ChunkErrorBoundary
  * - @/components/shared/LoadingFallback
  * - @/types/assessment.types
  * - @/utils/fileUtils
@@ -30,7 +31,7 @@
  */
 
 import { lazy, Suspense, useCallback, useEffect } from 'react';
-import { AuthGuard, ThemeProvider, LoadingFallback } from '@/components';
+import { AuthGuard, ChunkErrorBoundary, ThemeProvider, LoadingFallback } from '@/components';
 import type { AssessmentResponses } from '@/types';
 import { exportToJson } from '@/utils';
 import { useAssessmentStore, useUIStore, useAnalysisStore, useAuthStore, useAuthInitialized, useAuthHydrated } from '@/stores';
@@ -208,12 +209,14 @@ function App() {
     const authMode = getAuthMode();
     return (
       <ThemeProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <AuthPage
-            initialMode={authMode}
-            onAuthSuccess={handleAuthSuccess}
-          />
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <AuthPage
+              initialMode={authMode}
+              onAuthSuccess={handleAuthSuccess}
+            />
+          </Suspense>
+        </ChunkErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -223,12 +226,14 @@ function App() {
     return (
       <ThemeProvider>
         <AuthGuard mode="required">
-          <Suspense fallback={<LoadingFallback />}>
-            <ProfilePage
-              onNavigateToAssessmentById={handleNavigateToAssessmentById}
-              onNavigateToInsightsById={handleNavigateToInsightsById}
-            />
-          </Suspense>
+          <ChunkErrorBoundary>
+            <Suspense fallback={<LoadingFallback />}>
+              <ProfilePage
+                onNavigateToAssessmentById={handleNavigateToAssessmentById}
+                onNavigateToInsightsById={handleNavigateToInsightsById}
+              />
+            </Suspense>
+          </ChunkErrorBoundary>
         </AuthGuard>
       </ThemeProvider>
     );
@@ -238,9 +243,11 @@ function App() {
   if (currentView === 'verify-email') {
     return (
       <ThemeProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <EmailVerificationPage token={routeParams.token} />
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <EmailVerificationPage token={routeParams.token} />
+          </Suspense>
+        </ChunkErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -249,9 +256,11 @@ function App() {
   if (currentView === 'reset-password') {
     return (
       <ThemeProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <PasswordResetPage token={routeParams.token} />
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <PasswordResetPage token={routeParams.token} />
+          </Suspense>
+        </ChunkErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -260,15 +269,17 @@ function App() {
   if (currentView === 'landing') {
     return (
       <ThemeProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <LandingPage
-            onStartDiscovery={handleStartDiscovery}
-            onNavigateToAuth={handleNavigateToAuth}
-            onNavigateToSignUp={handleNavigateToSignUp}
-            onNavigateToProfile={handleNavigateToProfile}
-            onSignOut={handleSignOut}
-          />
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <LandingPage
+              onStartDiscovery={handleStartDiscovery}
+              onNavigateToAuth={handleNavigateToAuth}
+              onNavigateToSignUp={handleNavigateToSignUp}
+              onNavigateToProfile={handleNavigateToProfile}
+              onSignOut={handleSignOut}
+            />
+          </Suspense>
+        </ChunkErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -289,38 +300,42 @@ function App() {
       if (!isAuthenticated) {
         return (
           <ThemeProvider>
-            <Suspense fallback={<LoadingFallback />}>
-              <AuthPage
-                initialMode="login"
-                onAuthSuccess={() => {
-                  // Stay on current URL - component re-renders when auth state changes
-                  // and useResourceLoader will load the assessment
-                }}
-              />
-            </Suspense>
+            <ChunkErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <AuthPage
+                  initialMode="login"
+                  onAuthSuccess={() => {
+                    // Stay on current URL - component re-renders when auth state changes
+                    // and useResourceLoader will load the assessment
+                  }}
+                />
+              </Suspense>
+            </ChunkErrorBoundary>
           </ThemeProvider>
         );
       }
     }
     return (
       <ThemeProvider>
-        <Suspense fallback={<LoadingFallback />}>
-          <IdentityFoundationsAssessment
-            key={assessmentKey}
-            initialResponses={responses}
-            onComplete={handleAssessmentComplete}
-            startAtSynthesis={startAtSynthesis}
-            onImport={handleImportResponses}
-            onExport={handleExportResponses}
-            onNavigateToLanding={handleNavigateToLanding}
-            onNavigateToInsights={handleNavigateToInsights}
-            onNavigateToAuth={handleNavigateToAuth}
-            onNavigateToProfile={handleNavigateToProfile}
-            onSignOut={handleSignOut}
-            isReadOnly={isReadOnly}
-            viewOnlyAssessment={viewOnlyAssessment}
-          />
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <IdentityFoundationsAssessment
+              key={assessmentKey}
+              initialResponses={responses}
+              onComplete={handleAssessmentComplete}
+              startAtSynthesis={startAtSynthesis}
+              onImport={handleImportResponses}
+              onExport={handleExportResponses}
+              onNavigateToLanding={handleNavigateToLanding}
+              onNavigateToInsights={handleNavigateToInsights}
+              onNavigateToAuth={handleNavigateToAuth}
+              onNavigateToProfile={handleNavigateToProfile}
+              onSignOut={handleSignOut}
+              isReadOnly={isReadOnly}
+              viewOnlyAssessment={viewOnlyAssessment}
+            />
+          </Suspense>
+        </ChunkErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -340,39 +355,43 @@ function App() {
     if (!isAuthenticated) {
       return (
         <ThemeProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <AuthPage
-              initialMode="login"
-              onAuthSuccess={() => {
-                // Stay on current URL - component re-renders when auth state changes
-                // and useResourceLoader will load the analysis
-              }}
-            />
-          </Suspense>
+          <ChunkErrorBoundary>
+            <Suspense fallback={<LoadingFallback />}>
+              <AuthPage
+                initialMode="login"
+                onAuthSuccess={() => {
+                  // Stay on current URL - component re-renders when auth state changes
+                  // and useResourceLoader will load the analysis
+                }}
+              />
+            </Suspense>
+          </ChunkErrorBoundary>
         </ThemeProvider>
       );
     }
   }
   return (
     <ThemeProvider>
-      <Suspense fallback={<LoadingFallback />}>
-        <IdentityInsightsAI
-          responses={responses as AssessmentResponses}
-          onExport={handleExportResponses}
-          onImport={handleImportResponses}
-          onExportAnalysis={hasAnalysisResults ? exportAnalysisToJson : undefined}
-          hasAnalysis={hasAnalysisResults}
-          onNavigateToLanding={handleNavigateToLanding}
-          onNavigateToAssessment={handleNavigateToAssessment}
-          onNavigateToAuth={handleNavigateToAuth}
-          onNavigateToProfile={handleNavigateToProfile}
-          onNavigateToAuthWithReturn={handleNavigateToAuthWithReturn}
-          onSignOut={handleSignOut}
-          isReadOnly={isReadOnly}
-          viewingAssessmentId={viewingAssessmentId}
-          viewOnlyAnalysis={viewOnlyAnalysis}
-        />
-      </Suspense>
+      <ChunkErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <IdentityInsightsAI
+            responses={responses as AssessmentResponses}
+            onExport={handleExportResponses}
+            onImport={handleImportResponses}
+            onExportAnalysis={hasAnalysisResults ? exportAnalysisToJson : undefined}
+            hasAnalysis={hasAnalysisResults}
+            onNavigateToLanding={handleNavigateToLanding}
+            onNavigateToAssessment={handleNavigateToAssessment}
+            onNavigateToAuth={handleNavigateToAuth}
+            onNavigateToProfile={handleNavigateToProfile}
+            onNavigateToAuthWithReturn={handleNavigateToAuthWithReturn}
+            onSignOut={handleSignOut}
+            isReadOnly={isReadOnly}
+            viewingAssessmentId={viewingAssessmentId}
+            viewOnlyAnalysis={viewOnlyAnalysis}
+          />
+        </Suspense>
+      </ChunkErrorBoundary>
     </ThemeProvider>
   );
 }
