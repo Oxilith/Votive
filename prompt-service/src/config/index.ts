@@ -6,7 +6,6 @@
  * - Validates required configuration values
  * - Provides typed configuration object for application use
  * - Throws descriptive errors for missing required values
- * - Displays prominent warning when DEV_AUTH_BYPASS is enabled at startup
  * - Validates JWT secrets are present and different in production
  * - Configures SMTP email settings for password reset and verification emails
  * - Configures account lockout settings for progressive login lockout
@@ -47,12 +46,6 @@ const configSchema = z.object({
 
   // Session secret for signing cookies - must be separate from adminApiKey in production
   sessionSecret: z.string().min(32).optional(),
-
-  // Development auth bypass - requires explicit opt-in for security
-  devAuthBypass: z
-    .string()
-    .transform((val) => val === 'true')
-    .default('false'),
 
   // JWT Authentication - Required in all environments to prevent accidental use of fallback secrets
   jwtAccessSecret: z
@@ -174,7 +167,6 @@ function loadConfig(): Config {
     logLevel: process.env['LOG_LEVEL'],
     adminApiKey: process.env['ADMIN_API_KEY'],
     sessionSecret: process.env['SESSION_SECRET'] ?? process.env['ADMIN_API_KEY'],
-    devAuthBypass: process.env['DEV_AUTH_BYPASS'],
     // JWT Authentication
     jwtAccessSecret: process.env['JWT_ACCESS_SECRET'],
     jwtRefreshSecret: process.env['JWT_REFRESH_SECRET'],
@@ -220,18 +212,6 @@ function loadConfig(): Config {
 
   // Apply default database URL for non-production environments
   const databaseUrl = result.data.databaseUrl ?? 'file:./dev.db';
-
-  // Warn if DEV_AUTH_BYPASS is enabled - security-sensitive configuration
-  if (result.data.devAuthBypass && result.data.nodeEnv !== 'production') {
-    console.warn(
-      '\n' +
-        '╔════════════════════════════════════════════════════════════════════════════╗\n' +
-        '║  WARNING: DEV_AUTH_BYPASS is enabled                                       ║\n' +
-        '║  Authentication is bypassed - any API key will be accepted.                ║\n' +
-        '║  This should NEVER be used in production environments.                     ║\n' +
-        '╚════════════════════════════════════════════════════════════════════════════╝\n'
-    );
-  }
 
   return {
     ...result.data,

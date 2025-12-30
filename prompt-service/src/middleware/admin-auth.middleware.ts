@@ -7,8 +7,6 @@
  * - Falls back to X-Admin-Key header validation for backward compatibility
  * - Uses timing-safe comparison to prevent timing attacks
  * - Returns 401 Unauthorized if authentication fails
- * - Requires explicit DEV_AUTH_BYPASS=true in development for auth bypass
- * - Blocks access in production if admin key is not configured
  * @dependencies
  * - @/utils/crypto for timing-safe comparison
  * - @/utils/auth for shared auth config validation
@@ -59,12 +57,6 @@ export function adminAuthMiddleware(
     res.status(authValidation.errorResponse.status).json({
       error: authValidation.errorResponse.error,
     });
-    return;
-  }
-
-  // Development bypass enabled - skip authentication
-  if (authValidation.shouldBypass) {
-    next();
     return;
   }
 

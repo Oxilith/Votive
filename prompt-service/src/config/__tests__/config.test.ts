@@ -29,7 +29,6 @@ describe('config validation', () => {
     'ADMIN_API_KEY',
     'DATABASE_URL',
     'DATABASE_KEY',
-    'DEV_AUTH_BYPASS',
     'PORT',
     'CORS_ORIGINS',
     'LOG_LEVEL',

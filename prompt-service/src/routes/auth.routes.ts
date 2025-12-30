@@ -5,19 +5,17 @@
  * - Provides login endpoint that validates API key and sets session cookie
  * - Provides logout endpoint that clears session cookie
  * - Provides verify endpoint to check authentication status
- * - Requires explicit DEV_AUTH_BYPASS=true in development for auth bypass
  * @dependencies
  * - express Router
  * - @/utils/crypto for timing-safe comparison
  * - @/utils/auth for shared auth config validation
  * - @/config for configuration
- * - @/index for logger
  */
 
 import { Router, type Request, type Response } from 'express';
 import { config } from '@/config';
 import { AUTH_CONSTANTS } from '@/constants';
-import { timingSafeCompare, validateAuthConfig, logger } from '@/utils';
+import { timingSafeCompare, validateAuthConfig } from '@/utils';
 
 const router = Router();
 
@@ -40,14 +38,6 @@ router.post('/login', (req: Request, res: Response): void => {
     res.status(authValidation.errorResponse.status).json({
       error: authValidation.errorResponse.error,
     });
-    return;
-  }
-
-  // Development bypass enabled - allow any API key
-  if (authValidation.shouldBypass) {
-    logger.warn('DEV_AUTH_BYPASS is enabled - allowing any API key');
-    setSessionCookie(res);
-    res.json({ success: true });
     return;
   }
 
@@ -91,12 +81,6 @@ router.get('/verify', (req: Request, res: Response): void => {
   // Also check X-Admin-Key header for backward compatibility
   const apiKey = req.headers[AUTH_CONSTANTS.API_KEY_HEADER];
   if (apiKey && config.adminApiKey && timingSafeCompare(String(apiKey), config.adminApiKey)) {
-    res.json({ authenticated: true });
-    return;
-  }
-
-  // Development mode with explicit bypass enabled
-  if (!config.adminApiKey && config.nodeEnv !== 'production' && config.devAuthBypass) {
     res.json({ authenticated: true });
     return;
   }

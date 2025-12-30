@@ -28,7 +28,10 @@ const CSRF_COOKIE_OPTIONS = {
   sameSite: 'strict' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   path: '/',
-  signed: false, // Not signed - client needs to read exact value for header
+  // Not signed - client needs to read exact value for double-submit header.
+  // Unlike refresh tokens (which are httpOnly JWTs), CSRF tokens must be
+  // readable by JavaScript to send in the x-csrf-token header.
+  signed: false,
 };
 
 /**

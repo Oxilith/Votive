@@ -22,7 +22,7 @@
  */
 
 import { prisma } from '@/prisma';
-import type { User } from '@prisma/client';
+import { Prisma, type User } from '@prisma/client';
 import { config } from '@/config';
 import {
   NotFoundError,
@@ -333,7 +333,7 @@ export class UserService {
     }
 
     // Reset failed attempts on successful login
-    if (user.failedLoginAttempts > 0) {
+    if (user.failedLoginAttempts > 0 || user.lockoutUntil !== null) {
       await prisma.user.update({
         where: { id: user.id },
         data: {
@@ -455,39 +455,43 @@ export class UserService {
 
     // Atomic transaction: lookup, validate, and rotate in one operation
     // This prevents race conditions where concurrent requests could both succeed
-    await prisma.$transaction(async (tx) => {
-      // Find the refresh token in database (inside transaction for atomicity)
-      const storedToken = await tx.refreshToken.findUnique({
-        where: { token: tokenId },
-      });
+    // Explicit Serializable isolation for future-proofing if migrating to PostgreSQL
+    await prisma.$transaction(
+      async (tx) => {
+        // Find the refresh token in database (inside transaction for atomicity)
+        const storedToken = await tx.refreshToken.findUnique({
+          where: { token: tokenId },
+        });
 
-      // Validate stored token
-      if (!storedToken || storedToken.userId !== userId) {
-        throw new TokenError('Invalid refresh token');
-      }
+        // Validate stored token
+        if (!storedToken || storedToken.userId !== userId) {
+          throw new TokenError('Invalid refresh token');
+        }
 
-      // Check if token is expired in database
-      if (storedToken.expiresAt < new Date()) {
-        // Clean up expired token
+        // Check if token is expired in database
+        if (storedToken.expiresAt < new Date()) {
+          // Clean up expired token
+          await tx.refreshToken.delete({
+            where: { id: storedToken.id },
+          });
+          throw new TokenError('Refresh token expired', 'TOKEN_EXPIRED');
+        }
+
+        // Delete old token and create new one atomically
         await tx.refreshToken.delete({
           where: { id: storedToken.id },
         });
-        throw new TokenError('Refresh token expired', 'TOKEN_EXPIRED');
-      }
 
-      // Delete old token and create new one atomically
-      await tx.refreshToken.delete({
-        where: { id: storedToken.id },
-      });
-
-      await tx.refreshToken.create({
-        data: {
-          userId,
-          token: newTokenId,
-          expiresAt: newExpiresAt,
-        },
-      });
-    });
+        await tx.refreshToken.create({
+          data: {
+            userId,
+            token: newTokenId,
+            expiresAt: newExpiresAt,
+          },
+        });
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+    );
 
     // Generate new access token
     const accessToken = generateAccessToken(userId, this.jwtConfig);

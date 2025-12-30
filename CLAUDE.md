@@ -20,24 +20,14 @@ Votive - a full-stack behavioral psychology assessment application with AI-power
 All commands run from project root via npm workspaces:
 
 ```bash
-# Development
-npm run dev:app                  # Frontend (https://localhost:3000)
-npm run dev:backend              # Backend (https://localhost:3001)
-npm run dev:prompt-service       # Prompt service API (http://localhost:3002)
-npm run dev:prompt-service:all   # Prompt service API + admin UI
-npm run dev:worker               # Background worker
-
 # Quality
 npm run lint                     # Lint all projects
 npm run type-check               # Type-check all projects
 npm run test:run                 # Run all tests (once)
 npm run test:coverage            # Run all tests with coverage
 
-# Build & Production
+# Build
 npm run build                    # Build all projects (shared first)
-npm run start:backend            # Run compiled backend
-npm run start:prompt-service     # Run compiled prompt-service
-npm run start:worker             # Run compiled worker
 
 # Database (prompt-service)
 npm run db:migrate               # Run migrations
@@ -61,11 +51,15 @@ npm run lint:fix -w app          # Fix lint issues in specific workspace
 
 ## Docker
 
-```bash
-# Local development
-docker compose up --build   # Build and run full stack
+Development uses Docker exclusively:
 
-# Production (OCI deployment)
+```bash
+# Local development (build from source)
+ANTHROPIC_API_KEY=<key> DATABASE_KEY=<32+chars> ADMIN_API_KEY=<32+chars> SESSION_SECRET=<32+chars> \
+JWT_ACCESS_SECRET=<32+chars> JWT_REFRESH_SECRET=<32+chars> \
+  docker compose up --build
+
+# Production (OCI deployment with pre-built images)
 ANTHROPIC_API_KEY=<key> DATABASE_KEY=<32+chars> ADMIN_API_KEY=<32+chars> SESSION_SECRET=<32+chars> \
 JWT_ACCESS_SECRET=<32+chars> JWT_REFRESH_SECRET=<32+chars> \
   docker compose -f oci://oxilith/votive-oci:latest up
@@ -73,7 +67,7 @@ JWT_ACCESS_SECRET=<32+chars> JWT_REFRESH_SECRET=<32+chars> \
 
 See [docs/docker-hub.md](../docs/docker-hub.md) for complete workflow documentation.
 
-### HTTPS Setup (Local Development)
+### HTTPS Certificates (Required for Docker)
 ```bash
 brew install mkcert && mkcert -install
 mkdir -p certs && cd certs && mkcert localhost 127.0.0.1 ::1
@@ -286,7 +280,7 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
 See [docs/production-deployment.md](../docs/production-deployment.md#environment-variables) for complete reference.
 
 Key variables:
-- `VITE_API_URL` - Frontend build-time (leave empty for Docker, set to `https://localhost:3001` for local dev)
+- `VITE_API_URL` - Frontend build-time (leave empty for Docker)
 - `ANTHROPIC_API_KEY` - Claude API key
 - `DATABASE_KEY` / `ADMIN_API_KEY` / `SESSION_SECRET` - 32+ char secrets for prompt-service
 - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` - 32+ char secrets for user authentication tokens

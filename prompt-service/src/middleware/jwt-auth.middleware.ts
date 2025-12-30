@@ -6,7 +6,6 @@
  * - Verifies JWT access tokens using configured secrets
  * - Attaches decoded user payload to request for downstream handlers
  * - Returns 401 Unauthorized for missing, invalid, or expired tokens
- * - Requires explicit DEV_AUTH_BYPASS=true in development for auth bypass
  * @dependencies
  * - @/utils/jwt for token verification
  * - @/config for configuration
@@ -15,7 +14,7 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import { config } from '@/config';
-import { verifyAccessToken, logger, type AccessTokenPayload, type JwtConfig } from '@/utils';
+import { verifyAccessToken, type AccessTokenPayload, type JwtConfig } from '@/utils';
 
 /**
  * Extended Express Request with authenticated user payload
@@ -85,41 +84,9 @@ export function jwtAuthMiddleware(
 
   // Check if JWT is configured
   if (!jwtConfig) {
-    // In production, JWT must be configured
-    if (config.nodeEnv === 'production') {
-      res.status(503).json({
-        error: 'Authentication service not configured',
-      });
-      return;
-    }
-
-    // In development, only bypass if explicitly enabled
-    if (config.devAuthBypass) {
-      logger.debug({ path: req.path, method: req.method }, 'DEV_AUTH_BYPASS: Skipping JWT validation (no JWT config)');
-      // Set a mock user for development bypass
-      (req as AuthenticatedRequest).user = {
-        userId: 'dev-bypass-user',
-        type: 'access',
-      };
-      next();
-      return;
-    }
-
-    // Development without bypass enabled and no JWT config
     res.status(503).json({
-      error: 'Authentication not configured. Set JWT_ACCESS_SECRET and JWT_REFRESH_SECRET or DEV_AUTH_BYPASS=true',
+      error: 'Authentication service not configured',
     });
-    return;
-  }
-
-  // Development bypass enabled - skip token verification
-  if (config.devAuthBypass && config.nodeEnv !== 'production') {
-    logger.debug({ path: req.path, method: req.method }, 'DEV_AUTH_BYPASS: Skipping JWT validation');
-    (req as AuthenticatedRequest).user = {
-      userId: 'dev-bypass-user',
-      type: 'access',
-    };
-    next();
     return;
   }
 

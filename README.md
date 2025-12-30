@@ -40,13 +40,13 @@ A 5-phase identity-based approach to sustainable change:
 ## Getting Started
 
 ### Prerequisites
-- Node.js >= 20.0.0
+- Docker and Docker Compose
 - Anthropic API key
-- mkcert (for local HTTPS)
+- mkcert (for HTTPS certificates)
 
-### HTTPS Setup (Local Development)
+### HTTPS Certificates Setup
 
-Generate locally-trusted certificates using mkcert:
+Generate locally-trusted certificates using mkcert (required for Docker):
 
 ```bash
 # Install mkcert (macOS)
@@ -57,14 +57,8 @@ mkcert -install
 choco install mkcert
 mkcert -install
 
-# Generate certificates (macOS/Linux)
+# Generate certificates
 mkdir -p certs
-cd certs
-mkcert localhost 127.0.0.1 ::1
-cd ..
-
-# Generate certificates (Windows PowerShell)
-New-Item -ItemType Directory -Force -Path certs
 cd certs
 mkcert localhost 127.0.0.1 ::1
 cd ..
@@ -72,28 +66,46 @@ cd ..
 
 ### Quick Start
 
-```bash
-# Install all dependencies (from project root)
-npm install
-
-# Backend setup
-cp backend/.env.example backend/.env  # Add your ANTHROPIC_API_KEY
-npm run dev:backend                    # Starts on https://localhost:3001
-
-# Frontend setup (new terminal)
-npm run dev:app                        # Starts on https://localhost:3000
-```
-
-### Environment Setup
-
-Copy the example environment files and configure them:
+Run the full stack using Docker:
 
 ```bash
-cp backend/.env.example backend/.env           # Add your ANTHROPIC_API_KEY
-cp prompt-service/.env.example prompt-service/.env  # Configure database encryption
+# macOS/Linux
+ANTHROPIC_API_KEY=<YOUR_KEY> \
+DATABASE_KEY=<32+_CHAR_SECRET> \
+ADMIN_API_KEY=<32+_CHAR_SECRET> \
+SESSION_SECRET=<32+_CHAR_SECRET> \
+JWT_ACCESS_SECRET=<32+_CHAR_SECRET> \
+JWT_REFRESH_SECRET=<32+_CHAR_SECRET> \
+  docker compose up --build
+
+# Windows (PowerShell)
+$env:ANTHROPIC_API_KEY="<YOUR_KEY>"
+$env:DATABASE_KEY="<32+_CHAR_SECRET>"
+$env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
+$env:SESSION_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_ACCESS_SECRET="<32+_CHAR_SECRET>"
+$env:JWT_REFRESH_SECRET="<32+_CHAR_SECRET>"
+docker compose up --build
 ```
 
-See [Production Deployment > Environment Variables](docs/production-deployment.md#environment-variables) for the complete environment variable reference.
+Once running:
+- **Frontend**: https://localhost (via nginx)
+- **Backend API**: https://localhost/api/v1
+- **Admin UI**: http://localhost:3002/admin
+
+For pre-built images (faster startup):
+
+```bash
+docker compose -f oci://oxilith/votive-oci:latest up
+```
+
+See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation including:
+- Local build instructions
+- HTTPS configuration
+- Multi-arch image publishing (maintainers)
+- Troubleshooting guide
+
+See [Production Deployment](docs/production-deployment.md#environment-variables) for the complete environment variable reference.
 
 ## Project Structure
 
@@ -134,7 +146,6 @@ See [Production Deployment > Environment Variables](docs/production-deployment.m
 
 This repository uses **npm workspaces** for unified dependency management. Run commands from the project root.
 
-### Root Commands (Recommended)
 ```bash
 npm install              # Install all workspaces
 npm run lint             # Lint all projects
@@ -143,72 +154,12 @@ npm run build            # Build all projects (shared first)
 npm run test:run         # Run all tests (once)
 npm run test:coverage    # Run all tests with coverage
 
-# Development servers
-npm run dev:app                  # Start frontend (https://localhost:3000)
-npm run dev:backend              # Start backend (https://localhost:3001)
-npm run dev:prompt-service       # Start prompt-service API (http://localhost:3002)
-npm run dev:prompt-service:all   # Start prompt-service API + admin UI
-npm run dev:worker               # Start background worker
-
-# Production
-npm run start:backend            # Run compiled backend
-npm run start:prompt-service     # Run compiled prompt-service
-npm run start:worker             # Run compiled worker
-npm run preview:app              # Preview frontend build
-
 # Database (prompt-service)
 npm run db:migrate       # Run database migrations
 npm run db:generate      # Generate Prisma client
 npm run db:seed          # Seed initial data
 npm run db:studio        # Open Prisma Studio
 ```
-
-### Workspace-Specific Commands
-
-Commands can also be run per-workspace using `-w <workspace>`:
-
-```bash
-npm run dev -w app              # Same as npm run dev:app
-npm run test -w backend         # Run backend tests only
-npm run lint:fix -w shared      # Fix lint issues in shared
-```
-
-Or by navigating to the workspace directory:
-
-```bash
-cd app && npm run dev           # Start frontend dev server
-cd backend && npm run test      # Run backend tests
-```
-
-### Docker
-
-Quick deployment using pre-built multi-arch images:
-
-```bash
-# macOS/Linux
-ANTHROPIC_API_KEY=<YOUR_KEY> \
-DATABASE_KEY=<32+_CHAR_SECRET> \
-ADMIN_API_KEY=<32+_CHAR_SECRET> \
-SESSION_SECRET=<32+_CHAR_SECRET> \
-JWT_ACCESS_SECRET=<32+_CHAR_SECRET> \
-JWT_REFRESH_SECRET=<32+_CHAR_SECRET> \
-  docker compose -f oci://oxilith/votive-oci:latest up
-
-# Windows (PowerShell)
-$env:ANTHROPIC_API_KEY="<YOUR_KEY>"
-$env:DATABASE_KEY="<32+_CHAR_SECRET>"
-$env:ADMIN_API_KEY="<32+_CHAR_SECRET>"
-$env:SESSION_SECRET="<32+_CHAR_SECRET>"
-$env:JWT_ACCESS_SECRET="<32+_CHAR_SECRET>"
-$env:JWT_REFRESH_SECRET="<32+_CHAR_SECRET>"
-docker compose -f oci://oxilith/votive-oci:latest up
-```
-
-See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation including:
-- Local build instructions
-- HTTPS configuration
-- Multi-arch image publishing (maintainers)
-- Troubleshooting guide
 
 ## Documentation
 
