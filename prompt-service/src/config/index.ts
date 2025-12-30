@@ -54,9 +54,13 @@ const configSchema = z.object({
     .transform((val) => val === 'true')
     .default('false'),
 
-  // JWT Authentication
-  jwtAccessSecret: z.string().min(32).optional(),
-  jwtRefreshSecret: z.string().min(32).optional(),
+  // JWT Authentication - Required in all environments to prevent accidental use of fallback secrets
+  jwtAccessSecret: z
+    .string()
+    .min(32, 'JWT_ACCESS_SECRET must be at least 32 characters. Generate with: openssl rand -hex 32'),
+  jwtRefreshSecret: z
+    .string()
+    .min(32, 'JWT_REFRESH_SECRET must be at least 32 characters. Generate with: openssl rand -hex 32'),
   jwtAccessExpiry: z.string().default('15m'),
   jwtRefreshExpiry: z.string().default('7d'),
 
@@ -122,21 +126,19 @@ function loadConfig(): Config {
         'SESSION_SECRET is required in production. Using ADMIN_API_KEY as fallback is a security risk - if the API key leaks, session cookies can be forged.'
       );
     }
-    if (!process.env['JWT_ACCESS_SECRET']) {
-      throw new Error(
-        'JWT_ACCESS_SECRET is required in production. Generate with: openssl rand -hex 32'
-      );
-    }
-    if (!process.env['JWT_REFRESH_SECRET']) {
-      throw new Error(
-        'JWT_REFRESH_SECRET is required in production. Generate with: openssl rand -hex 32'
-      );
-    }
-    if (process.env['JWT_ACCESS_SECRET'] === process.env['JWT_REFRESH_SECRET']) {
-      throw new Error(
-        'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be different for security.'
-      );
-    }
+  }
+
+  // JWT secrets must be different for security (checked in all environments)
+  // Note: JWT secrets are now required by Zod schema - no fallbacks allowed
+  // Only check if both are defined (Zod will catch missing secrets)
+  if (
+    process.env['JWT_ACCESS_SECRET'] &&
+    process.env['JWT_REFRESH_SECRET'] &&
+    process.env['JWT_ACCESS_SECRET'] === process.env['JWT_REFRESH_SECRET']
+  ) {
+    throw new Error(
+      'JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must be different for security.'
+    );
   }
 
   // Warn in development if using ADMIN_API_KEY as SESSION_SECRET fallback

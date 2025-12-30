@@ -57,6 +57,7 @@ export {
   MOOD_TRIGGER_VALUES,
   WILLPOWER_PATTERN_VALUES,
   CORE_VALUE_VALUES,
+  GENDER_VALUES,
   REQUIRED_FIELDS,
   ARRAY_FIELDS,
   NUMBER_FIELDS,
@@ -66,6 +67,7 @@ export {
   PASSWORD_REGEX,
   PASSWORD_REQUIREMENTS_MESSAGE,
   isValidPassword,
+  isValidGender,
 } from './validation';
 
 // Prompt Types

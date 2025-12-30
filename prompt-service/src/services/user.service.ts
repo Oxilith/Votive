@@ -44,7 +44,7 @@ import {
   type JwtConfig,
 } from '@/utils';
 import { emailService } from '@/services/email.service';
-import type { Gender } from 'shared';
+import { type Gender, isValidGender } from 'shared';
 
 // Re-export Gender for backward compatibility
 export type { Gender };
@@ -163,7 +163,7 @@ function toSafeUser(user: User): SafeUser {
     emailVerified: user.emailVerified,
     emailVerifiedAt: user.emailVerifiedAt,
     name: user.name,
-    gender: user.gender as Gender | null,
+    gender: isValidGender(user.gender) ? user.gender : null,
     birthYear: user.birthYear,
     failedLoginAttempts: user.failedLoginAttempts,
     lockoutUntil: user.lockoutUntil,
@@ -178,10 +178,10 @@ export class UserService {
 
   constructor() {
     // Build JWT config from application configuration
-    // Use fallback secrets in development for testing
+    // Secrets are required by config validation - no fallbacks allowed
     this.jwtConfig = {
-      accessSecret: config.jwtAccessSecret ?? 'dev-access-secret-change-in-production',
-      refreshSecret: config.jwtRefreshSecret ?? 'dev-refresh-secret-change-in-production',
+      accessSecret: config.jwtAccessSecret,
+      refreshSecret: config.jwtRefreshSecret,
       accessExpiresIn: config.jwtAccessExpiry,
       refreshExpiresIn: config.jwtRefreshExpiry,
     };
@@ -740,11 +740,15 @@ export class UserService {
     }
 
     // After success check, TypeScript knows payload is non-null due to discriminated union
-    const { tokenId } = verifyResult.payload;
+    const { tokenId, userId } = verifyResult.payload;
 
-    // Delete the refresh token from database
+    // Delete the refresh token from database with explicit ownership verification
+    // This ensures token can only be deleted by its owner
     const result = await prisma.refreshToken.deleteMany({
-      where: { token: tokenId },
+      where: {
+        token: tokenId,
+        userId: userId,
+      },
     });
 
     return result.count > 0;

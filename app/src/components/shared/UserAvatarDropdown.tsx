@@ -26,7 +26,7 @@ const UserAvatarDropdown: FC<UserAvatarDropdownProps> = ({
   onNavigateToProfile,
   onSignOut,
 }) => {
-  const { t } = useTranslation('landing');
+  const { t } = useTranslation(['landing', 'header']);
   const user = useCurrentUser();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

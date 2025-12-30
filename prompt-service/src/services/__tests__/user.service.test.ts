@@ -643,8 +643,9 @@ describe('UserService', () => {
       const result = await userService.logout('valid_refresh_jwt');
 
       expect(result).toBe(true);
+      // Verify explicit ownership check - token can only be deleted by its owner
       expect(mockPrisma.refreshToken.deleteMany).toHaveBeenCalledWith({
-        where: { token: 'token-123' },
+        where: { token: 'token-123', userId: 'user-123' },
       });
     });
 

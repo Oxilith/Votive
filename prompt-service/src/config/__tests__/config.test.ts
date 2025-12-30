@@ -73,7 +73,9 @@ describe('config validation', () => {
     });
 
     it('should throw an error when neither SESSION_SECRET nor ADMIN_API_KEY is set', async () => {
-      // Arrange: Both secrets are cleared in beforeEach
+      // Arrange: Provide JWT secrets to test cookie validation
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
@@ -82,7 +84,9 @@ describe('config validation', () => {
     });
 
     it('should include helpful instructions in the error message', async () => {
-      // Arrange: Both secrets are cleared in beforeEach
+      // Arrange: Provide JWT secrets to test cookie validation
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
@@ -91,12 +95,25 @@ describe('config validation', () => {
     });
 
     it('should include an example in the error message', async () => {
-      // Arrange: Both secrets are cleared in beforeEach
+      // Arrange: Provide JWT secrets to test cookie validation
+      process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
+      process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-at-least-32-chars';
 
       // Act & Assert
       await expect(async () => {
         await import('..');
       }).rejects.toThrow('Example:');
+    });
+
+    it('should throw an error when JWT secrets are missing', async () => {
+      // Arrange: JWT secrets are cleared in beforeEach
+      // Provide cookie secret so we're specifically testing JWT validation
+      process.env['SESSION_SECRET'] = 'test-session-secret-at-least-32-characters-long';
+
+      // Act & Assert - Zod reports required fields as "Required" when missing
+      await expect(async () => {
+        await import('..');
+      }).rejects.toThrow(/jwtAccessSecret: Required/);
     });
 
     it('should not throw an error when SESSION_SECRET is set', async () => {

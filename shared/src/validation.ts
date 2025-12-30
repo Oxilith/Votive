@@ -67,6 +67,8 @@ export const CORE_VALUE_VALUES = [
   'leadership',
 ] as const;
 
+export const GENDER_VALUES = ['male', 'female', 'other', 'prefer-not-to-say'] as const;
+
 // Required fields for completion validation
 export const REQUIRED_FIELDS: (keyof AssessmentResponses)[] = [
   'peak_energy_times',
@@ -143,4 +145,16 @@ export function isValidPassword(password: string): boolean {
     password.length <= PASSWORD_MAX_LENGTH &&
     PASSWORD_REGEX.test(password)
   );
+}
+
+/**
+ * Type guard that validates a value is a valid gender.
+ * @param value - Value to validate
+ * @returns true if value is a valid gender
+ */
+export function isValidGender(
+  value: string | null | undefined
+): value is (typeof GENDER_VALUES)[number] {
+  if (value == null) return false;
+  return (GENDER_VALUES as readonly string[]).includes(value);
 }

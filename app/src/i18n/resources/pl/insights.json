@@ -6,7 +6,7 @@
   },
   "ready": {
     "title": "Gotowe do analizy",
-    "description": "Kliknij poniżej aby wysłać dane oceny do Claude w celu głębokiej analizy wzorców. Zajmuje to zazwyczaj 10-20 sekund.",
+    "description": "Kliknij poniżej aby wysłać dane oceny do Claude w celu głębokiej analizy wzorców. Zajmuje to zazwyczaj około 15 minut.",
     "button": "Analizuj moje odpowiedzi"
   },
   "loading": {
