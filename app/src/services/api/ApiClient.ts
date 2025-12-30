@@ -14,7 +14,7 @@
  * - @/services/interfaces (IApiClient, RequestConfig, ApiResponse, ApiError)
  */
 
-import type { IApiClient, RequestConfig, ApiResponse, ApiError } from '../interfaces';
+import type { IApiClient, RequestConfig, ApiResponse, ApiError } from '@/services/interfaces';
 
 const DEFAULT_TIMEOUT = 30000; // 30 seconds
 const DEFAULT_RETRIES = 3;

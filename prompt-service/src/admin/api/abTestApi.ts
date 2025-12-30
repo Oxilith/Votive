@@ -11,8 +11,8 @@
  * - Manages A/B test variants
  * - Uses HttpOnly cookie authentication via credentials: 'include'
  * @dependencies
- * - ../types for type definitions
- * - ./auth for authentication utilities and headers
+ * - @/admin/types for type definitions
+ * - @/admin/api/auth for authentication utilities and headers
  */
 
 import type {
@@ -23,8 +23,8 @@ import type {
   CreateABVariantInput,
   UpdateABVariantInput,
   ApiError,
-} from '../types';
-import { getAuthHeaders, getAuthHeadersNoContent, handleUnauthorized } from './auth';
+} from '@/admin/types';
+import { getAuthHeaders, getAuthHeadersNoContent, handleUnauthorized } from '@/admin/api/auth';
 
 const API_BASE = '/api/ab-tests';
 

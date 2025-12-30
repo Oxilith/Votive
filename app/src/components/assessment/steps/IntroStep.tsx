@@ -14,7 +14,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import type { IntroContent } from '../types';
+import type { IntroContent } from '@/components/assessment/types';
 
 interface IntroStepProps {
   content: IntroContent;

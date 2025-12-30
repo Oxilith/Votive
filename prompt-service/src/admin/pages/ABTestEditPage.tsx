@@ -16,10 +16,11 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useABTest } from '../hooks/useABTests';
-import { abTestApi } from '../api/abTestApi';
-import { CLAUDE_MODELS } from '../types';
-import type { UpdateABTestInput, CreateABVariantInput, ABVariantDTO } from '../types';
+import { useABTest } from '@/admin/hooks/useABTests';
+import { abTestApi } from '@/admin/api/abTestApi';
+import { colors, shadows, fonts } from '@/admin/styles/theme';
+import { CLAUDE_MODELS } from '@/admin/types';
+import type { UpdateABTestInput, CreateABVariantInput, ABVariantDTO } from '@/admin/types';
 
 export function ABTestEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -229,8 +230,8 @@ export function ABTestEditPage() {
             onClick={() => void handleToggleActive()}
             style={{
               ...styles.statusButton,
-              backgroundColor: abTest.isActive ? '#d1fae5' : '#f3f4f6',
-              color: abTest.isActive ? '#065f46' : '#6b7280',
+              backgroundColor: abTest.isActive ? colors.successBg : colors.bgTertiary,
+              color: abTest.isActive ? colors.successText : colors.textMuted,
             }}
           >
             {abTest.isActive ? 'Active' : 'Inactive'}
@@ -537,7 +538,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '2rem',
   },
   backLink: {
-    color: '#6b7280',
+    color: colors.textMuted,
     textDecoration: 'none',
     fontSize: '0.875rem',
     display: 'inline-block',
@@ -546,7 +547,7 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: '1.75rem',
     fontWeight: 700,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: 0,
   },
   headerActions: {
@@ -563,26 +564,27 @@ const styles: Record<string, React.CSSProperties> = {
   },
   errorBox: {
     padding: '1rem',
-    backgroundColor: '#fee2e2',
-    border: '1px solid #fecaca',
+    backgroundColor: colors.dangerBg,
+    border: `1px solid ${colors.dangerBorder}`,
     borderRadius: '0.5rem',
-    color: '#dc2626',
+    color: colors.dangerText,
     marginBottom: '1.5rem',
   },
   form: {
     marginBottom: '1.5rem',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
     padding: '1.5rem',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    boxShadow: shadows.sm,
+    border: `1px solid ${colors.border}`,
     marginBottom: '1.5rem',
   },
   sectionTitle: {
     fontSize: '1.125rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: '0 0 1rem 0',
   },
   formGroup: {
@@ -593,24 +595,29 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'block',
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: '#374151',
+    color: colors.textSecondary,
     marginBottom: '0.375rem',
   },
   input: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    resize: 'vertical',
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
+    resize: 'vertical' as const,
   },
   select: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    backgroundColor: '#fff',
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
   },
   row: {
     display: 'flex',
@@ -621,7 +628,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   saveButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     border: 'none',
     borderRadius: '0.5rem',
     color: '#fff',
@@ -637,14 +644,15 @@ const styles: Record<string, React.CSSProperties> = {
   },
   addVariantButton: {
     padding: '0.5rem 1rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
     cursor: 'pointer',
+    color: colors.textSecondary,
   },
   noVariants: {
-    color: '#6b7280',
+    color: colors.textMuted,
     textAlign: 'center',
     padding: '2rem',
   },
@@ -655,9 +663,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   variantCard: {
     padding: '1rem',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.bgSecondary,
     borderRadius: '0.5rem',
-    border: '1px solid #e5e7eb',
+    border: `1px solid ${colors.border}`,
   },
   variantHeader: {
     display: 'flex',
@@ -666,11 +674,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   variantName: {
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
   },
   variantModel: {
     fontSize: '0.8125rem',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   variantStats: {
     display: 'flex',
@@ -684,11 +692,11 @@ const styles: Record<string, React.CSSProperties> = {
   statValue: {
     fontSize: '1.25rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
   },
   statLabel: {
     fontSize: '0.75rem',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   weightControl: {
     marginBottom: '0.75rem',
@@ -696,7 +704,7 @@ const styles: Record<string, React.CSSProperties> = {
   weightLabel: {
     display: 'block',
     fontSize: '0.8125rem',
-    color: '#374151',
+    color: colors.textSecondary,
     marginBottom: '0.25rem',
   },
   weightSlider: {
@@ -708,26 +716,28 @@ const styles: Record<string, React.CSSProperties> = {
   },
   variantSummary: {
     fontSize: '0.8125rem',
-    color: '#3b82f6',
+    color: colors.accent,
     cursor: 'pointer',
   },
   variantContent: {
     marginTop: '0.5rem',
     padding: '0.75rem',
-    backgroundColor: '#fff',
-    border: '1px solid #e5e7eb',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.border}`,
     borderRadius: '0.375rem',
     fontSize: '0.75rem',
+    fontFamily: fonts.mono,
     overflow: 'auto',
     maxHeight: '200px',
     whiteSpace: 'pre-wrap',
+    color: colors.textPrimary,
   },
   removeVariantButton: {
     padding: '0.25rem 0.5rem',
-    backgroundColor: '#fff',
-    border: '1px solid #fecaca',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.dangerBorder}`,
     borderRadius: '0.25rem',
-    color: '#dc2626',
+    color: colors.danger,
     fontSize: '0.75rem',
     cursor: 'pointer',
   },
@@ -741,18 +751,20 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
     padding: '1.5rem',
     width: '600px',
     maxWidth: '90vw',
     maxHeight: '90vh',
     overflow: 'auto',
+    border: `1px solid ${colors.border}`,
+    boxShadow: shadows.md,
   },
   modalTitle: {
     fontSize: '1.25rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: '0 0 1.5rem 0',
   },
   modalActions: {
@@ -763,34 +775,34 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cancelButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.5rem',
-    color: '#374151',
+    color: colors.textSecondary,
     fontWeight: 500,
     fontSize: '0.875rem',
     cursor: 'pointer',
   },
   dangerZone: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
     padding: '1.5rem',
-    border: '1px solid #fecaca',
+    border: `1px solid ${colors.dangerBorder}`,
   },
   dangerTitle: {
     fontSize: '1rem',
     fontWeight: 600,
-    color: '#dc2626',
+    color: colors.danger,
     margin: '0 0 0.5rem 0',
   },
   dangerText: {
     fontSize: '0.875rem',
-    color: '#6b7280',
+    color: colors.textMuted,
     margin: '0 0 1rem 0',
   },
   deleteButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#dc2626',
+    backgroundColor: colors.danger,
     border: 'none',
     borderRadius: '0.5rem',
     color: '#fff',
@@ -801,18 +813,18 @@ const styles: Record<string, React.CSSProperties> = {
   loading: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   error: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    color: '#dc2626',
+    color: colors.danger,
   },
   backButton: {
     display: 'inline-block',
     marginTop: '1rem',
     padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     color: '#fff',
     textDecoration: 'none',
     borderRadius: '0.375rem',
@@ -823,7 +835,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   weightText: {
     fontSize: '0.875rem',
-    color: '#374151',
+    color: colors.textSecondary,
     fontWeight: 500,
   },
   variantsActions: {
@@ -832,15 +844,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   editWeightsButton: {
     padding: '0.5rem 1rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
     cursor: 'pointer',
+    color: colors.textSecondary,
   },
   modalDescription: {
     fontSize: '0.875rem',
-    color: '#6b7280',
+    color: colors.textMuted,
     marginBottom: '1.5rem',
     marginTop: 0,
   },
@@ -855,12 +868,12 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0.75rem',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.bgSecondary,
     borderRadius: '0.375rem',
   },
   weightEditorName: {
     fontWeight: 500,
-    color: '#111827',
+    color: colors.textPrimary,
   },
   weightInputRow: {
     display: 'flex',
@@ -870,38 +883,42 @@ const styles: Record<string, React.CSSProperties> = {
   weightNumberInput: {
     width: '70px',
     padding: '0.5rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    textAlign: 'right',
+    textAlign: 'right' as const,
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
   },
   weightPercent: {
-    color: '#6b7280',
+    color: colors.textMuted,
     fontSize: '0.875rem',
   },
   weightEditorTotal: {
     padding: '0.75rem',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.bgTertiary,
     borderRadius: '0.375rem',
     fontWeight: 500,
     textAlign: 'center',
     marginBottom: '1rem',
+    color: colors.textPrimary,
   },
   weightTotalError: {
-    color: '#dc2626',
+    color: colors.danger,
   },
   weightErrorBox: {
     padding: '0.75rem',
-    backgroundColor: '#fee2e2',
-    border: '1px solid #fecaca',
+    backgroundColor: colors.dangerBg,
+    border: `1px solid ${colors.dangerBorder}`,
     borderRadius: '0.375rem',
-    color: '#dc2626',
+    color: colors.dangerText,
     marginBottom: '1rem',
     fontSize: '0.875rem',
   },
   helpText: {
     fontSize: '0.75rem',
-    color: '#6b7280',
+    color: colors.textMuted,
     marginTop: '0.25rem',
     marginBottom: 0,
   },

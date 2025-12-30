@@ -9,21 +9,21 @@
  * - Provides navigation between admin sections
  * @dependencies
  * - react-router-dom for routing
- * - ./components/Layout for page layout
- * - ./components/ProtectedRoute for auth protection
- * - ./pages/* for page components
+ * - @/admin/components/Layout for page layout
+ * - @/admin/components/ProtectedRoute for auth protection
+ * - @/admin/pages/* for page components
  */
 
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { LoginPage } from './pages/LoginPage';
-import { PromptListPage } from './pages/PromptListPage';
-import { PromptEditPage } from './pages/PromptEditPage';
-import { PromptCreatePage } from './pages/PromptCreatePage';
-import { ABTestListPage } from './pages/ABTestListPage';
-import { ABTestEditPage } from './pages/ABTestEditPage';
-import { ABTestCreatePage } from './pages/ABTestCreatePage';
+import { Layout } from '@/admin/components/Layout';
+import { ProtectedRoute } from '@/admin/components/ProtectedRoute';
+import { LoginPage } from '@/admin/pages/LoginPage';
+import { PromptListPage } from '@/admin/pages/PromptListPage';
+import { PromptEditPage } from '@/admin/pages/PromptEditPage';
+import { PromptCreatePage } from '@/admin/pages/PromptCreatePage';
+import { ABTestListPage } from '@/admin/pages/ABTestListPage';
+import { ABTestEditPage } from '@/admin/pages/ABTestEditPage';
+import { ABTestCreatePage } from '@/admin/pages/ABTestCreatePage';
 
 export function App() {
   return (

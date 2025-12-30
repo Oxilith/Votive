@@ -10,7 +10,7 @@
  * - @/components/assessment/types (TextareaStep)
  */
 
-import type { TextareaStep as TextareaStepType } from '../types';
+import type { TextareaStep as TextareaStepType } from '@/components/assessment/types';
 
 interface TextareaStepProps {
   step: TextareaStepType;

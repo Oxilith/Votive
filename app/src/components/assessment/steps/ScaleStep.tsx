@@ -11,7 +11,7 @@
  * - @/components/assessment/types (ScaleStep)
  */
 
-import type { ScaleStep as ScaleStepType } from '../types';
+import type { ScaleStep as ScaleStepType } from '@/components/assessment/types';
 
 interface ScaleStepProps {
   step: ScaleStepType;

@@ -16,10 +16,11 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { usePrompt, usePromptVersions } from '../hooks/usePrompts';
-import { promptApi } from '../api/promptApi';
-import { CLAUDE_MODELS } from '../types';
-import type { UpdatePromptInput, PromptVariantDTO, PromptVersionDTO } from '../types';
+import { usePrompt, usePromptVersions } from '@/admin/hooks/usePrompts';
+import { promptApi } from '@/admin/api/promptApi';
+import { colors, shadows, fonts } from '@/admin/styles/theme';
+import { CLAUDE_MODELS } from '@/admin/types';
+import type { UpdatePromptInput, PromptVariantDTO, PromptVersionDTO } from '@/admin/types';
 
 export function PromptEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -405,7 +406,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '2rem',
   },
   backLink: {
-    color: '#6b7280',
+    color: colors.textMuted,
     textDecoration: 'none',
     fontSize: '0.875rem',
     display: 'inline-block',
@@ -414,14 +415,16 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: '1.75rem',
     fontWeight: 700,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: '0 0 0.5rem 0',
   },
   keyBadge: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: colors.bgTertiary,
     padding: '0.25rem 0.5rem',
     borderRadius: '0.25rem',
     fontSize: '0.875rem',
+    fontFamily: fonts.mono,
+    color: colors.textPrimary,
   },
   headerActions: {
     display: 'flex',
@@ -429,18 +432,19 @@ const styles: Record<string, React.CSSProperties> = {
   },
   versionButton: {
     padding: '0.5rem 1rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
     cursor: 'pointer',
+    color: colors.textSecondary,
   },
   errorBox: {
     padding: '1rem',
-    backgroundColor: '#fee2e2',
-    border: '1px solid #fecaca',
+    backgroundColor: colors.dangerBg,
+    border: `1px solid ${colors.dangerBorder}`,
     borderRadius: '0.5rem',
-    color: '#dc2626',
+    color: colors.dangerText,
     marginBottom: '1.5rem',
   },
   layout: {
@@ -454,15 +458,16 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '1.5rem',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
     padding: '1.5rem',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    boxShadow: shadows.sm,
+    border: `1px solid ${colors.border}`,
   },
   sectionTitle: {
     fontSize: '1.125rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: '0 0 1rem 0',
   },
   formGroup: {
@@ -473,24 +478,29 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'block',
     fontSize: '0.875rem',
     fontWeight: 500,
-    color: '#374151',
+    color: colors.textSecondary,
     marginBottom: '0.375rem',
   },
   input: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    resize: 'vertical',
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
+    resize: 'vertical' as const,
   },
   select: {
     width: '100%',
     padding: '0.625rem 0.875rem',
-    border: '1px solid #d1d5db',
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
-    backgroundColor: '#fff',
+    fontFamily: fonts.body,
+    backgroundColor: colors.bgPrimary,
+    color: colors.textPrimary,
   },
   row: {
     display: 'flex',
@@ -503,27 +513,27 @@ const styles: Record<string, React.CSSProperties> = {
   },
   deleteButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#fff',
-    border: '1px solid #fecaca',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.dangerBorder}`,
     borderRadius: '0.5rem',
-    color: '#dc2626',
+    color: colors.danger,
     fontWeight: 500,
     fontSize: '0.875rem',
     cursor: 'pointer',
   },
   cancelButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.5rem',
-    color: '#374151',
+    color: colors.textSecondary,
     textDecoration: 'none',
     fontWeight: 500,
     fontSize: '0.875rem',
   },
   saveButton: {
     padding: '0.625rem 1.25rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     border: 'none',
     borderRadius: '0.5rem',
     color: '#fff',
@@ -533,20 +543,21 @@ const styles: Record<string, React.CSSProperties> = {
   },
   versionsPanel: {
     width: '280px',
-    backgroundColor: '#fff',
+    backgroundColor: colors.bgPrimary,
     borderRadius: '0.75rem',
     padding: '1rem',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    boxShadow: shadows.sm,
+    border: `1px solid ${colors.border}`,
     alignSelf: 'flex-start',
   },
   versionsPanelTitle: {
     fontSize: '1rem',
     fontWeight: 600,
-    color: '#111827',
+    color: colors.textPrimary,
     margin: '0 0 1rem 0',
   },
   noVersions: {
-    color: '#6b7280',
+    color: colors.textMuted,
     fontSize: '0.875rem',
   },
   versionsList: {
@@ -556,7 +567,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   versionItem: {
     padding: '0.75rem',
-    backgroundColor: '#f9fafb',
+    backgroundColor: colors.bgSecondary,
     borderRadius: '0.375rem',
     fontSize: '0.875rem',
   },
@@ -567,40 +578,41 @@ const styles: Record<string, React.CSSProperties> = {
   },
   versionNumber: {
     fontWeight: 600,
-    color: '#3b82f6',
+    color: colors.accent,
   },
   versionDate: {
-    color: '#6b7280',
+    color: colors.textMuted,
     fontSize: '0.75rem',
   },
   versionNote: {
-    color: '#374151',
+    color: colors.textSecondary,
     margin: '0.25rem 0 0.5rem 0',
     fontSize: '0.8125rem',
   },
   restoreButton: {
     padding: '0.25rem 0.5rem',
-    backgroundColor: '#fff',
-    border: '1px solid #d1d5db',
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.borderStrong}`,
     borderRadius: '0.25rem',
     fontSize: '0.75rem',
     cursor: 'pointer',
+    color: colors.textSecondary,
   },
   loading: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    color: '#6b7280',
+    color: colors.textMuted,
   },
   error: {
     textAlign: 'center',
     padding: '4rem 2rem',
-    color: '#dc2626',
+    color: colors.danger,
   },
   backButton: {
     display: 'inline-block',
     marginTop: '1rem',
     padding: '0.5rem 1rem',
-    backgroundColor: '#3b82f6',
+    backgroundColor: colors.accent,
     color: '#fff',
     textDecoration: 'none',
     borderRadius: '0.375rem',

@@ -431,3 +431,7 @@ See `.claude/skills/graphiti-memory/SKILL.md` for complete operations reference,
 - `feature-dev` – feature development workflow
 
 Leverage these tools proactively during development.
+
+## Coding conventions enforcement:
+
+CRITICAL: When working on this repository you must ensure to follow exisitng conventions, to ease this process utilize "npm run verify:conventions" command, execute that in the same manner as lint and type-check commands.

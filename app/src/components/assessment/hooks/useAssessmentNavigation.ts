@@ -12,7 +12,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import type { Phase } from '../types';
+import type { Phase } from '@/components/assessment/types';
 
 interface UseAssessmentNavigationProps {
   phases: Phase[];

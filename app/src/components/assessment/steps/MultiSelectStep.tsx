@@ -13,7 +13,7 @@
  */
 
 import { CheckIcon } from '@/components/shared/icons';
-import type { MultiSelectStep as MultiSelectStepType, SelectOption } from '../types';
+import type { MultiSelectStep as MultiSelectStepType, SelectOption } from '@/components/assessment/types';
 
 interface MultiSelectStepProps {
   step: MultiSelectStepType;

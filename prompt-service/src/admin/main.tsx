@@ -7,13 +7,13 @@
  * @dependencies
  * - react-dom/client for React 18 rendering
  * - react-router-dom for routing
- * - ./App for main application component
+ * - @/admin/App for main application component
  */
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { App } from './App';
+import { App } from '@/admin/App';
 
 const container = document.getElementById('root');
 if (!container) {

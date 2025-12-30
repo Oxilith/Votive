@@ -11,7 +11,7 @@
  * - @/components/assessment/types (SingleSelectStep, SelectOption)
  */
 
-import type { SingleSelectStep as SingleSelectStepType, SelectOption } from '../types';
+import type { SingleSelectStep as SingleSelectStepType, SelectOption } from '@/components/assessment/types';
 
 interface SingleSelectStepProps {
   step: SingleSelectStepType;

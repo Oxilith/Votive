@@ -18,7 +18,7 @@
 import { useTranslation } from 'react-i18next';
 import type { AssessmentResponses } from '@/types/assessment.types';
 import { cardStyles, textStyles, phaseBadge } from '@/styles/theme';
-import type { Phase, MultiSelectStep, SingleSelectStep, SelectOption } from '../types';
+import type { Phase, MultiSelectStep, SingleSelectStep, SelectOption } from '@/components/assessment/types';
 
 interface SynthesisStepProps {
   responses: Partial<AssessmentResponses>;
