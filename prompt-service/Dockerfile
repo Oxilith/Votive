@@ -61,7 +61,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 USER appuser
 WORKDIR /app/prompt-service
-ENV DATABASE_URL=file:/app/data/prompts.db
 
 EXPOSE 3002
 
