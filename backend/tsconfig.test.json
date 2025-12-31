@@ -5,16 +5,15 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "exactOptionalPropertyTypes": true,
+    "types": ["vitest/globals", "node"],
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
+  "include": [
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
-    "src/__tests__/**"
-  ]
+    "src/__tests__/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

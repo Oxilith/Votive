@@ -14,8 +14,6 @@
  * - Mock BackgroundRefreshManager for isolation
  */
 
-/* eslint-disable @typescript-eslint/unbound-method -- vitest mocks are safe to use unbound */
-
 import { describe, it, expect, beforeEach, vi, afterEach, type Mock } from 'vitest';
 import { PromptClientService, PromptServiceUnavailableError, promptCacheService } from '@/services';
 import { createMockPromptConfig } from 'shared/testing';
