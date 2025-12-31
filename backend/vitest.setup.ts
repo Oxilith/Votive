@@ -7,6 +7,7 @@ process.env.LOG_LEVEL = 'error';
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret';
 process.env.ANTHROPIC_API_KEY = 'test-anthropic-api-key';
+process.env.PROMPT_SERVICE_URL = 'http://prompt-service:3002';
 
 // Reset mocks after each test
 afterEach(() => {
