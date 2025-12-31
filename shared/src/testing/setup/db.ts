@@ -14,7 +14,7 @@
  * - vitest for test lifecycle hooks
  */
 
-import { beforeEach, afterAll } from 'vitest';
+
 
 /**
  * Minimal interface for Prisma-like client operations.

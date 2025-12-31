@@ -9,7 +9,9 @@
  * - vitest for mock function creation
  */
 
-import { vi, type Mock } from 'vitest';
+
+
+import type { Mock } from "vitest";
 
 /**
  * Model names in the Prisma schema.

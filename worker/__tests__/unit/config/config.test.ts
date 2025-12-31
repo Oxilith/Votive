@@ -12,7 +12,7 @@
  * - Config module under test (dynamically imported)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
 
 // Create hoisted mock for bootstrap logger
 const mockBootstrapLogger = vi.hoisted(() => ({

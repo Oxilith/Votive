@@ -13,7 +13,7 @@
  * - @/testing for integration test setup
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+
 import request from 'supertest';
 import {
   createIntegrationTestApp,

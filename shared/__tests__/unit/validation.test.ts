@@ -9,7 +9,7 @@
  * - vitest for testing framework
  */
 
-import { describe, it, expect } from 'vitest';
+
 import {
   TIME_OF_DAY_VALUES,
   MOOD_TRIGGER_VALUES,

@@ -13,7 +13,7 @@
  *       They will be skipped if the database is not available.
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+
 import { tokenCleanupJob } from '@/jobs';
 import { createFreshPrismaClient } from '@/prisma';
 import {

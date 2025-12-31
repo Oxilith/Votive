@@ -9,7 +9,7 @@
  * - vitest for fake timer control
  */
 
-import { vi } from 'vitest';
+
 
 /**
  * Waits for all pending promises to resolve.

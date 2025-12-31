@@ -10,7 +10,7 @@
  * - formatResponsesForPrompt function under test
  */
 
-import { describe, it, expect } from 'vitest';
+
 import { formatResponsesForPrompt } from '@/responseFormatter';
 import type { AssessmentResponses } from '@/assessment.types';
 

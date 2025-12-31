@@ -14,7 +14,7 @@
  * - Mocked Prisma client factory and config
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+
 
 // Mock Prisma with hoisting
 const mockPrisma = vi.hoisted(() => ({

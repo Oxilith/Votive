@@ -14,7 +14,7 @@
  * - @/testing for integration test setup
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach, vi, type Mock } from 'vitest';
+
 import request from 'supertest';
 import {
   createBackendTestApp,

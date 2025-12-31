@@ -13,7 +13,7 @@
  * - Mocked node-cron and logger
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach, type Mock } from 'vitest';
+
 import type { Job, JobResult } from '@/jobs';
 
 // Mock logger with hoisting
