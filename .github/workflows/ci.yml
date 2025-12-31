@@ -72,8 +72,10 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./app/coverage/lcov.info,./backend/coverage/lcov.info,./prompt-service/coverage/lcov.info,./shared/coverage/lcov.info,./worker/coverage/lcov.info
           fail_ci_if_error: false
+          verbose: true
 
   build:
     name: Build
