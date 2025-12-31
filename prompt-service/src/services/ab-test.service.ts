@@ -9,7 +9,16 @@
  * - Provides weighted random variant selection
  * @dependencies
  * - @/prisma/client for database access
+ *
+ * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
+ * See: https://github.com/prisma/prisma/issues/21365
  */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/require-await */
 
 import {prisma} from '@/prisma';
 import type {ABTest, ABVariant, ABVariantConfig, Prisma} from '@prisma/client';

@@ -13,7 +13,13 @@
  * - @/routes for API routes
  * - @/middleware for tracing
  * - shared/testing for database utilities
+ *
+ * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
+ * See: https://github.com/prisma/prisma/issues/21365
  */
+ 
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import express, { type Express, type ErrorRequestHandler } from 'express';
 import cookieParser from 'cookie-parser';

@@ -11,11 +11,22 @@
  * - @prisma/client for database access
  * - @prisma/adapter-libsql for driver adapter
  * - @libsql/client for SQLCipher encrypted connections
+ *
+ * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
+ * This is a known limitation when using Prisma's driver adapter pattern.
+ * See: https://github.com/prisma/prisma/issues/21365
  */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 
+/**
+ * Global cache for Prisma instance.
+ */
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -44,7 +55,7 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({
     adapter,
     log: logConfig as ('query' | 'info' | 'warn' | 'error')[],
-  });
+  }) as PrismaClient;
 }
 
 /**

@@ -21,7 +21,15 @@
  * - @/config for application configuration
  * - @/errors for custom error types
  * - shared/auth.types for Gender type
+ *
+ * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
+ * See: https://github.com/prisma/prisma/issues/21365
  */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import { prisma } from '@/prisma';
 import { Prisma, type User } from '@prisma/client';
@@ -818,7 +826,7 @@ export class UserService {
     });
 
     // Validate token exists and hasn't been used
-    if (!resetToken || resetToken.usedAt !== null) {
+    if (resetToken?.usedAt !== null) {
       throw new TokenError('Invalid or expired password reset token');
     }
 
@@ -874,7 +882,7 @@ export class UserService {
     });
 
     // Validate token exists and hasn't been used
-    if (!verifyToken || verifyToken.usedAt !== null) {
+    if (verifyToken?.usedAt !== null) {
       throw new TokenError('Invalid or expired verification token');
     }
 
