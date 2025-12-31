@@ -1,5 +1,5 @@
 # Prompt Service Dockerfile
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 RUN apk add --no-cache openssl
 
@@ -31,7 +31,7 @@ RUN npm run db:generate -w prompt-service
 RUN npm run build -w prompt-service
 
 # Production
-FROM node:20-alpine
+FROM node:24-alpine
 
 RUN apk add --no-cache openssl
 

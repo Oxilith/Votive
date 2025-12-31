@@ -1,5 +1,5 @@
 # Worker Dockerfile
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 RUN apk add --no-cache openssl
 
@@ -29,7 +29,7 @@ RUN npm run db:generate -w worker
 RUN npm run build -w worker
 
 # Production
-FROM node:22-alpine
+FROM node:24-alpine
 
 RUN apk add --no-cache openssl
 

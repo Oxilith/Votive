@@ -1,5 +1,5 @@
 # Backend Dockerfile
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ COPY backend/tsup.config.ts backend/
 RUN npm run build -w backend
 
 # Production
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 ENV NODE_ENV=production

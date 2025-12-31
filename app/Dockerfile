@@ -1,5 +1,5 @@
 # Frontend Dockerfile
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ COPY app/postcss.config.* app/
 RUN npm run build -w app
 
 # Production
-FROM nginx:alpine
+FROM nginx:1.28.1-alpine
 
 RUN apk add --no-cache openssl && \
     mkdir -p /etc/nginx/ssl
