@@ -13,8 +13,6 @@
  * - vitest for testing framework
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-
 // Mock dotenv to prevent loading .env file values during tests
 vi.mock('dotenv', () => ({
   config: vi.fn(),

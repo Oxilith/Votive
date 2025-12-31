@@ -13,8 +13,6 @@
  * - nodemailer mock for email transport
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-
 // Create hoisted mocks for nodemailer
 const mockTransporter = vi.hoisted(() => ({
   sendMail: vi.fn(),

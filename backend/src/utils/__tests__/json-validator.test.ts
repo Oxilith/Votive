@@ -60,34 +60,26 @@ describe('json-validator', () => {
     it('should parse valid JSON and return success', () => {
       const result = parseJson<{ name: string }>('{"name": "test"}');
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({ name: 'test' });
-      }
+      expect(result.success && result.data).toEqual({ name: 'test' });
     });
 
     it('should return error for invalid JSON', () => {
       const result = parseJson('not valid json');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBeInstanceOf(Error);
-      }
+      expect(!result.success && result.error).toBeInstanceOf(Error);
     });
 
     it('should handle arrays', () => {
       const result = parseJson<number[]>('[1, 2, 3]');
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([1, 2, 3]);
-      }
+      expect(result.success && result.data).toEqual([1, 2, 3]);
     });
 
     it('should handle nested objects', () => {
       const json = '{"outer": {"inner": "value"}}';
       const result = parseJson<{ outer: { inner: string } }>(json);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.outer.inner).toBe('value');
-      }
+      expect(result.success && result.data.outer.inner).toBe('value');
     });
 
     it('should return error for truncated JSON', () => {
@@ -98,9 +90,7 @@ describe('json-validator', () => {
     it('should handle null', () => {
       const result = parseJson<null>('null');
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBeNull();
-      }
+      expect(result.success && result.data).toBeNull();
     });
   });
 
@@ -109,18 +99,14 @@ describe('json-validator', () => {
       const input = '```json\n{"analysis": "result"}\n```';
       const result = parseAiJsonResponse<{ analysis: string }>(input);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({ analysis: 'result' });
-      }
+      expect(result.success && result.data).toEqual({ analysis: 'result' });
     });
 
     it('should parse plain JSON without code blocks', () => {
       const input = '{"analysis": "result"}';
       const result = parseAiJsonResponse<{ analysis: string }>(input);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({ analysis: 'result' });
-      }
+      expect(result.success && result.data).toEqual({ analysis: 'result' });
     });
 
     it('should return error for invalid JSON in code blocks', () => {
@@ -134,9 +120,7 @@ describe('json-validator', () => {
       const input = '```json\n{"patterns": []}\n```';
       const result = parseAiJsonResponse<{ patterns: unknown[] }>(input);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.patterns).toEqual([]);
-      }
+      expect(result.success && result.data.patterns).toEqual([]);
     });
   });
 });

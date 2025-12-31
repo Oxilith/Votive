@@ -8,7 +8,6 @@
  * - Returning 200 and attaching user to request when token is valid
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
 
 // Mock config before importing middleware
