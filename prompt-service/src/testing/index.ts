@@ -6,6 +6,7 @@
  * - Exports test app factory and authenticated request builders
  * - Exports CSRF token extraction helper
  * - Exports shared test fixtures (validAssessmentResponses)
+ * - Exports AUTH_ENDPOINTS, AUTH_HEADERS, and bearerToken for test constants
  * - Re-exports shared fixtures (MOCK_PASSWORD)
  * @dependencies
  * - ./integration-setup
@@ -14,6 +15,9 @@
 
 export {
   TEST_CONFIG,
+  AUTH_ENDPOINTS,
+  AUTH_HEADERS,
+  bearerToken,
   createIntegrationTestApp,
   createTestAgent,
   createAuthenticatedRequest,

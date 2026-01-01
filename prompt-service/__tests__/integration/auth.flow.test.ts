@@ -94,6 +94,76 @@ describe('Auth Flow Integration Tests', () => {
       expect(response.body).toHaveProperty('error');
     });
 
+    it('should reject password with 7 characters (below minimum)', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/register')
+        .send({
+          email: 'boundary7@example.com',
+          password: 'Abc123!', // 7 chars - just below 8 minimum
+          name: 'Boundary Test',
+          birthYear: 1990,
+          gender: 'male',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should accept password with exactly 8 characters (boundary)', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/register')
+        .send({
+          email: 'boundary8@example.com',
+          password: 'Abcd123!', // 8 chars - exactly at minimum
+          name: 'Boundary Test',
+          birthYear: 1990,
+          gender: 'male',
+        });
+
+      expect(response.status).toBe(201);
+    });
+
+    it('should reject password missing uppercase', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/register')
+        .send({
+          email: 'nouppercase@example.com',
+          password: 'password123!', // No uppercase letter
+          name: 'No Uppercase',
+          birthYear: 1990,
+          gender: 'male',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should reject password missing lowercase', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/register')
+        .send({
+          email: 'nolowercase@example.com',
+          password: 'PASSWORD123!', // No lowercase letter
+          name: 'No Lowercase',
+          birthYear: 1990,
+          gender: 'male',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should reject password missing number', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/register')
+        .send({
+          email: 'nonumber@example.com',
+          password: 'Password!!!', // No number
+          name: 'No Number',
+          birthYear: 1990,
+          gender: 'male',
+        });
+
+      expect(response.status).toBe(400);
+    });
+
     it('should reject duplicate email registration', async () => {
       // First registration
       await request(app)
@@ -310,9 +380,8 @@ describe('Auth Flow Integration Tests', () => {
       const response = await request(app)
         .get('/api/user-auth/verify-email/invalid-token-12345');
 
-      // Should return error for invalid token
-      // 400 = validation error, 401 = invalid token auth error, 404 = token not found
-      expect([400, 401, 404]).toContain(response.status);
+      // Invalid or expired token returns unauthorized
+      expect(response.status).toBe(401);
     });
 
     it('should reject empty verification token', async () => {
@@ -329,8 +398,8 @@ describe('Auth Flow Integration Tests', () => {
       const response = await request(app)
         .post('/api/user-auth/resend-verification');
 
-      // Should require JWT authentication
-      expect([401, 403]).toContain(response.status);
+      // CSRF middleware runs first and rejects (no CSRF token)
+      expect(response.status).toBe(403);
     });
 
     it('should accept request with valid JWT and CSRF token', async () => {

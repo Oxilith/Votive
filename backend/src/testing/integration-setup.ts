@@ -146,7 +146,14 @@ export function createMswHandlers() {
 }
 
 /**
- * Creates an MSW server with default handlers
+ * Creates an MSW server with default handlers.
+ *
+ * Usage:
+ * - For strict testing (fail on unhandled requests): `server.listen({ onUnhandledRequest: 'error' })`
+ * - For flexible testing (allow unmocked requests): `server.listen({ onUnhandledRequest: 'bypass' })`
+ * - Default behavior is 'warn' which logs but doesn't fail
+ *
+ * @returns MSW SetupServerApi instance
  */
 export function createMswServer() {
   return setupServer(...createMswHandlers());

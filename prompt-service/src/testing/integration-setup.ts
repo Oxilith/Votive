@@ -10,6 +10,7 @@
  * - Extracts CSRF tokens from response cookies
  * - Provides shared test fixtures (validAssessmentResponses)
  * - Gracefully skips tests when database unavailable (via setup())
+ * - Exports AUTH_ENDPOINTS, AUTH_HEADERS, and bearerToken() for test constants
  * @dependencies
  * - express for app creation
  * - cookie-parser for signed cookies
@@ -58,6 +59,49 @@ export const TEST_CONFIG = {
   jwtAccessSecret: 'test-jwt-access-secret-at-least-32-chars',
   jwtRefreshSecret: 'test-jwt-refresh-secret-at-least-32-chars',
 } as const;
+
+/**
+ * API endpoint paths for user authentication.
+ * Centralizes endpoint URLs to avoid magic strings in tests.
+ */
+export const AUTH_ENDPOINTS = {
+  register: '/api/user-auth/register',
+  login: '/api/user-auth/login',
+  logout: '/api/user-auth/logout',
+  logoutAll: '/api/user-auth/logout-all',
+  refresh: '/api/user-auth/refresh',
+  refreshWithUser: '/api/user-auth/refresh-with-user',
+  passwordReset: '/api/user-auth/password-reset',
+  passwordResetConfirm: '/api/user-auth/password-reset/confirm',
+  verifyEmail: '/api/user-auth/verify-email',
+  resendVerification: '/api/user-auth/resend-verification',
+  me: '/api/user-auth/me',
+  profile: '/api/user-auth/profile',
+  password: '/api/user-auth/password',
+  account: '/api/user-auth/account',
+  assessment: '/api/user-auth/assessment',
+  analysis: '/api/user-auth/analysis',
+  analyses: '/api/user-auth/analyses',
+} as const;
+
+/**
+ * HTTP header names used in authentication.
+ * Centralizes header names to avoid magic strings in tests.
+ */
+export const AUTH_HEADERS = {
+  authorization: 'Authorization',
+  csrfToken: 'x-csrf-token',
+  csrfCookie: 'csrf-token',
+} as const;
+
+/**
+ * Creates the Authorization header value with Bearer prefix.
+ * @param token - The JWT access token
+ * @returns The formatted Authorization header value
+ */
+export function bearerToken(token: string): string {
+  return `Bearer ${token}`;
+}
 
 /**
  * Creates a minimal Express app for integration testing.
