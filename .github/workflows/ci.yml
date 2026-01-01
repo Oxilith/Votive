@@ -45,8 +45,6 @@ jobs:
     name: Test
     needs: lint
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: file:./prisma/dev.db
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -66,7 +64,7 @@ jobs:
         run: npm run db:generate -w prompt-service
 
       - name: Run database migrations
-        run: npm run db:migrate:deploy -w prompt-service
+        run: DATABASE_URL=file:./prisma/dev.db npm run db:migrate:deploy -w prompt-service
 
       - name: Run tests
         run: npm run test:run
