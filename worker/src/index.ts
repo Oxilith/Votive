@@ -10,9 +10,6 @@
  * - @/jobs for job definitions
  * - @/utils/logger for structured logging
  * - @/prisma/client for database connection
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import { Scheduler } from './scheduler';

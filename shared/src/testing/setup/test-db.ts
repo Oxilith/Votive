@@ -8,30 +8,24 @@
  * - Gracefully skips tests when database unavailable
  * @dependencies
  * - vitest for test hooks
- * - ../db for Prisma test utilities
+ * - @votive/shared/prisma for PrismaClient type
+ * - ./db for Prisma test utilities
  */
 
-
-import { setTestPrisma, cleanupTestDb, type PrismaLikeClient } from './db'; 
+import type { PrismaClient } from '../../generated/prisma/client';
+import { setTestPrisma, cleanupTestDb } from './db';
 
 /**
  * Checks if the database is available and has migrations applied.
  * @param prisma - The Prisma client instance to check
  * @returns Promise<boolean> - True if database is available and ready
  */
-export async function checkDatabaseAvailable(prisma: PrismaLikeClient): Promise<boolean> {
+export async function checkDatabaseAvailable(prisma: PrismaClient): Promise<boolean> {
   try {
     // Check basic connectivity
     await prisma.$queryRaw`SELECT 1`;
     // Check if User table exists (migrations applied)
-    // Using type assertion because different packages may have different models
-    const prismaAny = prisma as unknown as Record<string, unknown>;
-    if (typeof prismaAny.user === 'object' && prismaAny.user !== null) {
-      const userModel = prismaAny.user as { findFirst?: () => Promise<unknown> };
-      if (typeof userModel.findFirst === 'function') {
-        await userModel.findFirst();
-      }
-    }
+    await prisma.user.findFirst();
     return true;
   } catch (error: unknown) {
     // Provide specific error messages for different failure modes
@@ -94,7 +88,7 @@ export async function checkDatabaseAvailable(prisma: PrismaLikeClient): Promise<
  * });
  * ```
  */
-export function setupIntegrationDb(prisma: PrismaLikeClient) {
+export function setupIntegrationDb(prisma: PrismaClient) {
   let databaseAvailable = false;
 
   beforeAll(async () => {

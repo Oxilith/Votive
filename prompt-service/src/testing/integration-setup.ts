@@ -16,9 +16,6 @@
  * - @/routes for API routes
  * - @/middleware for tracing
  * - shared/testing for database utilities
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * See: https://github.com/prisma/prisma/issues/21365
  */
  
 import express, { type Express, type ErrorRequestHandler } from 'express';
@@ -32,7 +29,6 @@ import {
   cleanupTestDb,
   setTestPrisma,
   checkDatabaseAvailable,
-  type PrismaLikeClient,
 } from '@votive/shared/testing';
 import { prisma } from '@/prisma';
 
@@ -168,9 +164,9 @@ export const integrationTestHooks = {
    * Returns whether the database is available.
    */
   async setup(): Promise<boolean> {
-    _databaseAvailable = await checkDatabaseAvailable(prisma as PrismaLikeClient);
+    _databaseAvailable = await checkDatabaseAvailable(prisma);
     if (_databaseAvailable) {
-      setTestPrisma(prisma as PrismaLikeClient);
+      setTestPrisma(prisma);
     }
     return _databaseAvailable;
   },

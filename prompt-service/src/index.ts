@@ -18,9 +18,6 @@
  * - @/routes for API routes
  * - @/middleware/admin-auth.middleware for admin authentication
  * - express-rate-limit for rate limiting static admin routes
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import express from 'express';

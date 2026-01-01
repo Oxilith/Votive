@@ -25,7 +25,9 @@ export {
     setupTestDb,
     withCleanup,
     CLEANUP_TABLE_ORDER,
-    type PrismaLikeClient,
     type TableName,
     type CleanupOptions,
 } from './db';
+
+// Re-export PrismaClient type for consumers
+export type { PrismaClient } from '../../generated/prisma/client';

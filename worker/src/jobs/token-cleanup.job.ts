@@ -11,9 +11,6 @@
  * - @/prisma for database access (factory function)
  * - @/config for job configuration
  * - @/jobs for Job interface
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import { createFreshPrismaClient } from '@/prisma';

@@ -10,10 +10,6 @@
  * - shared/prisma for PrismaClient (generated types)
  * - @prisma/adapter-libsql for libsql support
  * - @/config for database configuration
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * This is a known limitation when using Prisma's driver adapter pattern.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import { PrismaClient } from '@votive/shared/prisma';
@@ -33,7 +29,7 @@ export function createFreshPrismaClient(): PrismaClient {
   return new PrismaClient({
     adapter,
     log: config.nodeEnv === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  }) as PrismaClient;
+  });
 }
 
 // Create Prisma adapter with libsql config (Prisma 7+ API)
@@ -46,4 +42,4 @@ const adapter = new PrismaLibSql({
 export const prisma = new PrismaClient({
   adapter,
   log: config.nodeEnv === 'development' ? ['query', 'error', 'warn'] : ['error'],
-}) as PrismaClient;
+});

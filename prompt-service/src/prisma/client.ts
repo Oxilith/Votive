@@ -11,10 +11,6 @@
  * - shared/prisma for PrismaClient (generated types)
  * - @prisma/adapter-libsql for driver adapter
  * - @libsql/client for SQLCipher encrypted connections
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * This is a known limitation when using Prisma's driver adapter pattern.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import { PrismaClient } from '@votive/shared/prisma';
@@ -51,7 +47,7 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({
     adapter,
     log: logConfig as ('query' | 'info' | 'warn' | 'error')[],
-  }) as PrismaClient;
+  });
 }
 
 /**

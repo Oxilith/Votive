@@ -9,9 +9,6 @@
  * - Provides weighted random variant selection
  * @dependencies
  * - @/prisma/client for database access
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import {prisma} from '@/prisma';

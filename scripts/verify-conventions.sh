@@ -72,6 +72,7 @@ PARENT_IMPORTS=$(grep -rn "from ['\"]\.\./" --include="*.ts" --include="*.tsx" \
     | grep -v "__tests__" \
     | grep -v "// @allow-relative" \
     | grep -v "shared/src/generated/prisma/" \
+    | grep -v "shared/src/testing/setup/.*generated/prisma" \
     || true)
 
 if [ -n "$PARENT_IMPORTS" ]; then
@@ -444,6 +445,7 @@ RELATIVE_DEEP_IMPORTS=$(grep -rn "from ['\"]\.\/[^'\"]*\/[^'\"]*['\"]" --include
     | grep -v "\.json['\"]" \
     | grep -v "import type" \
     | grep -v "// @allow-deep-import" \
+    | grep -v "shared/src/testing/setup/.*generated/prisma" \
     || true)
 
 if [ -n "$RELATIVE_DEEP_IMPORTS" ]; then

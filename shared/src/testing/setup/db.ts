@@ -12,23 +12,13 @@
  * - Provides withCleanup for isolated test execution with cleanup
  * @dependencies
  * - vitest for test lifecycle hooks
+ * - @votive/shared/prisma for PrismaClient type
  */
 
-
-
-/**
- * Minimal interface for Prisma-like client operations.
- * This allows the shared testing module to work without importing the generated client directly.
- */
-export interface PrismaLikeClient {
-  $connect(): Promise<void>;
-  $disconnect(): Promise<void>;
-  $executeRawUnsafe(query: string): Promise<unknown>;
-  $queryRaw(query: TemplateStringsArray, ...values: unknown[]): Promise<unknown>;
-}
+import type { PrismaClient } from '../../generated/prisma/client';
 
 // Module-level client storage
-let testClient: PrismaLikeClient | null = null;
+let testClient: PrismaClient | null = null;
 
 /**
  * Sets the Prisma client for test database operations.
@@ -46,7 +36,7 @@ let testClient: PrismaLikeClient | null = null;
  * setTestPrisma(prisma);
  * ```
  */
-export function setTestPrisma(client: PrismaLikeClient): void {
+export function setTestPrisma(client: PrismaClient): void {
   testClient = client;
 }
 
@@ -63,7 +53,7 @@ export function setTestPrisma(client: PrismaLikeClient): void {
  * await prisma.$executeRawUnsafe('DELETE FROM "User"');
  * ```
  */
-export function getTestPrisma(): PrismaLikeClient {
+export function getTestPrisma(): PrismaClient {
   if (!testClient) {
     throw new Error(
       'Test Prisma client not initialized. Call setTestPrisma() in your test setup file.'
@@ -298,7 +288,7 @@ export function setupTestDb(options: { cleanupBeforeEach?: boolean } = {}): void
  * ```
  */
 export async function withCleanup<T>(
-  callback: (prisma: PrismaLikeClient) => Promise<T>,
+  callback: (prisma: PrismaClient) => Promise<T>,
   options?: CleanupOptions
 ): Promise<T> {
   const prisma = getTestPrisma();

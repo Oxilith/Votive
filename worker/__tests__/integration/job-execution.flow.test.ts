@@ -19,7 +19,6 @@ import { createFreshPrismaClient } from '@/prisma';
 import {
   setTestPrisma,
   cleanupTestDb,
-  type PrismaLikeClient,
 } from '@votive/shared/testing';
 
 describe('Job Execution Integration Tests', () => {
@@ -33,7 +32,7 @@ describe('Job Execution Integration Tests', () => {
       // Check if User table exists (migrations applied)
       await prisma.user.findFirst();
       databaseAvailable = true;
-      setTestPrisma(prisma as PrismaLikeClient);
+      setTestPrisma(prisma);
     } catch {
       console.warn(
         'Database not available or migrations not applied. ' +

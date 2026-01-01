@@ -12,9 +12,6 @@
  * @dependencies
  * - @/prisma/client for database access
  * - shared/prompt.types for PromptConfig type
- *
- * ESLint disabled rules are due to PrismaLibSql adapter not preserving full PrismaClient types.
- * See: https://github.com/prisma/prisma/issues/21365
  */
 
 import { prisma } from '@/prisma';
