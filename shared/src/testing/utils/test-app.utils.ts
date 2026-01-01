@@ -65,7 +65,9 @@ export function createTestApp(options: TestAppOptions = {}): Express {
   // Mount routes
   routes.forEach(({ path, router }) => app.use(path, router));
 
-  // Default error handler
+  // Default error handler - TESTING ONLY
+  // This handler exposes error details that should NOT be used in production.
+  // Production apps should use proper error sanitization to avoid leaking internals.
   const defaultErrorHandler: ErrorRequestHandler = (
     err: Error,
     _req: express.Request,

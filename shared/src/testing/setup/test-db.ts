@@ -33,12 +33,37 @@ export async function checkDatabaseAvailable(prisma: PrismaLikeClient): Promise<
       }
     }
     return true;
-  } catch {
-    console.warn(
-      'Database not available or migrations not applied. ' +
-      'Integration tests will be skipped. ' +
-      'Run `npm run db:migrate` in prompt-service to enable these tests.'
-    );
+  } catch (error: unknown) {
+    // Provide specific error messages for different failure modes
+    if (error instanceof Error) {
+      if (error.message.includes('SQLITE_BUSY')) {
+        console.warn(
+          '[checkDatabaseAvailable] Database is locked by another process. ' +
+          'Close other database connections and retry.'
+        );
+      } else if (error.message.includes('SQLITE_CORRUPT')) {
+        console.error(
+          '[checkDatabaseAvailable] Database file is corrupted. ' +
+          'Delete the .db file and run migrations again.'
+        );
+      } else if (error.message.includes('no such table')) {
+        console.warn(
+          '[checkDatabaseAvailable] Migrations not applied. ' +
+          'Integration tests will be skipped. ' +
+          'Run `npm run db:migrate` in prompt-service to enable these tests.'
+        );
+      } else {
+        console.warn(
+          `[checkDatabaseAvailable] Database not available: ${error.message}. ` +
+          'Integration tests will be skipped.'
+        );
+      }
+    } else {
+      console.warn(
+        '[checkDatabaseAvailable] Unknown database error. ' +
+        'Integration tests will be skipped.'
+      );
+    }
     return false;
   }
 }

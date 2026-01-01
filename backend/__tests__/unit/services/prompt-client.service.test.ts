@@ -220,7 +220,7 @@ describe('PromptClientService', () => {
       mockCacheService.isFresh.mockReturnValue(false);
 
       // Create a new service with mocked open circuit
-      const { createCircuitBreaker } = await import('@/services/circuit-breaker.service.js');
+      const { createCircuitBreaker } = await import('@/services/circuit-breaker.service');
       (createCircuitBreaker as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
         fire: vi.fn(),
         opened: true,

@@ -14,11 +14,13 @@
 
 
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
 import {
   createIntegrationTestApp,
   integrationTestHooks,
   registerTestUser,
   createAuthenticatedRequest,
+  TEST_CONFIG,
 } from '@/testing';
 
 describe('JWT Protection Integration Tests', () => {
@@ -86,6 +88,22 @@ describe('JWT Protection Integration Tests', () => {
         .set('Authorization', 'Bearer ');
 
       expect(response.status).toBe(401);
+    });
+
+    it('should reject request with expired JWT', async () => {
+      // Create an expired token using the same secret as the app
+      const expiredToken = jwt.sign(
+        { userId: 'test-user-id', type: 'access' },
+        TEST_CONFIG.jwtAccessSecret,
+        { expiresIn: '-1h' } // Expired 1 hour ago
+      );
+
+      const response = await request(app)
+        .get('/api/user-auth/me')
+        .set('Authorization', `Bearer ${expiredToken}`);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toMatch(/expired|invalid/i);
     });
   });
 

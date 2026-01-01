@@ -7,7 +7,6 @@
  * - Sets JWT secrets for authentication tests
  * - Sets NODE_ENV to test mode
  * - Sets LOG_LEVEL to silent to suppress all log output during tests
- * - Sets DATABASE_KEY to suppress encryption warning in tests
  * @dependencies
  * - Vitest setup mechanism
  */
@@ -16,9 +15,6 @@
 vi.mock('dotenv', () => ({
   config: vi.fn(() => ({ parsed: process.env })),
 }));
-
-// Suppress console.warn for DATABASE_KEY warning during tests
-vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 // Set required env vars before any module imports
 // This runs before test files load, preventing config validation errors
@@ -29,7 +25,6 @@ process.env['LOG_LEVEL'] = 'silent';
 process.env['JWT_ACCESS_SECRET'] = 'test-jwt-access-secret-at-least-32-chars';
 process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-32-chars-min';
 // Note: DATABASE_KEY is intentionally NOT set - test DB is unencrypted
-// The console.warn mock above suppresses the DATABASE_KEY warning
 // Suppress Prisma debug/error output during tests
 process.env['DEBUG'] = '';
 // Point to the actual database created by prisma migrate

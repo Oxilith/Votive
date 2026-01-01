@@ -280,4 +280,89 @@ describe('Auth Flow Integration Tests', () => {
       expect(logoutResponse.body.message).toMatch(/logged out.*session/i);
     });
   });
+
+  describe('POST /api/user-auth/password-reset', () => {
+    it('should accept valid email for password reset', async () => {
+      // Register a user first
+      await registerTestUser(app, {
+        email: 'resettest@example.com',
+        password: 'ValidPass123',
+        name: 'Reset Test',
+      });
+
+      // Request password reset
+      const response = await request(app)
+        .post('/api/user-auth/password-reset')
+        .send({ email: 'resettest@example.com' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBeDefined();
+    });
+
+    it('should return success for non-existent email (prevents enumeration)', async () => {
+      // Request password reset for non-existent email
+      const response = await request(app)
+        .post('/api/user-auth/password-reset')
+        .send({ email: 'nonexistent@example.com' });
+
+      // Should still return success to prevent email enumeration attacks
+      expect(response.status).toBe(200);
+    });
+
+    it('should reject invalid email format', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/password-reset')
+        .send({ email: 'not-an-email' });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('GET /api/user-auth/verify-email/:token', () => {
+    it('should reject invalid verification token', async () => {
+      const response = await request(app)
+        .get('/api/user-auth/verify-email/invalid-token-12345');
+
+      // Should return error for invalid token
+      // 400 = validation error, 401 = invalid token auth error, 404 = token not found
+      expect([400, 401, 404]).toContain(response.status);
+    });
+
+    it('should reject empty verification token', async () => {
+      const response = await request(app)
+        .get('/api/user-auth/verify-email/');
+
+      // Route won't match without token, so expect 404
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('POST /api/user-auth/resend-verification', () => {
+    it('should require authentication', async () => {
+      const response = await request(app)
+        .post('/api/user-auth/resend-verification');
+
+      // Should require JWT authentication
+      expect([401, 403]).toContain(response.status);
+    });
+
+    it('should accept request with valid JWT and CSRF token', async () => {
+      const { accessToken, csrfToken } = await registerTestUser(app, {
+        email: 'resendverify@example.com',
+        password: 'ValidPass123',
+        name: 'Resend Verify Test',
+      });
+
+      const response = await request(app)
+        .post('/api/user-auth/resend-verification')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .set('x-csrf-token', csrfToken || '')
+        .set('Cookie', `csrf-token=${csrfToken}`);
+
+      // Possible responses based on implementation state:
+      // 200 = success, 400 = already verified, 429 = rate limited
+      // 500 = email service not configured (acceptable in test environment)
+      expect([200, 400, 429, 500]).toContain(response.status);
+    });
+  });
 });

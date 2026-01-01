@@ -4,9 +4,13 @@
  * @functionality
  * - Exports async utilities (flushPromises, advanceTimersAndFlush, runAllTimersAndFlush)
  * - Exports Express mock utilities (createMockRequest, createMockResponse, createMockNext)
+ * - Exports RequestBuilder for fluent HTTP request building in tests
+ * - Exports test app utilities (createTestApp, createTestRequest, createAuthenticatedRequest)
  * @dependencies
  * - ./async.utils
  * - ./express.utils
+ * - ./request-builder
+ * - ./test-app.utils
  */
 
 export {

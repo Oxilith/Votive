@@ -5,7 +5,7 @@
  * - Tests successful analysis with mocked Claude API
  * - Tests error handling for Claude API failures
  * - Tests prompt service integration
- * - Tests request validation
+ * - Tests request validation (missing fields, invalid language, malformed JSON)
  * @dependencies
  * - vitest for testing framework
  * - supertest for HTTP testing
@@ -145,6 +145,16 @@ describe('External API Integration Tests', () => {
           },
           language: 'english',
         });
+
+      expect(response.status).toBe(400);
+      expect(mockMessagesCreate).not.toHaveBeenCalled();
+    });
+
+    it('should reject request with malformed JSON body', async () => {
+      const response = await request(app)
+        .post('/api/v1/claude/analyze')
+        .set('Content-Type', 'application/json')
+        .send('{ invalid json syntax }');
 
       expect(response.status).toBe(400);
       expect(mockMessagesCreate).not.toHaveBeenCalled();

@@ -5,7 +5,6 @@
  * - Mocks dotenv to suppress promotional tips during tests
  * - Sets NODE_ENV to test mode
  * - Sets LOG_LEVEL to silent to suppress all log output during tests
- * - Suppresses console.warn for DATABASE_KEY warning
  * - Clears mocks after each test
  * @dependencies
  * - Vitest setup mechanism

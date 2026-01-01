@@ -3,8 +3,13 @@
  * @purpose Barrel export for integration test setup utilities
  * @functionality
  * - Exports database setup utilities for integration tests
+ * - Exports database lifecycle hooks (setupIntegrationDb, checkDatabaseAvailable)
+ * - Exports Prisma client management (setTestPrisma, getTestPrisma, hasTestPrisma)
+ * - Exports cleanup utilities (cleanupTestDb, cleanupTables, disconnectTestDb)
+ * - Exports test wrappers (setupTestDb, withCleanup)
  * @dependencies
  * - ./test-db for database setup functions
+ * - ./db for database lifecycle utilities
  */
 
 export { setupIntegrationDb, checkDatabaseAvailable } from './test-db';

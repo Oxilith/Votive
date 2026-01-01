@@ -70,9 +70,13 @@ export interface SetupMswServerOptions {
  */
 export function setupMswServer(options: SetupMswServerOptions = {}): void {
   const { onUnhandledRequest = 'error' } = options;
+  let serverStarted = false;
 
   beforeAll(() => {
-    server.listen({ onUnhandledRequest });
+    if (!serverStarted) {
+      server.listen({ onUnhandledRequest });
+      serverStarted = true;
+    }
   });
 
   afterEach(() => {
@@ -80,7 +84,10 @@ export function setupMswServer(options: SetupMswServerOptions = {}): void {
   });
 
   afterAll(() => {
-    server.close();
+    if (serverStarted) {
+      server.close();
+      serverStarted = false;
+    }
   });
 }
 

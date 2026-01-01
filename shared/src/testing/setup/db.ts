@@ -85,6 +85,8 @@ export function hasTestPrisma(): boolean {
  * Tables to clean up, ordered by foreign key dependencies.
  * Children (dependent tables) must be deleted before parents.
  * Exported for use with cleanupTables type validation.
+ *
+ * NOTE: Update this list when adding new tables to the Prisma schema.
  */
 export const CLEANUP_TABLE_ORDER = [
   // A/B test related (most dependent)
@@ -221,11 +223,12 @@ export async function cleanupTables(tables: readonly TableName[]): Promise<void>
 export async function disconnectTestDb(): Promise<void> {
   if (testClient) {
     const client = testClient;
-    testClient = null; // Clear first to prevent stale state on error
     try {
       await client.$disconnect();
+      testClient = null; // Clear only after successful disconnect
     } catch (error: unknown) {
       console.error('[disconnectTestDb] Failed to disconnect:', error);
+      // Don't clear client on failure - caller might want to retry
       throw error;
     }
   }
@@ -299,10 +302,36 @@ export async function withCleanup<T>(
   options?: CleanupOptions
 ): Promise<T> {
   const prisma = getTestPrisma();
+  let result: T | undefined;
+  let testError: Error | undefined;
+  let cleanupError: Error | undefined;
 
   try {
-    return await callback(prisma);
-  } finally {
-    await cleanupTestDb(options);
+    result = await callback(prisma);
+  } catch (error) {
+    testError = error instanceof Error ? error : new Error(String(error));
   }
+
+  // Always attempt cleanup
+  try {
+    await cleanupTestDb(options);
+  } catch (error) {
+    cleanupError = error instanceof Error ? error : new Error(String(error));
+    // Log cleanup errors to aid debugging
+    console.error('[withCleanup] Cleanup failed:', error);
+  }
+
+  // If test failed, throw the test error (cleanup error is logged but not thrown)
+  if (testError) {
+    throw testError;
+  }
+
+  // If test passed but cleanup failed, throw cleanup error
+  if (cleanupError) {
+    throw cleanupError;
+  }
+
+  // Return result (we know it's defined because testError is undefined)
+  // Using 'as T' because TypeScript doesn't infer that result is defined here
+  return result as T;
 }

@@ -4,9 +4,10 @@
  * @functionality
  * - Creates Express app for integration testing (without rate limiting)
  * - Provides database setup and cleanup hooks with availability checking
+ * - Provides requireDatabase() hook that fails tests with migration instructions
  * - Creates authenticated request builders with JWT tokens
  * - Manages test user creation and cleanup
- * - Gracefully skips tests when database unavailable
+ * - Gracefully skips tests when database unavailable (via setup())
  * @dependencies
  * - express for app creation
  * - cookie-parser for signed cookies
@@ -172,6 +173,31 @@ export const integrationTestHooks = {
   },
 
   /**
+   * Call in beforeAll to require database availability.
+   * Throws an error with migration instructions if database is not available.
+   * Use this when tests MUST have database access and should not silently skip.
+   *
+   * @throws Error with migration instructions if database unavailable
+   *
+   * @example
+   * ```typescript
+   * beforeAll(async () => {
+   *   await integrationTestHooks.requireDatabase();
+   * });
+   * ```
+   */
+  async requireDatabase(): Promise<void> {
+    const available = await this.setup();
+    if (!available) {
+      throw new Error(
+        'Integration tests require a database with migrations applied.\n' +
+        'Run: npm run db:migrate -w prompt-service\n' +
+        'Then re-run the tests.'
+      );
+    }
+  },
+
+  /**
    * Call in beforeEach to clean up database for test isolation.
    */
   async cleanup(): Promise<void> {
@@ -182,12 +208,16 @@ export const integrationTestHooks = {
 
   /**
    * Call in afterAll to disconnect from database.
+   * Uses try-finally to ensure disconnect runs even if cleanup fails.
    */
   async teardown(): Promise<void> {
-    if (_databaseAvailable) {
-      await cleanupTestDb();
+    try {
+      if (_databaseAvailable) {
+        await cleanupTestDb();
+      }
+    } finally {
+      await prisma.$disconnect();
     }
-    await prisma.$disconnect();
   },
 
   /**
@@ -223,7 +253,10 @@ export async function registerTestUser(
     });
 
   if (response.status !== 201) {
-    throw new Error(`Failed to register test user: ${JSON.stringify(response.body)}`);
+    throw new Error(
+      `Failed to register test user (${userData.email}): ` +
+      `Status ${response.status} - ${JSON.stringify(response.body)}`
+    );
   }
 
   // Extract CSRF token from response cookies
@@ -249,7 +282,10 @@ export async function loginTestUser(
     .send(credentials);
 
   if (response.status !== 200) {
-    throw new Error(`Failed to login test user: ${JSON.stringify(response.body)}`);
+    throw new Error(
+      `Failed to login test user (${credentials.email}): ` +
+      `Status ${response.status} - ${JSON.stringify(response.body)}`
+    );
   }
 
   // Extract CSRF token from response cookies
@@ -265,11 +301,15 @@ export async function loginTestUser(
 
 /**
  * Extracts CSRF token from Set-Cookie header(s).
+ * Logs debug info if token is not found to aid test troubleshooting.
  */
 function extractCsrfToken(
   setCookieHeader: string | string[] | undefined
 ): string | undefined {
-  if (!setCookieHeader) return undefined;
+  if (!setCookieHeader) {
+    console.debug('[extractCsrfToken] No Set-Cookie header present');
+    return undefined;
+  }
 
   const cookies = Array.isArray(setCookieHeader)
     ? setCookieHeader
@@ -281,6 +321,7 @@ function extractCsrfToken(
     }
   }
 
+  console.debug('[extractCsrfToken] csrf-token not found in cookies:', cookies);
   return undefined;
 }
 
