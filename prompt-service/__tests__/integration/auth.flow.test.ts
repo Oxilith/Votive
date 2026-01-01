@@ -13,11 +13,11 @@
  * - @/testing for integration test setup
  */
 
-
 import request from 'supertest';
 import {
   createIntegrationTestApp,
   integrationTestHooks,
+  MOCK_PASSWORD,
   registerTestUser,
 } from '@/testing';
 
@@ -42,7 +42,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'newuser@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'New User',
           birthYear: 1990,
           gender: 'male',
@@ -61,7 +61,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'csrftest@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'CSRF Test',
           birthYear: 1990,
           gender: 'female',
@@ -99,7 +99,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'duplicate@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'First User',
           birthYear: 1990,
           gender: 'male',
@@ -110,7 +110,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'duplicate@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'Second User',
           birthYear: 1991,
           gender: 'female',
@@ -126,7 +126,7 @@ describe('Auth Flow Integration Tests', () => {
       // Register first
       await registerTestUser(app, {
         email: 'logintest@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Login Test',
       });
 
@@ -135,7 +135,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/login')
         .send({
           email: 'logintest@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
         });
 
       expect(response.status).toBe(200);
@@ -147,7 +147,7 @@ describe('Auth Flow Integration Tests', () => {
     it('should reject login with invalid password', async () => {
       await registerTestUser(app, {
         email: 'wrongpass@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Wrong Pass',
       });
 
@@ -167,7 +167,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/login')
         .send({
           email: 'nonexistent@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
         });
 
       expect(response.status).toBe(401);
@@ -185,7 +185,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'refreshtest@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'Refresh Test',
           birthYear: 1990,
           gender: 'male',
@@ -215,7 +215,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'logouttest@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'Logout Test',
           birthYear: 1990,
           gender: 'male',
@@ -254,7 +254,7 @@ describe('Auth Flow Integration Tests', () => {
         .post('/api/user-auth/register')
         .send({
           email: 'logoutall@example.com',
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
           name: 'Logout All Test',
           birthYear: 1990,
           gender: 'male',
@@ -286,7 +286,7 @@ describe('Auth Flow Integration Tests', () => {
       // Register a user first
       await registerTestUser(app, {
         email: 'resettest@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Reset Test',
       });
 
@@ -349,7 +349,7 @@ describe('Auth Flow Integration Tests', () => {
     it('should accept request with valid JWT and CSRF token', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'resendverify@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Resend Verify Test',
       });
 

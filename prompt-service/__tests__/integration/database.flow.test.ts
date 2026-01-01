@@ -12,13 +12,13 @@
  * - @/testing for integration test setup
  */
 
-
 import request from 'supertest';
 import {
+  createAuthenticatedRequest,
   createIntegrationTestApp,
   integrationTestHooks,
+  MOCK_PASSWORD,
   registerTestUser,
-  createAuthenticatedRequest,
 } from '@/testing';
 
 describe('Database Flow Integration Tests', () => {
@@ -59,7 +59,7 @@ describe('Database Flow Integration Tests', () => {
     it('should create assessment successfully', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'assessmentcrud@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Assessment CRUD',
       });
 
@@ -78,7 +78,7 @@ describe('Database Flow Integration Tests', () => {
     it('should list user assessments', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'listassess@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'List Assessments',
       });
 
@@ -106,7 +106,7 @@ describe('Database Flow Integration Tests', () => {
     it('should get single assessment by ID', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'getassess@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Get Assessment',
       });
 
@@ -132,7 +132,7 @@ describe('Database Flow Integration Tests', () => {
     it('should return 404 for non-existent assessment', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'notfound@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Not Found',
       });
 
@@ -148,7 +148,7 @@ describe('Database Flow Integration Tests', () => {
     it('should save analysis successfully', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'analysiscrud@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Analysis CRUD',
       });
 
@@ -196,7 +196,7 @@ describe('Database Flow Integration Tests', () => {
     it('should list user analyses', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'listanalyses@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'List Analyses',
       });
 
@@ -239,7 +239,7 @@ describe('Database Flow Integration Tests', () => {
     it('should get single analysis by ID', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'getanalysis@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Get Analysis',
       });
 
@@ -287,7 +287,7 @@ describe('Database Flow Integration Tests', () => {
       // User 1
       const { accessToken: token1, csrfToken: csrf1 } = await registerTestUser(app, {
         email: 'isolation1@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'User One',
       });
 
@@ -299,7 +299,7 @@ describe('Database Flow Integration Tests', () => {
       // User 2
       const { accessToken: token2 } = await registerTestUser(app, {
         email: 'isolation2@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'User Two',
       });
 
@@ -317,7 +317,7 @@ describe('Database Flow Integration Tests', () => {
     it('should delete all user data when account is deleted', async () => {
       const { accessToken, csrfToken, user } = await registerTestUser(app, {
         email: 'cascade@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Cascade Delete',
       });
 
@@ -354,7 +354,7 @@ describe('Database Flow Integration Tests', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .set('x-csrf-token', csrfToken || '')
         .set('Cookie', `csrf-token=${csrfToken}`)
-        .send({ password: 'ValidPass123' });
+        .send({ password: MOCK_PASSWORD });
 
       expect(deleteResponse.status).toBe(200);
 
@@ -363,7 +363,7 @@ describe('Database Flow Integration Tests', () => {
         .post('/api/user-auth/login')
         .send({
           email: user.email,
-          password: 'ValidPass123',
+          password: MOCK_PASSWORD,
         });
 
       expect(loginResponse.status).toBe(401);
@@ -376,7 +376,7 @@ describe('Database Flow Integration Tests', () => {
       // It stores whatever is sent and relies on app validation
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'partialassess@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Partial Assessment',
       });
 
@@ -399,7 +399,7 @@ describe('Database Flow Integration Tests', () => {
     it('should reject analysis with non-existent assessmentId (FK constraint)', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'invalidanalysis@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Invalid Analysis',
       });
 

@@ -12,14 +12,14 @@
  * - @/testing for integration test setup
  */
 
-
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import {
+  createAuthenticatedRequest,
   createIntegrationTestApp,
   integrationTestHooks,
+  MOCK_PASSWORD,
   registerTestUser,
-  createAuthenticatedRequest,
   TEST_CONFIG,
 } from '@/testing';
 
@@ -42,7 +42,7 @@ describe('JWT Protection Integration Tests', () => {
     it('should return user profile with valid JWT', async () => {
       const { accessToken, user } = await registerTestUser(app, {
         email: 'jwttest@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'JWT Test User',
       });
 
@@ -111,7 +111,7 @@ describe('JWT Protection Integration Tests', () => {
     it('should update profile with valid JWT and CSRF token', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'updateprofile@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Original Name',
       });
 
@@ -140,7 +140,7 @@ describe('JWT Protection Integration Tests', () => {
     it('should list assessments with valid JWT', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'assessments@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Assessment User',
       });
 
@@ -164,7 +164,7 @@ describe('JWT Protection Integration Tests', () => {
     it('should list analyses with valid JWT', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'analyses@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Analysis User',
       });
 
@@ -182,7 +182,7 @@ describe('JWT Protection Integration Tests', () => {
       // Create user 1 with an assessment
       const { accessToken: token1, csrfToken: csrf1 } = await registerTestUser(app, {
         email: 'user1@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'User One',
       });
 
@@ -217,7 +217,7 @@ describe('JWT Protection Integration Tests', () => {
       // Create user 2
       const { accessToken: token2 } = await registerTestUser(app, {
         email: 'user2@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'User Two',
       });
 

@@ -12,11 +12,11 @@
  * - @/testing for integration test setup
  */
 
-
 import request from 'supertest';
 import {
   createIntegrationTestApp,
   integrationTestHooks,
+  MOCK_PASSWORD,
   registerTestUser,
 } from '@/testing';
 
@@ -39,7 +39,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should accept request with valid CSRF token', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'csrfvalid@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'CSRF Valid',
       });
 
@@ -57,7 +57,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should reject request without CSRF token header', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'nocsrfheader@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'No CSRF Header',
       });
 
@@ -73,7 +73,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should reject request with mismatched CSRF token', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'csrfmismatch@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'CSRF Mismatch',
       });
 
@@ -94,7 +94,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should require CSRF token for password change', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'passchange@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Pass Change',
       });
 
@@ -102,7 +102,7 @@ describe('CSRF Protection Integration Tests', () => {
         .put('/api/user-auth/password')
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
-          currentPassword: 'ValidPass123',
+          currentPassword: MOCK_PASSWORD,
           newPassword: 'NewValidPass456',
         });
 
@@ -113,7 +113,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should allow password change with valid CSRF token', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'passchangevalid@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Pass Change Valid',
       });
 
@@ -123,7 +123,7 @@ describe('CSRF Protection Integration Tests', () => {
         .set('x-csrf-token', csrfToken || '')
         .set('Cookie', `csrf-token=${csrfToken}`)
         .send({
-          currentPassword: 'ValidPass123',
+          currentPassword: MOCK_PASSWORD,
           newPassword: 'NewValidPass456',
         });
 
@@ -135,7 +135,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should require CSRF token for saving assessment', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'assessmentcsrf@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Assessment CSRF',
       });
 
@@ -172,14 +172,14 @@ describe('CSRF Protection Integration Tests', () => {
     it('should require CSRF token for account deletion', async () => {
       const { accessToken } = await registerTestUser(app, {
         email: 'deletecs@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Delete CSRF',
       });
 
       const response = await request(app)
         .delete('/api/user-auth/account')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ password: 'ValidPass123' });
+        .send({ password: MOCK_PASSWORD });
 
       expect(response.status).toBe(403);
       expect(response.body.error).toMatch(/csrf/i);
@@ -188,7 +188,7 @@ describe('CSRF Protection Integration Tests', () => {
     it('should allow account deletion with valid CSRF token', async () => {
       const { accessToken, csrfToken } = await registerTestUser(app, {
         email: 'deletevalid@example.com',
-        password: 'ValidPass123',
+        password: MOCK_PASSWORD,
         name: 'Delete Valid',
       });
 
@@ -197,7 +197,7 @@ describe('CSRF Protection Integration Tests', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .set('x-csrf-token', csrfToken || '')
         .set('Cookie', `csrf-token=${csrfToken}`)
-        .send({ password: 'ValidPass123' });
+        .send({ password: MOCK_PASSWORD });
 
       expect(response.status).toBe(200);
       expect(response.body.message).toMatch(/deleted/i);

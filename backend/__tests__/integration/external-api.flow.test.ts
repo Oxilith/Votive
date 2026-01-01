@@ -14,7 +14,6 @@
  * - @/testing for integration test setup
  */
 
-
 import request from 'supertest';
 import {
   createBackendTestApp,
