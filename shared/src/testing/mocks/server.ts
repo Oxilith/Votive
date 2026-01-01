@@ -21,8 +21,8 @@ import { handlers } from './handlers';
  *
  * @example
  * ```typescript
- * import { server } from 'shared/testing';
- * import { createRateLimitHandler } from 'shared/testing';
+ * import { server } from '@votive/shared/testing';
+ * import { createRateLimitHandler } from '@votive/shared/testing';
  *
  * // Override default handler for a specific test
  * server.use(createRateLimitHandler(30));
@@ -51,7 +51,7 @@ export interface SetupMswServerOptions {
  *
  * @example
  * ```typescript
- * import { setupMswServer } from 'shared/testing';
+ * import { setupMswServer } from '@votive/shared/testing';
  *
  * describe('MyService', () => {
  *   setupMswServer();
@@ -99,7 +99,7 @@ export function setupMswServer(options: SetupMswServerOptions = {}): void {
  *
  * @example
  * ```typescript
- * import { useHandlers, createRateLimitHandler } from 'shared/testing';
+ * import { useHandlers, createRateLimitHandler } from '@votive/shared/testing';
  *
  * it('handles rate limits', async () => {
  *   useHandlers(createRateLimitHandler(60));

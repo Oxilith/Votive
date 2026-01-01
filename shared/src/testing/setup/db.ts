@@ -39,8 +39,8 @@ let testClient: PrismaLikeClient | null = null;
  * @example
  * ```typescript
  * // prompt-service/vitest.setup.ts
- * import { PrismaClient } from 'shared';
- * import { setTestPrisma } from 'shared/testing';
+ * import { PrismaClient } from '@votive/shared';
+ * import { setTestPrisma } from '@votive/shared/testing';
  *
  * const prisma = new PrismaClient();
  * setTestPrisma(prisma);

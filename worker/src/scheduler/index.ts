@@ -14,7 +14,7 @@
  */
 
 import cron, { type ScheduledTask } from 'node-cron';
-import { generateTraceId, generateSpanId } from 'shared';
+import { generateTraceId, generateSpanId } from '@votive/shared';
 import type { Job } from '@/jobs';
 import { logger } from '@/utils';
 

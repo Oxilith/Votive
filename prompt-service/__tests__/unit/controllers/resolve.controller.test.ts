@@ -30,7 +30,7 @@ vi.mock('@/services', () => ({
 
 import { ResolveController } from '@/controllers';
 import { NotFoundError } from '@/errors';
-import { createMockRequest, createMockResponse, createMockPromptConfig } from 'shared/testing';
+import { createMockRequest, createMockResponse, createMockPromptConfig } from '@votive/shared/testing';
 import type { Request, Response } from 'express';
 
 // Valid test UUID

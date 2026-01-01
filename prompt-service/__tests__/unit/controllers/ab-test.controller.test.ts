@@ -42,7 +42,7 @@ import {
   createMockResponse,
   createMockABTest,
   createMockABVariant,
-} from 'shared/testing';
+} from '@votive/shared/testing';
 import type { Request, Response } from 'express';
 
 // Valid test UUIDs

@@ -19,7 +19,7 @@ import {
   createMockBlindSpot,
   createMockLeveragePoint,
   createMockRisk,
-} from 'shared/testing';
+} from '@votive/shared/testing';
 import type { AnalysisPattern } from '@/types';
 
 // Mock react-i18next

@@ -20,7 +20,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import IdentityInsightsAI from '@/components/insights/IdentityInsightsAI';
-import type { AIAnalysisResult, AssessmentResponses } from 'shared';
+import type { AIAnalysisResult, AssessmentResponses } from '@votive/shared';
 
 // Mock i18next
 vi.mock('react-i18next', () => ({

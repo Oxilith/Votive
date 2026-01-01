@@ -41,7 +41,7 @@ import { useAnalysisStore } from '@/stores/useAnalysisStore';
 import { authService } from '@/services/api/AuthService';
 import type { Gender, ProfileUpdateRequest, PasswordChangeRequest } from '@/types';
 import { logger } from '@/utils';
-import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH } from 'shared';
+import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH } from '@votive/shared';
 
 /**
  * Profile tab type

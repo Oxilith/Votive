@@ -15,7 +15,7 @@
 import { ClaudeService } from '@/services/api/ClaudeService';
 import { ApiClientError } from '@/services';
 import type { IApiClient, AnalysisRequest, ApiResponse } from '@/services';
-import type { AIAnalysisResult, AssessmentResponses, UserProfileForAnalysis } from 'shared';
+import type { AIAnalysisResult, AssessmentResponses, UserProfileForAnalysis } from '@votive/shared';
 
 // Create mock Headers object
 function createMockHeaders(): Headers {

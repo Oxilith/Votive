@@ -16,7 +16,7 @@ import {
   ARRAY_FIELDS,
   NUMBER_FIELDS,
   STRING_FIELDS,
-} from 'shared';
+} from '@votive/shared';
 
 export const exportToJson = (
   data: AssessmentResponses,

@@ -16,7 +16,7 @@
 
 import type { IApiClient, ApiResponse } from '@/services/interfaces';
 import { AuthService } from '@/services/api/AuthService';
-import type { AssessmentResponses, AIAnalysisResult } from 'shared';
+import type { AssessmentResponses, AIAnalysisResult } from '@votive/shared';
 
 // Mock useAuthStore
 vi.mock('@/stores/useAuthStore', () => ({

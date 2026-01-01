@@ -15,7 +15,7 @@
  */
 
 import { PromptClientService, PromptServiceUnavailableError, promptCacheService } from '@/services';
-import { createMockPromptConfig } from 'shared/testing';
+import { createMockPromptConfig } from '@votive/shared/testing';
 
 // Cast to mocked type for type safety
 const mockCacheService = vi.mocked(promptCacheService);

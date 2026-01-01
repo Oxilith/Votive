@@ -287,7 +287,7 @@ export class RequestBuilder {
  *
  * @example
  * ```typescript
- * import { requestBuilder } from 'shared/testing';
+ * import { requestBuilder } from '@votive/shared/testing';
  *
  * const req = requestBuilder()
  *   .post('/api/auth/login')

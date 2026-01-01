@@ -18,7 +18,7 @@ const { mockExtractOrCreateTrace } = vi.hoisted(() => ({
   mockExtractOrCreateTrace: vi.fn(),
 }));
 
-vi.mock('shared', async (importOriginal: () => Promise<typeof import('shared')>) => {
+vi.mock('@votive/shared', async (importOriginal: () => Promise<typeof import('@votive/shared')>) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -27,9 +27,9 @@ vi.mock('shared', async (importOriginal: () => Promise<typeof import('shared')>)
 });
 
 import { tracingMiddleware } from '@/middleware/tracing.middleware';
-import { createMockRequest, createMockResponse } from 'shared/testing';
+import { createMockRequest, createMockResponse } from '@votive/shared/testing';
 import type { Request, Response, NextFunction } from 'express';
-import { TRACEPARENT_HEADER, type TraceInfo } from 'shared';
+import { TRACEPARENT_HEADER, type TraceInfo } from '@votive/shared';
 
 // Extended mock request type to include traceContext
 interface MockRequestWithTrace {

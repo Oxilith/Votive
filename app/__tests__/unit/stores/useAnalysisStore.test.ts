@@ -14,7 +14,7 @@
  */
 
 import { useAnalysisStore } from '@/stores/useAnalysisStore';
-import { createMockAnalysisResult, createCompleteAssessment } from 'shared/testing';
+import { createMockAnalysisResult, createCompleteAssessment } from '@votive/shared/testing';
 
 // Mock the service layer
 vi.mock('@/services', () => ({

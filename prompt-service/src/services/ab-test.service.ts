@@ -15,7 +15,7 @@
  */
 
 import {prisma} from '@/prisma';
-import type { Prisma, ABTest, ABVariant, ABVariantConfig } from 'shared/prisma';
+import type { Prisma, ABTest, ABVariant, ABVariantConfig } from '@votive/shared/prisma';
 import {NotFoundError, ValidationError} from '@/errors';
 
 export interface ABTestWithVariants extends ABTest {

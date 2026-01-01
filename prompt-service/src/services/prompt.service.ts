@@ -20,7 +20,7 @@
 import { prisma } from '@/prisma';
 import { NotFoundError } from '@/errors';
 import { validatePromptContent, validatePromptKey } from '@/utils';
-import type { Prisma, Prompt, PromptVariant, PromptVersion } from 'shared/prisma';
+import type { Prisma, Prompt, PromptVariant, PromptVersion } from '@votive/shared/prisma';
 
 export interface PromptWithVariants extends Prompt {
   variants: PromptVariant[];

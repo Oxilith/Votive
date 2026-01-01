@@ -23,10 +23,10 @@ export type {
   AnalysisRisk,
   IdentitySynthesis,
   AIAnalysisResult,
-} from 'shared';
+} from '@votive/shared';
 
 // Re-import for use in local interfaces
-import type { AssessmentResponses, AIAnalysisResult } from 'shared';
+import type { AssessmentResponses, AIAnalysisResult } from '@votive/shared';
 
 /**
  * View-only assessment data (for /assessment/:id routes)

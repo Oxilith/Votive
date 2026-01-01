@@ -19,7 +19,7 @@
 
 import { NotFoundError, ValidationError, ConflictError, isAppError } from '@/errors';
 import { PromptResolverService, promptService, abTestService, type ABTestWithVariants } from '@/services';
-import type { Prompt, PromptVariant, ABVariant, ABVariantConfig } from 'shared/prisma';
+import type { Prompt, PromptVariant, ABVariant, ABVariantConfig } from '@votive/shared/prisma';
 
 describe('Error Types', () => {
   describe('NotFoundError', () => {

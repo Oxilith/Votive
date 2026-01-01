@@ -15,7 +15,7 @@
  * - Email service mock for email sending
  */
 
-import type { User, RefreshToken, PasswordResetToken, EmailVerifyToken, Assessment, Analysis } from 'shared/prisma';
+import type { User, RefreshToken, PasswordResetToken, EmailVerifyToken, Assessment, Analysis } from '@votive/shared/prisma';
 
 // Define the return type for verifyRefreshToken mock
 interface VerifyResult {

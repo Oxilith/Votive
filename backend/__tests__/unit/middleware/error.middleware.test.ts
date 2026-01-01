@@ -61,7 +61,7 @@ import {
   type AppError,
 } from '@/middleware';
 import { PromptServiceUnavailableError } from '@/services';
-import { createMockRequest, createMockResponse, createMockNext } from 'shared/testing';
+import { createMockRequest, createMockResponse, createMockNext } from '@votive/shared/testing';
 import type { Request, Response, NextFunction } from 'express';
 
 describe('error.middleware', () => {

@@ -30,7 +30,7 @@ import {
   setTestPrisma,
   checkDatabaseAvailable,
   type PrismaLikeClient,
-} from 'shared/testing';
+} from '@votive/shared/testing';
 import { prisma } from '@/prisma';
 
 /** Response type for register endpoint */

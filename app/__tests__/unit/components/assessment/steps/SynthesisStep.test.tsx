@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { SynthesisStep } from '@/components/assessment/steps/SynthesisStep';
-import type { AssessmentResponses } from 'shared';
+import type { AssessmentResponses } from '@votive/shared';
 import type { Phase } from '@/components/assessment/types';
 
 // Mock i18next

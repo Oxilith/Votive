@@ -23,4 +23,4 @@ export {
 } from './integration-setup';
 
 // Re-export shared fixtures for convenience
-export { MOCK_PASSWORD } from 'shared/testing';
+export { MOCK_PASSWORD } from '@votive/shared/testing';

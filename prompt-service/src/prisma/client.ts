@@ -17,7 +17,7 @@
  * See: https://github.com/prisma/prisma/issues/21365
  */
 
-import { PrismaClient } from 'shared/prisma';
+import { PrismaClient } from '@votive/shared/prisma';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 
 /**

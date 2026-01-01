@@ -38,7 +38,7 @@ import {
   createMockNext,
   createCompleteAssessment,
   createMockAnalysisResult,
-} from 'shared/testing';
+} from '@votive/shared/testing';
 import type { Request, Response, NextFunction } from 'express';
 
 describe('claude.controller', () => {

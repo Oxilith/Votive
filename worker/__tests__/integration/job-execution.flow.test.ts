@@ -20,7 +20,7 @@ import {
   setTestPrisma,
   cleanupTestDb,
   type PrismaLikeClient,
-} from 'shared/testing';
+} from '@votive/shared/testing';
 
 describe('Job Execution Integration Tests', () => {
   const prisma = createFreshPrismaClient();

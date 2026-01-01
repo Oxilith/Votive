@@ -27,7 +27,7 @@
  */
 
 import { prisma } from '@/prisma';
-import { TransactionIsolationLevel, type Prisma, type User } from 'shared/prisma';
+import { TransactionIsolationLevel, type Prisma, type User } from '@votive/shared/prisma';
 import { config } from '@/config';
 import {
   NotFoundError,
@@ -52,7 +52,7 @@ import {
 } from '@/utils';
 import { emailService } from './email.service';
 import { auditLog, type RequestContext } from './audit.service';
-import type { Gender } from 'shared';
+import type { Gender } from '@votive/shared';
 
 /**
  * Token expiry constants in milliseconds

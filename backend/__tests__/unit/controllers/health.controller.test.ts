@@ -25,7 +25,7 @@ vi.mock('@/health', () => ({
 }));
 
 import { liveness, readiness } from '@/controllers';
-import { createMockRequest, createMockResponse } from 'shared/testing';
+import { createMockRequest, createMockResponse } from '@votive/shared/testing';
 import type { Request, Response } from 'express';
 
 describe('health.controller', () => {

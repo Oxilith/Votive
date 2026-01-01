@@ -14,7 +14,7 @@
  */
 
 import { PromptCacheService } from '@/services';
-import { createMockPromptConfig } from 'shared/testing';
+import { createMockPromptConfig } from '@votive/shared/testing';
 
 // Mock config with test values
 vi.mock('@/config', () => ({

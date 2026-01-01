@@ -30,7 +30,7 @@ import {
 } from '@/utils';
 import { createCircuitBreaker } from './circuit-breaker.service';
 import { promptCacheService } from './prompt-cache.service';
-import type { PromptConfig } from 'shared';
+import type { PromptConfig } from '@votive/shared';
 
 const REQUEST_TIMEOUT_MS = 5000;
 

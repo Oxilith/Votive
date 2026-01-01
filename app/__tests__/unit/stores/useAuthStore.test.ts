@@ -14,7 +14,7 @@
  */
 
 import { useAuthStore } from '@/stores/useAuthStore';
-import { createMockSafeUser, createMockSavedAssessment, createMockSavedAnalysis } from 'shared/testing';
+import { createMockSafeUser, createMockSavedAssessment, createMockSavedAnalysis } from '@votive/shared/testing';
 
 describe('useAuthStore', () => {
   beforeEach(() => {

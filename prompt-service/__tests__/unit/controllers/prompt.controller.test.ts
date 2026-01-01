@@ -41,7 +41,7 @@ import {
   createMockResponse,
   createMockPrompt,
   createMockPromptVersion,
-} from 'shared/testing';
+} from '@votive/shared/testing';
 import type { Request, Response } from 'express';
 
 // Valid test UUIDs

@@ -10,7 +10,7 @@
  */
 
 // Re-export labels for components that import from this file
-export { valueLabels, timeLabels, triggerLabels, willpowerLabels } from 'shared';
+export { valueLabels, timeLabels, triggerLabels, willpowerLabels } from '@votive/shared';
 
 // Re-export formatter from shared (now with language parameter)
-export { formatResponsesForPrompt } from 'shared';
+export { formatResponsesForPrompt } from '@votive/shared';

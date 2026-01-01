@@ -15,8 +15,8 @@
  */
 
 import { analyzeAssessment, promptClientService } from '@/services';
-import { createMockPromptConfig, createCompleteAssessment, createMockAnalysisResult } from 'shared/testing';
-import type { PromptConfig } from 'shared';
+import { createMockPromptConfig, createCompleteAssessment, createMockAnalysisResult } from '@votive/shared/testing';
+import type { PromptConfig } from '@votive/shared';
 
 // Mock Anthropic SDK - use vi.hoisted for proper mock hoisting
 const { mockMessagesCreate } = vi.hoisted(() => ({

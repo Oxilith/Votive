@@ -23,8 +23,8 @@ import type { MessageCreateParamsNonStreaming } from '@anthropic-ai/sdk/resource
 import { config } from '@/config';
 import { logger } from '@/utils';
 import type { AssessmentResponses, AIAnalysisResult } from '@/types';
-import type { AnalysisLanguage, PromptConfig, PromptConfigKey, UserProfileForAnalysis } from 'shared';
-import { formatResponsesForPrompt } from 'shared';
+import type { AnalysisLanguage, PromptConfig, PromptConfigKey, UserProfileForAnalysis } from '@votive/shared';
+import { formatResponsesForPrompt } from '@votive/shared';
 import { extractTextFromMessage, parseAnalysisResponse, promptClientService } from '@/services';
 
 const anthropic = new Anthropic({
