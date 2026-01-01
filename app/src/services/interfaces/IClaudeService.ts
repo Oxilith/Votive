@@ -12,10 +12,10 @@
  */
 
 import type { AssessmentResponses, AIAnalysisResult } from '@/types';
-import type { AnalysisLanguage, UserProfileForAnalysis } from 'shared';
+import type { AnalysisLanguage, UserProfileForAnalysis } from '@votive/shared';
 
 // Re-export for backward compatibility
-export type { AnalysisLanguage } from 'shared';
+export type { AnalysisLanguage } from '@votive/shared';
 
 export interface AnalysisRequest {
   responses: AssessmentResponses;

@@ -10,7 +10,7 @@
  * - vitest for matcher extension
  */
 
-import { expect } from 'vitest';
+
 
 // Augment Vitest's expect types with custom matchers
 declare module 'vitest' {

@@ -6,6 +6,7 @@
  * - Validates required configuration values
  * - Provides typed configuration object for application use
  * - Configures job-specific settings (enabled/schedule)
+ * - Configures health server port (default: 3003)
  * @dependencies
  * - dotenv for environment variable loading
  * - zod for schema validation
@@ -13,6 +14,7 @@
 
 import { config as dotenvConfig } from 'dotenv';
 import { z } from 'zod';
+import { bootstrapLogger } from '@/utils/bootstrap-logger';
 
 dotenvConfig();
 
@@ -28,7 +30,10 @@ const configSchema = z.object({
     .optional(),
 
   // Logging
-  logLevel: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  logLevel: z.enum(['silent', 'fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+
+  // Health check server port
+  healthPort: z.coerce.number().int().positive().default(3003),
 
   // Job Configuration
   jobs: z.object({
@@ -61,8 +66,8 @@ function loadConfig(): Config {
 
   // Warn in development if DATABASE_KEY is not set (database will be unencrypted)
   if (!isProduction && !process.env.DATABASE_KEY) {
-    console.warn(
-      '[CONFIG WARNING] DATABASE_KEY not set - database will not be encrypted. Set DATABASE_KEY for encryption.'
+    bootstrapLogger.warn(
+      'DATABASE_KEY not set - database will not be encrypted. Set DATABASE_KEY for encryption.'
     );
   }
 
@@ -71,6 +76,7 @@ function loadConfig(): Config {
     databaseUrl: process.env.DATABASE_URL,
     databaseKey: process.env.DATABASE_KEY,
     logLevel: process.env.LOG_LEVEL,
+    healthPort: process.env.WORKER_HEALTH_PORT,
     jobs: {
       tokenCleanup: {
         enabled: process.env.JOB_TOKEN_CLEANUP_ENABLED,
@@ -87,7 +93,8 @@ function loadConfig(): Config {
   }
 
   // Apply default database URL for non-production environments
-  const databaseUrl = result.data.databaseUrl ?? 'file:./dev.db';
+  // Worker shares database with prompt-service - use the same file in development
+  const databaseUrl = result.data.databaseUrl ?? 'file:../prompt-service/prisma/dev.db';
 
   return {
     ...result.data,

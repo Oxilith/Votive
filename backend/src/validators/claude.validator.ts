@@ -20,7 +20,7 @@ import {
   CORE_VALUE_VALUES,
   GENDER_VALUES,
   SUPPORTED_LANGUAGES,
-} from 'shared';
+} from '@votive/shared';
 
 const timeOfDaySchema = z.enum(TIME_OF_DAY_VALUES);
 const moodTriggerSchema = z.enum(MOOD_TRIGGER_VALUES);

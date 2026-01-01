@@ -25,7 +25,7 @@ import type {
   SavedAssessment,
   SavedAnalysis,
 } from '@/types';
-import type { AssessmentResponses, AIAnalysisResult } from 'shared';
+import type { AssessmentResponses, AIAnalysisResult } from '@votive/shared';
 
 /**
  * Interface for authentication service

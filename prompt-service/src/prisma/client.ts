@@ -8,14 +8,17 @@
  * - Prevents multiple client instances in development with hot reload
  * @note Graceful shutdown is handled in index.ts via SIGTERM/SIGINT handlers
  * @dependencies
- * - @prisma/client for database access
+ * - shared/prisma for PrismaClient (generated types)
  * - @prisma/adapter-libsql for driver adapter
  * - @libsql/client for SQLCipher encrypted connections
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@votive/shared/prisma';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 
+/**
+ * Global cache for Prisma instance.
+ */
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -30,12 +33,20 @@ function createPrismaClient(): PrismaClient {
     encryptionKey,
   });
 
+  // Determine log level based on environment
+  // - Development: verbose logging for debugging
+  // - Test: no logging to keep test output clean
+  // - Production: error logging only
+  const logConfig =
+    process.env.NODE_ENV === 'development'
+      ? ['query', 'error', 'warn']
+      : process.env.NODE_ENV === 'test'
+        ? []
+        : ['error'];
+
   return new PrismaClient({
     adapter,
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
+    log: logConfig as ('query' | 'info' | 'warn' | 'error')[],
   });
 }
 

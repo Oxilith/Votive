@@ -34,8 +34,8 @@ import type {
   SavedAnalysis,
   SavedAnalysisRaw,
 } from '@/types';
-import type { AssessmentResponses, AIAnalysisResult } from 'shared';
-import { parseAssessmentResponses, parseAIAnalysisResult } from 'shared';
+import type { AssessmentResponses, AIAnalysisResult } from '@votive/shared';
+import { parseAssessmentResponses, parseAIAnalysisResult } from '@votive/shared';
 import { apiClient, setCsrfTokenGetter } from './ApiClient';
 import { useAuthStore } from '@/stores';
 

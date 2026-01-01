@@ -16,7 +16,7 @@
  *       (default 1 hour) to propagate across all instances.
  */
 
-import type { PromptConfig } from 'shared';
+import type { PromptConfig } from '@votive/shared';
 import { config } from '@/config';
 
 interface CacheEntry {

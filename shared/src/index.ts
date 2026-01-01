@@ -107,3 +107,7 @@ export {
   aiAnalysisResultSchema,
   parseAIAnalysisResult,
 } from './validators';
+
+// NOTE: Prisma exports are in 'shared/prisma' (server-side only)
+// Do NOT add Prisma exports here - they contain Node.js runtime code
+// that breaks app builds. Import from '@votive/shared/prisma' in backend packages.

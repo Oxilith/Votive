@@ -18,7 +18,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { AssessmentResponses } from '@/types';
-import { REQUIRED_FIELDS } from 'shared';
+import { REQUIRED_FIELDS } from '@votive/shared';
 import { useAnalysisStore } from '@/stores';
 
 interface AssessmentState {

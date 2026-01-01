@@ -38,6 +38,18 @@ This guide covers security considerations and configuration requirements for dep
 | `SESSION_SECRET` | Yes | - | 32+ char cookie signing secret |
 | `CORS_ORIGINS` | Yes | - | Comma-separated allowed origins |
 | `LOG_LEVEL` | No | info | Pino log level (fatal, error, warn, info, debug, trace) |
+| `JWT_ACCESS_SECRET` | Yes | - | 32+ char secret for JWT access tokens |
+| `JWT_REFRESH_SECRET` | Yes | - | 32+ char secret for JWT refresh tokens |
+| `JWT_ACCESS_EXPIRY` | No | 15m | Access token expiry (e.g., 15m, 1h) |
+| `JWT_REFRESH_EXPIRY` | No | 7d | Refresh token expiry (e.g., 7d, 30d) |
+| `BCRYPT_SALT_ROUNDS` | No | 10 | Bcrypt password hashing rounds |
+| `APP_URL` | Yes | - | Frontend application URL for email links |
+| `API_URL` | Yes | - | API URL for email links |
+| `SMTP_HOST` | No | - | SMTP server host for sending emails |
+| `SMTP_PORT` | No | 587 | SMTP server port |
+| `SMTP_USER` | No | - | SMTP authentication username |
+| `SMTP_PASS` | No | - | SMTP authentication password |
+| `SMTP_FROM` | No | - | Email sender address |
 | `RATE_LIMIT_WINDOW_MS` | No | 60000 | Rate limit window (ms) |
 | `RATE_LIMIT_LOGIN` | No | 5 | Login attempts per window |
 | `RATE_LIMIT_REGISTER` | No | 5 | Registration attempts per window |

@@ -20,7 +20,7 @@ import {
   PASSWORD_MAX_LENGTH,
   PASSWORD_REGEX,
   PASSWORD_REQUIREMENTS_MESSAGE,
-} from 'shared';
+} from '@votive/shared';
 
 /**
  * Maximum email length to prevent abuse

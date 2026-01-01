@@ -50,7 +50,6 @@ RUN npm ci --workspaces --include-workspace-root --omit=dev
 COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/prompt-service/dist prompt-service/dist
 COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
-COPY --from=builder /app/node_modules/.prisma node_modules/.prisma
 COPY .env prompt-service/.env
 
 # Create non-root user matching worker (UID 1001) for shared volume access
@@ -61,7 +60,6 @@ RUN addgroup --system --gid 1001 nodejs && \
 
 USER appuser
 WORKDIR /app/prompt-service
-ENV DATABASE_URL=file:/app/data/prompts.db
 
 EXPOSE 3002
 

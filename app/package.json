@@ -1,19 +1,20 @@
 {
-  "name": "votive-frontend",
+  "name": "@votive/app",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc -b && vite build",
     "build:analyze": "ANALYZE=true npm run build",
     "clean": "rm -rf dist",
-    "lint": "eslint .",
+    "lint": "eslint src/ __tests__/",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc -b",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:unit": "vitest --project=unit",
+    "test:unit:run": "vitest run --project=unit",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
@@ -22,7 +23,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-i18next": "^16.5.0",
-    "shared": "*",
+    "@votive/shared": "*",
     "zustand": "^5.0.9"
   },
   "devDependencies": {

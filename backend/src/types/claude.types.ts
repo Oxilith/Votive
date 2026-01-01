@@ -24,10 +24,10 @@ export type {
   IdentitySynthesis,
   AIAnalysisResult,
   AnalysisLanguage,
-} from 'shared';
+} from '@votive/shared';
 
 // Import for local use
-import type { AssessmentResponses, AIAnalysisResult, AnalysisLanguage } from 'shared';
+import type { AssessmentResponses, AIAnalysisResult, AnalysisLanguage } from '@votive/shared';
 
 // Analysis request
 export interface AnalyzeRequest {

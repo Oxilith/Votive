@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-    entry: ['src/**/*.ts', 'prisma/**/*.ts', 'scripts/**/*.ts', '!src/admin/**', '!src/**/__tests__/**'],
+    entry: ['src/**/*.ts', 'prisma/**/*.ts', 'scripts/**/*.ts', '!src/admin/**', '!__tests__/**'],
     format: ['esm'],
     dts: true,
     clean: true,

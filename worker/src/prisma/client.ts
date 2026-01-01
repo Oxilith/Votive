@@ -7,12 +7,12 @@
  * - Shares database with prompt-service
  * - Provides factory function for fresh connections (avoids stale connection issues)
  * @dependencies
- * - @prisma/client for database access
+ * - shared/prisma for PrismaClient (generated types)
  * - @prisma/adapter-libsql for libsql support
  * - @/config for database configuration
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@votive/shared/prisma';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { config } from '@/config';
 

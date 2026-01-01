@@ -1,0 +1,327 @@
+/**
+ * @file shared/src/testing/setup/db.ts
+ * @purpose Database test utilities with injectable Prisma client pattern
+ * @functionality
+ * - Provides setTestPrisma for injecting test database client
+ * - Provides getTestPrisma for retrieving the configured client
+ * - Provides hasTestPrisma for checking client initialization
+ * - Provides cleanupTestDb for clearing all test data (supports strictMode option)
+ * - Provides cleanupTables for clearing specific tables (throws on error)
+ * - Provides disconnectTestDb for cleanup after test suite
+ * - Provides setupTestDb for automatic lifecycle management
+ * - Provides withCleanup for isolated test execution with cleanup
+ * @dependencies
+ * - vitest for test lifecycle hooks
+ * - @votive/shared/prisma for PrismaClient type
+ */
+
+import type { PrismaClient } from '../../generated/prisma/client';
+
+// Module-level client storage
+let testClient: PrismaClient | null = null;
+
+/**
+ * Sets the Prisma client for test database operations.
+ * Call this in your workspace's test setup file.
+ *
+ * @param client - The Prisma client instance to use for tests
+ *
+ * @example
+ * ```typescript
+ * // prompt-service/vitest.setup.ts
+ * import { PrismaClient } from '@votive/shared';
+ * import { setTestPrisma } from '@votive/shared/testing';
+ *
+ * const prisma = new PrismaClient();
+ * setTestPrisma(prisma);
+ * ```
+ */
+export function setTestPrisma(client: PrismaClient): void {
+  testClient = client;
+}
+
+/**
+ * Gets the configured test Prisma client.
+ * Throws if setTestPrisma has not been called.
+ *
+ * @returns The configured Prisma client
+ * @throws Error if no client has been set
+ *
+ * @example
+ * ```typescript
+ * const prisma = getTestPrisma();
+ * await prisma.$executeRawUnsafe('DELETE FROM "User"');
+ * ```
+ */
+export function getTestPrisma(): PrismaClient {
+  if (!testClient) {
+    throw new Error(
+      'Test Prisma client not initialized. Call setTestPrisma() in your test setup file.'
+    );
+  }
+  return testClient;
+}
+
+/**
+ * Checks if a test Prisma client has been configured.
+ *
+ * @returns true if a client has been set
+ */
+export function hasTestPrisma(): boolean {
+  return testClient !== null;
+}
+
+/**
+ * Tables to clean up, ordered by foreign key dependencies.
+ * Children (dependent tables) must be deleted before parents.
+ * Exported for use with cleanupTables type validation.
+ *
+ * NOTE: Update this list when adding new tables to the Prisma schema.
+ */
+export const CLEANUP_TABLE_ORDER = [
+  // A/B test related (most dependent)
+  'ABVariantConfig',
+  'ABVariant',
+  'ABTest',
+
+  // Prompt related
+  'PromptVersion',
+  'PromptVariant',
+
+  // User data (depends on User and Assessment)
+  'Analysis',
+  'Assessment',
+
+  // Auth tokens (depends on User)
+  'EmailVerifyToken',
+  'PasswordResetToken',
+  'RefreshToken',
+
+  // Core tables (least dependent)
+  'User',
+  'Prompt',
+] as const;
+
+/**
+ * Type for valid table names from the schema.
+ * Use with cleanupTables for compile-time validation.
+ */
+export type TableName = (typeof CLEANUP_TABLE_ORDER)[number];
+
+/**
+ * Options for database cleanup operations.
+ */
+export interface CleanupOptions {
+  /**
+   * When true, collects all errors during cleanup and throws after completion.
+   * This ensures all tables are attempted before failing.
+   * Default: false (errors are logged but cleanup continues silently)
+   */
+  strictMode?: boolean;
+}
+
+/**
+ * Cleans up all test data from the database.
+ * Deletes from tables in correct order to respect foreign key constraints.
+ *
+ * @param options - Optional cleanup configuration
+ * @throws Error if no client has been configured
+ * @throws Error if strictMode is true and any table cleanup fails
+ *
+ * @example
+ * ```typescript
+ * // Default behavior: log errors and continue
+ * beforeEach(async () => {
+ *   await cleanupTestDb();
+ * });
+ *
+ * // Strict mode: collect and throw all errors
+ * beforeEach(async () => {
+ *   await cleanupTestDb({ strictMode: true });
+ * });
+ * ```
+ */
+export async function cleanupTestDb(options: CleanupOptions = {}): Promise<void> {
+  const { strictMode = false } = options;
+  const prisma = getTestPrisma();
+  const errors: { table: string; error: unknown }[] = [];
+
+  for (const table of CLEANUP_TABLE_ORDER) {
+    try {
+      await prisma.$executeRawUnsafe(`DELETE FROM "${table}"`);
+    } catch (error: unknown) {
+      // Only suppress "table does not exist" errors for workspaces with partial schemas
+      const isTableNotExist =
+        error instanceof Error &&
+        (error.message.includes('no such table') ||
+          error.message.includes('does not exist'));
+
+      if (!isTableNotExist) {
+        // Log unexpected errors (connection, permissions)
+        console.error(`[cleanupTestDb] Failed to clean table "${table}":`, error);
+        if (strictMode) {
+          errors.push({ table, error });
+        }
+      }
+    }
+  }
+
+  if (strictMode && errors.length > 0) {
+    const tableList = errors.map((e) => e.table).join(', ');
+    throw new Error(
+      `Database cleanup failed for ${errors.length} table(s): ${tableList}`
+    );
+  }
+}
+
+/**
+ * Cleans up specific tables from the database.
+ * Useful when you only need to clean certain tables between tests.
+ *
+ * Note: Unlike cleanupTestDb(), this function throws on errors including
+ * missing tables. Use this when you need strict cleanup verification.
+ *
+ * @param tables - Array of valid table names from CLEANUP_TABLE_ORDER
+ * @throws Error if any table doesn't exist or deletion fails
+ *
+ * @example
+ * ```typescript
+ * beforeEach(async () => {
+ *   await cleanupTables(['User', 'RefreshToken']);
+ * });
+ * ```
+ */
+export async function cleanupTables(tables: readonly TableName[]): Promise<void> {
+  const prisma = getTestPrisma();
+
+  for (const table of tables) {
+    await prisma.$executeRawUnsafe(`DELETE FROM "${table}"`);
+  }
+}
+
+/**
+ * Disconnects the test Prisma client and clears the reference.
+ * Call this in afterAll to clean up resources.
+ *
+ * @example
+ * ```typescript
+ * afterAll(async () => {
+ *   await disconnectTestDb();
+ * });
+ * ```
+ */
+export async function disconnectTestDb(): Promise<void> {
+  if (testClient) {
+    const client = testClient;
+    try {
+      await client.$disconnect();
+      testClient = null; // Clear only after successful disconnect
+    } catch (error: unknown) {
+      console.error('[disconnectTestDb] Failed to disconnect:', error);
+      // Don't clear client on failure - caller might want to retry
+      throw error;
+    }
+  }
+}
+
+/**
+ * Sets up database lifecycle hooks for a test file.
+ * Automatically cleans up between tests and disconnects after the suite.
+ *
+ * @param options - Configuration options
+ *
+ * @example
+ * ```typescript
+ * describe('UserService Integration', () => {
+ *   setupTestDb();
+ *
+ *   it('creates a user', async () => {
+ *     // Database is clean at the start of each test
+ *   });
+ * });
+ * ```
+ */
+export function setupTestDb(options: { cleanupBeforeEach?: boolean } = {}): void {
+  const { cleanupBeforeEach = true } = options;
+
+  if (cleanupBeforeEach) {
+    beforeEach(async () => {
+      if (hasTestPrisma()) {
+        await cleanupTestDb();
+      }
+    });
+  }
+
+  afterAll(async () => {
+    await disconnectTestDb();
+  });
+}
+
+/**
+ * Wraps a test callback with automatic database cleanup afterward.
+ * Useful for keeping test data isolated without explicit cleanup calls.
+ *
+ * Note: This performs cleanup via DELETE, not transaction rollback.
+ * All data created during the callback will be deleted after it completes.
+ *
+ * @param callback - Test function to run
+ * @param options - Optional cleanup configuration (passed to cleanupTestDb)
+ * @returns Promise that resolves with the callback's return value after cleanup
+ *
+ * @example
+ * ```typescript
+ * it('creates data in isolation', async () => {
+ *   const result = await withCleanup(async (prisma) => {
+ *     await prisma.$executeRawUnsafe('INSERT INTO "User" ...');
+ *     return { success: true };
+ *     // Data is automatically cleaned up after the test
+ *   });
+ *   expect(result.success).toBe(true);
+ * });
+ *
+ * // With strict mode
+ * it('fails on cleanup errors', async () => {
+ *   await withCleanup(async (prisma) => {
+ *     // ... test code
+ *   }, { strictMode: true });
+ * });
+ * ```
+ */
+export async function withCleanup<T>(
+  callback: (prisma: PrismaClient) => Promise<T>,
+  options?: CleanupOptions
+): Promise<T> {
+  const prisma = getTestPrisma();
+  let result: T | undefined;
+  let testError: Error | undefined;
+  let cleanupError: Error | undefined;
+
+  try {
+    result = await callback(prisma);
+  } catch (error) {
+    testError = error instanceof Error ? error : new Error(String(error));
+  }
+
+  // Always attempt cleanup
+  try {
+    await cleanupTestDb(options);
+  } catch (error) {
+    cleanupError = error instanceof Error ? error : new Error(String(error));
+    // Log cleanup errors to aid debugging
+    console.error('[withCleanup] Cleanup failed:', error);
+  }
+
+  // If test failed, throw the test error (cleanup error is logged but not thrown)
+  if (testError) {
+    throw testError;
+  }
+
+  // If test passed but cleanup failed, throw cleanup error
+  if (cleanupError) {
+    throw cleanupError;
+  }
+
+  // Return result (we know it's defined because testError is undefined)
+  // Using 'as T' because TypeScript doesn't infer that result is defined here
+  return result as T;
+}

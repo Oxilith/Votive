@@ -23,10 +23,10 @@ export type {
   AnalysisRisk,
   IdentitySynthesis,
   AIAnalysisResult,
-} from 'shared';
+} from '@votive/shared';
 
 // Re-import for use in local interfaces
-import type { AssessmentResponses, AIAnalysisResult } from 'shared';
+import type { AssessmentResponses, AIAnalysisResult } from '@votive/shared';
 
 /**
  * View-only assessment data (for /assessment/:id routes)
@@ -80,5 +80,5 @@ export interface InsightsProps {
   viewOnlyAnalysis?: ViewOnlyAnalysis | null;
 }
 
-// App state - includes auth views
-export type AppView = 'landing' | 'assessment' | 'insights' | 'auth' | 'profile' | 'verify-email' | 'reset-password';
+// App state - includes auth views and error pages
+export type AppView = 'landing' | 'assessment' | 'insights' | 'auth' | 'profile' | 'verify-email' | 'reset-password' | 'not-found';

@@ -47,7 +47,7 @@ import type {
 } from '@/types';
 import { useAnalysisStore } from '@/stores/useAnalysisStore';
 import { useIsAuthenticated, useCurrentUser } from '@/stores/useAuthStore';
-import type { UserProfileForAnalysis } from 'shared';
+import type { UserProfileForAnalysis } from '@votive/shared';
 import { authService } from '@/services/api/AuthService';
 import { cardStyles, textStyles } from '@/styles';
 import InsightCard from './InsightCard';
