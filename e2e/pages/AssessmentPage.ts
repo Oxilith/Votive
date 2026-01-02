@@ -8,6 +8,8 @@
  * - Handles intro and synthesis steps
  * - Supports completing a full assessment with sample data
  * - Validates step completion with error message detection
+ * - Detects readonly mode (synthesis-only view)
+ * - Verifies view-only badge and disabled inputs
  * @dependencies
  * - BasePage for common functionality
  * - @playwright/test for Page type
@@ -56,6 +58,11 @@ export class AssessmentPage extends BasePage {
 
   // Validation error selectors
   readonly validationError = '[data-testid="validation-error"]';
+
+  // Readonly mode selectors
+  readonly viewOnlyBadge = '[data-testid="view-only-badge"]';
+  readonly progressHeader = '[data-testid="assessment-progress"]';
+  readonly pageHeader = '[data-testid="page-header"]';
 
   /**
    * Navigate to the assessment page
@@ -325,5 +332,70 @@ export class AssessmentPage extends BasePage {
     await this.page.click(this.nextButton);
     // Small delay to allow validation error to appear
     await this.page.waitForTimeout(200);
+  }
+
+  /**
+   * Check if the assessment is in readonly mode (synthesis-only)
+   *
+   * @returns True if in readonly mode
+   */
+  async isReadOnlyMode(): Promise<boolean> {
+    // In readonly mode, synthesis step is shown and progress header is hidden
+    const hasSynthesis = await this.page
+      .locator(this.synthesisStep)
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    const hasProgressHeader = await this.page
+      .locator(this.progressHeader)
+      .isVisible({ timeout: 1000 })
+      .catch(() => false);
+
+    // Readonly mode = synthesis visible, progress header hidden
+    return hasSynthesis && !hasProgressHeader;
+  }
+
+  /**
+   * Check if the view-only badge is visible
+   *
+   * @returns True if view-only badge is visible
+   */
+  async hasViewOnlyBadge(): Promise<boolean> {
+    return await this.page
+      .locator(this.viewOnlyBadge)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if page header is visible (shown in readonly mode)
+   *
+   * @returns True if page header is visible
+   */
+  async hasPageHeader(): Promise<boolean> {
+    return await this.page
+      .locator(this.pageHeader)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if progress header is visible (hidden in readonly mode)
+   *
+   * @returns True if progress header is visible
+   */
+  async hasProgressHeader(): Promise<boolean> {
+    return await this.page
+      .locator(this.progressHeader)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Navigate to a specific saved assessment (readonly view)
+   *
+   * @param assessmentId - The ID of the assessment to view
+   */
+  async viewAssessment(assessmentId: string): Promise<void> {
+    await this.goto(`/assessment/${assessmentId}`);
   }
 }
