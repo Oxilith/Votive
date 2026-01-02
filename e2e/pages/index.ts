@@ -23,3 +23,6 @@ export { ProfilePage, type ProfileTab } from './ProfilePage';
 
 // Admin pages
 export { AdminPage } from './AdminPage';
+
+// Layout testing
+export { LayoutPage, VIEWPORTS } from './LayoutPage';

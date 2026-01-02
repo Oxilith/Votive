@@ -21,6 +21,7 @@ import {
   InsightsPage,
   ProfilePage,
   AdminPage,
+  LayoutPage,
 } from '../pages';
 import { DEFAULT_TEST_PASSWORD } from './mock-data';
 
@@ -51,6 +52,8 @@ interface TestFixtures {
   profilePage: ProfilePage;
   /** Admin page object */
   adminPage: AdminPage;
+  /** Layout page object for layout/responsive/theme testing */
+  layoutPage: LayoutPage;
   /** Generated test user with unique email */
   testUser: TestUser;
   /** Pre-authenticated page (user already registered and logged in) */
@@ -94,6 +97,10 @@ export const test = base.extend<TestFixtures>({
 
   adminPage: async ({ page }, use) => {
     await use(new AdminPage(page));
+  },
+
+  layoutPage: async ({ page }, use) => {
+    await use(new LayoutPage(page));
   },
 
   // Generate unique test user for each test
