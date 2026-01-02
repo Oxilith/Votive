@@ -8,12 +8,12 @@
  * - Supports full-width layout
  * @dependencies
  * - React
- * - @/components/shared/icons (LoadingSpinnerIcon)
+ * - @/components/shared (InkLoader)
  */
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import React from 'react';
-import { LoadingSpinnerIcon } from '@/components';
+import { InkLoader } from '@/components';
 
 /**
  * Props for FormButton component
@@ -72,7 +72,7 @@ const FormButton: React.FC<FormButtonProps> = ({
     >
       {isLoading && (
         <span className="absolute inset-0 flex items-center justify-center">
-          <LoadingSpinnerIcon size="sm" />
+          <InkLoader variant="inline" />
         </span>
       )}
       <span className={isLoading ? 'invisible' : ''}>{children}</span>

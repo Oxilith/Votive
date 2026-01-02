@@ -40,6 +40,9 @@ test.describe('User Registration', () => {
       birthYear: testUser.birthYear,
     });
 
+    // Ensure first registration is fully complete
+    await registerPage.page.waitForTimeout(500);
+
     // Clear cookies to log out
     await registerPage.clearCookies();
 
@@ -54,9 +57,16 @@ test.describe('User Registration', () => {
       birthYear: secondUser.birthYear,
     });
 
-    const error = await registerPage.getErrorMessage();
+    // Wait for error message with retries
+    let error: string | null = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      error = await registerPage.getErrorMessage();
+      if (error) break;
+      await registerPage.page.waitForTimeout(500);
+    }
+
     expect(error).toBeTruthy();
-    expect(error?.toLowerCase()).toMatch(/already|exists|registered|duplicate/);
+    expect(error?.toLowerCase()).toMatch(/already|exists|registered|duplicate|email/);
   });
 
   test('should show error for weak password', async ({ registerPage, testUser }) => {

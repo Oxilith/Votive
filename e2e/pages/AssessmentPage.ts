@@ -7,6 +7,7 @@
  * - Provides progress tracking
  * - Handles intro and synthesis steps
  * - Supports completing a full assessment with sample data
+ * - Validates step completion with error message detection
  * @dependencies
  * - BasePage for common functionality
  * - @playwright/test for Page type
@@ -39,11 +40,22 @@ export class AssessmentPage extends BasePage {
   readonly progressIndicator = '[class*="progress"]';
   readonly phaseTitle = 'h1, h2';
 
-  // Step type selectors
-  readonly multiSelectOption = 'button[role="checkbox"], [role="checkbox"]';
-  readonly singleSelectOption = 'button[role="radio"], [role="radio"]';
-  readonly scaleSlider = 'input[type="range"]';
-  readonly textareaInput = 'textarea';
+  // Step type selectors - use data-testid for reliable detection
+  readonly multiSelectStep = '[data-testid="multi-select-step"]';
+  readonly singleSelectStep = '[data-testid="single-select-step"]';
+  readonly scaleStep = '[data-testid="scale-step"]';
+  readonly textareaStep = '[data-testid="textarea-step"]';
+  readonly introStep = '[data-testid="intro-step"]';
+  readonly synthesisStep = '[data-testid="synthesis-step"]';
+
+  // Input element selectors
+  readonly multiSelectOption = '[data-testid="multi-select-option"]';
+  readonly singleSelectOption = '[data-testid="single-select-option"]';
+  readonly scaleOption = '[data-testid="scale-option"]';
+  readonly textareaInput = '[data-testid="textarea-input"]';
+
+  // Validation error selectors
+  readonly validationError = '[data-testid="validation-error"]';
 
   /**
    * Navigate to the assessment page
@@ -93,14 +105,16 @@ export class AssessmentPage extends BasePage {
   }
 
   /**
-   * Set slider value for scale steps
+   * Set scale value by clicking the corresponding button (1-5)
    *
-   * @param value - Scale value (typically 1-5)
+   * @param value - Scale value (1-5)
    */
-  async setSliderValue(value: number): Promise<void> {
-    const slider = this.page.locator(this.scaleSlider);
-    if (await slider.isVisible()) {
-      await slider.fill(String(value));
+  async setScaleValue(value: number): Promise<void> {
+    // Scale options are buttons 1-5, click the one matching the value
+    const options = await this.page.locator(this.scaleOption).all();
+    const index = value - 1; // value 1 = index 0
+    if (options[index]) {
+      await options[index].click();
     }
   }
 
@@ -171,22 +185,28 @@ export class AssessmentPage extends BasePage {
   }
 
   /**
-   * Get the current step type based on visible input elements
+   * Get the current step type based on visible step containers
    *
    * @returns The step type or 'unknown'
    */
-  async getCurrentStepType(): Promise<'multiSelect' | 'singleSelect' | 'scale' | 'textarea' | 'unknown'> {
-    if (await this.page.locator(this.multiSelectOption).first().isVisible({ timeout: 1000 }).catch(() => false)) {
+  async getCurrentStepType(): Promise<'intro' | 'multiSelect' | 'singleSelect' | 'scale' | 'textarea' | 'synthesis' | 'unknown'> {
+    if (await this.page.locator(this.introStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+      return 'intro';
+    }
+    if (await this.page.locator(this.multiSelectStep).isVisible({ timeout: 1000 }).catch(() => false)) {
       return 'multiSelect';
     }
-    if (await this.page.locator(this.singleSelectOption).first().isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.singleSelectStep).isVisible({ timeout: 1000 }).catch(() => false)) {
       return 'singleSelect';
     }
-    if (await this.page.locator(this.scaleSlider).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.scaleStep).isVisible({ timeout: 1000 }).catch(() => false)) {
       return 'scale';
     }
-    if (await this.page.locator(this.textareaInput).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.textareaStep).isVisible({ timeout: 1000 }).catch(() => false)) {
       return 'textarea';
+    }
+    if (await this.page.locator(this.synthesisStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+      return 'synthesis';
     }
     return 'unknown';
   }
@@ -208,7 +228,7 @@ export class AssessmentPage extends BasePage {
     await this.clickNext();
 
     // Step 3: Energy consistency (scale)
-    await this.setSliderValue(3);
+    await this.setScaleValue(3);
     await this.clickNext();
 
     // Step 4: Energy drains (textarea)
@@ -224,7 +244,7 @@ export class AssessmentPage extends BasePage {
     await this.clickNext();
 
     // Step 7: Motivation reliability (scale)
-    await this.setSliderValue(4);
+    await this.setScaleValue(4);
     await this.clickNext();
 
     // Step 8: Willpower pattern (singleSelect)
@@ -233,8 +253,8 @@ export class AssessmentPage extends BasePage {
 
     // Phase 2 intro - just continue
     const stepType = await this.getCurrentStepType();
-    if (stepType === 'unknown') {
-      // Likely an intro/transition screen
+    if (stepType === 'intro') {
+      // Phase 2 intro screen - click next to proceed
       await this.clickNext();
     }
 
@@ -268,10 +288,42 @@ export class AssessmentPage extends BasePage {
     await this.clickNext();
 
     // Step 8: Identity clarity (scale)
-    await this.setSliderValue(4);
+    await this.setScaleValue(4);
     await this.clickNext();
 
     // Synthesis step - complete the assessment
     await this.clickComplete();
+  }
+
+  /**
+   * Check if validation error is visible
+   *
+   * @returns True if validation error is visible
+   */
+  async isValidationErrorVisible(): Promise<boolean> {
+    return await this.page.locator(this.validationError).isVisible({ timeout: 1000 }).catch(() => false);
+  }
+
+  /**
+   * Get the validation error text
+   *
+   * @returns The validation error text or empty string
+   */
+  async getValidationErrorText(): Promise<string> {
+    const errorElement = this.page.locator(this.validationError);
+    if (await errorElement.isVisible({ timeout: 1000 }).catch(() => false)) {
+      return (await errorElement.textContent()) ?? '';
+    }
+    return '';
+  }
+
+  /**
+   * Attempt to click next without filling the step (for validation testing)
+   * Does not wait for navigation since validation should prevent it
+   */
+  async tryClickNextWithoutWait(): Promise<void> {
+    await this.page.click(this.nextButton);
+    // Small delay to allow validation error to appear
+    await this.page.waitForTimeout(200);
   }
 }

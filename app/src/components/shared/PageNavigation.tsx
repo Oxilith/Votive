@@ -151,7 +151,7 @@ const PageNavigation: FC<PageNavigationProps> = ({
           <ThemeToggle />
 
           {/* User Avatar Dropdown or Sign In */}
-          {isAuthenticated && onNavigateToProfile && onSignOut ? (
+          {isAuthenticated && onSignOut ? (
             <UserAvatarDropdown
               onNavigateToProfile={onNavigateToProfile}
               onSignOut={onSignOut}

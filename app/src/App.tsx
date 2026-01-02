@@ -27,7 +27,7 @@
  * - @/types/assessment.types
  * - @/utils/fileUtils
  * - @/components/providers/ThemeProvider
- * - @/services/api/AuthService
+ * - @/services
  */
 
 import { lazy, Suspense, useCallback, useEffect } from 'react';

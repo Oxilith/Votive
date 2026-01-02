@@ -70,6 +70,7 @@ vi.mock('@/components', () => ({
   FooterSection: () => <div data-testid="footer" />,
   PageNavigation: () => <div data-testid="page-navigation" />,
   InkBrushDecoration: () => <div data-testid="ink-brush" />,
+  InkLoader: () => <div data-testid="ink-loader" />,
   ErrorCircleIcon: () => <span data-testid="error-icon" />,
   SearchIcon: () => <span data-testid="search-icon" />,
   SwitchHorizontalIcon: () => <span data-testid="switch-icon" />,
@@ -253,8 +254,7 @@ describe('IdentityInsightsAI', () => {
 
       render(<IdentityInsightsAI {...defaultProps} />);
 
-      expect(screen.getByText('loading.title')).toBeInTheDocument();
-      expect(screen.getByText('loading.description')).toBeInTheDocument();
+      expect(screen.getByTestId('ink-loader')).toBeInTheDocument();
     });
   });
 

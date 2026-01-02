@@ -103,11 +103,11 @@ describe('SingleSelectStep', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('should disable buttons in read-only mode', () => {
+  it('should disable options in read-only mode', () => {
     render(<SingleSelectStep step={mockStep} value="opt1" onChange={() => {}} isReadOnly />);
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach((button) => {
-      expect(button).toBeDisabled();
+    const options = screen.getAllByRole('radio');
+    options.forEach((option) => {
+      expect(option).toBeDisabled();
     });
   });
 

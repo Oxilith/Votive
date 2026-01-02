@@ -10,12 +10,14 @@
  * - Manages user profile operations
  * - Handles assessment CRUD with Zod-validated parsing
  * - Handles analysis CRUD with Zod-validated parsing
+ * - Gracefully skips invalid assessment/analysis records when fetching lists
  * - Automatically injects Authorization header from auth store
  * @dependencies
  * - @/services (IAuthService, IApiClient, RequestConfig)
  * - @/types for request/response types
  * - shared for types and Zod validators (parseAssessmentResponses, parseAIAnalysisResult)
  * - @/stores for access token
+ * - @/utils for logger
  */
 
 import type { IApiClient, RequestConfig, IAuthService } from '@/services';
@@ -38,6 +40,7 @@ import type { AssessmentResponses, AIAnalysisResult } from '@votive/shared';
 import { parseAssessmentResponses, parseAIAnalysisResult } from '@votive/shared';
 import { apiClient, setCsrfTokenGetter } from './ApiClient';
 import { useAuthStore } from '@/stores';
+import { logger } from '@/utils';
 
 
 /**
@@ -269,6 +272,8 @@ export class AuthService implements IAuthService {
 
   /**
    * Get all assessments for authenticated user
+   *
+   * Invalid assessments are logged and skipped, not thrown.
    */
   async getAssessments(): Promise<SavedAssessment[]> {
     const response = await this.client.get<SavedAssessmentRaw[]>(
@@ -276,14 +281,22 @@ export class AuthService implements IAuthService {
       this.getAuthConfig()
     );
 
-    // Parse and validate responses from JSON strings
-    return response.data.map((assessment) => ({
-      ...assessment,
-      responses: parseAssessmentResponses(
-        assessment.responses,
-        `assessment ${assessment.id}`
-      ),
-    }));
+    // Parse and validate responses, skipping invalid records
+    const validAssessments: SavedAssessment[] = [];
+    for (const assessment of response.data) {
+      try {
+        validAssessments.push({
+          ...assessment,
+          responses: parseAssessmentResponses(
+            assessment.responses,
+            `assessment ${assessment.id}`
+          ),
+        });
+      } catch (error) {
+        logger.warn('Skipping invalid assessment data', { assessmentId: assessment.id, error });
+      }
+    }
+    return validAssessments;
   }
 
   /**
@@ -330,6 +343,8 @@ export class AuthService implements IAuthService {
 
   /**
    * Get all analyses for authenticated user
+   *
+   * Invalid analyses are logged and skipped, not thrown.
    */
   async getAnalyses(): Promise<SavedAnalysis[]> {
     const response = await this.client.get<SavedAnalysisRaw[]>(
@@ -337,14 +352,22 @@ export class AuthService implements IAuthService {
       this.getAuthConfig()
     );
 
-    // Parse and validate results from JSON strings
-    return response.data.map((analysis) => ({
-      ...analysis,
-      result: parseAIAnalysisResult(
-        analysis.result,
-        `analysis ${analysis.id}`
-      ),
-    }));
+    // Parse and validate results, skipping invalid records
+    const validAnalyses: SavedAnalysis[] = [];
+    for (const analysis of response.data) {
+      try {
+        validAnalyses.push({
+          ...analysis,
+          result: parseAIAnalysisResult(
+            analysis.result,
+            `analysis ${analysis.id}`
+          ),
+        });
+      } catch (error) {
+        logger.warn('Skipping invalid analysis data', { analysisId: analysis.id, error });
+      }
+    }
+    return validAnalyses;
   }
 
   /**

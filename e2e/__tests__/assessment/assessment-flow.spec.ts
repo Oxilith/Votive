@@ -84,7 +84,7 @@ test.describe('Assessment Flow', () => {
     // Phase 1, Step 3: should be scale
     const stepType = await assessmentPage.getCurrentStepType();
     if (stepType === 'scale') {
-      await assessmentPage.setSliderValue(4);
+      await assessmentPage.setScaleValue(4);
       expect(await assessmentPage.isNextEnabled()).toBe(true);
     }
   });
@@ -98,7 +98,7 @@ test.describe('Assessment Flow', () => {
     await assessmentPage.clickNext();
     await assessmentPage.selectMultipleOptions([2, 3]);
     await assessmentPage.clickNext();
-    await assessmentPage.setSliderValue(3);
+    await assessmentPage.setScaleValue(3);
     await assessmentPage.clickNext();
 
     // Should now be on textarea step

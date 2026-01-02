@@ -7,6 +7,7 @@
  * - Tests complete button for synthesis step
  * - Tests saving state
  * - Tests navigation not shown when showNavigation is false
+ * - Tests validation error display and accessibility
  * @dependencies
  * - vitest globals
  * - @testing-library/react
@@ -223,6 +224,71 @@ describe('NavigationControls', () => {
 
       const continueButton = screen.getByText('Continue');
       expect(continueButton).toHaveClass('bg-[var(--accent)]');
+    });
+  });
+
+  describe('validation error', () => {
+    it('should display error message when validationError is provided', () => {
+      render(
+        <NavigationControls
+          {...defaultProps}
+          validationError="Please complete this step"
+        />
+      );
+
+      expect(screen.getByText('Please complete this step')).toBeInTheDocument();
+    });
+
+    it('should not display error message when validationError is null', () => {
+      render(
+        <NavigationControls
+          {...defaultProps}
+          validationError={null}
+        />
+      );
+
+      expect(screen.queryByTestId('validation-error')).not.toBeInTheDocument();
+    });
+
+    it('should not display error message when validationError is undefined', () => {
+      render(<NavigationControls {...defaultProps} />);
+
+      expect(screen.queryByTestId('validation-error')).not.toBeInTheDocument();
+    });
+
+    it('should have role="alert" for accessibility', () => {
+      render(
+        <NavigationControls
+          {...defaultProps}
+          validationError="Please complete this step"
+        />
+      );
+
+      const errorElement = screen.getByRole('alert');
+      expect(errorElement).toBeInTheDocument();
+    });
+
+    it('should have data-testid for E2E testing', () => {
+      render(
+        <NavigationControls
+          {...defaultProps}
+          validationError="Please complete this step"
+        />
+      );
+
+      expect(screen.getByTestId('validation-error')).toBeInTheDocument();
+    });
+
+    it('should render error with proper styling', () => {
+      render(
+        <NavigationControls
+          {...defaultProps}
+          validationError="Please complete this step"
+        />
+      );
+
+      const errorText = screen.getByText('Please complete this step');
+      expect(errorText).toHaveClass('text-[var(--error)]');
     });
   });
 });

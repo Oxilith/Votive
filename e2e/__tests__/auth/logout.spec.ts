@@ -20,35 +20,19 @@ test.describe('User Logout', () => {
     // Verify logged in state
     expect(await basePage.isLoggedIn()).toBe(true);
 
-    // Find and click logout
-    // Try different possible logout button locations
-    const logoutSelectors = [
-      '[data-testid="user-menu"]',
-      'button:has-text("Sign out")',
-      'button:has-text("Logout")',
-      '[aria-label="User menu"]',
-    ];
+    // Click avatar dropdown to open menu
+    await authenticatedPage.click('[data-testid="user-avatar-dropdown"]');
 
-    for (const selector of logoutSelectors) {
-      try {
-        const element = authenticatedPage.locator(selector);
-        if (await element.isVisible({ timeout: 1000 })) {
-          await element.click();
-          break;
-        }
-      } catch {
-        continue;
-      }
-    }
+    // Click sign out button
+    await authenticatedPage.click('[data-testid="sign-out-button"]');
 
-    // Click the actual logout option if a menu opened
-    try {
-      await authenticatedPage.click('button:has-text("Sign out"), button:has-text("Logout")');
-    } catch {
-      // May have clicked directly on logout button
-    }
+    // Wait for redirect to landing page
+    await authenticatedPage.waitForURL('**/');
 
-    await basePage.waitForNavigation();
+    // Wait for avatar to disappear (React state update)
+    await authenticatedPage
+      .locator('[data-testid="user-avatar-dropdown"]')
+      .waitFor({ state: 'hidden', timeout: 5000 });
 
     // Should be logged out now
     expect(await basePage.isLoggedIn()).toBe(false);
@@ -57,19 +41,14 @@ test.describe('User Logout', () => {
   test('should redirect to landing page after logout', async ({ authenticatedPage }) => {
     const basePage = new BasePage(authenticatedPage);
 
-    // Find and click logout
-    try {
-      await authenticatedPage.click('[data-testid="user-menu"]');
-      await authenticatedPage.click('button:has-text("Sign out")');
-    } catch {
-      try {
-        await authenticatedPage.click('button:has-text("Logout")');
-      } catch {
-        await authenticatedPage.click('button:has-text("Sign out")');
-      }
-    }
+    // Click avatar dropdown to open menu
+    await authenticatedPage.click('[data-testid="user-avatar-dropdown"]');
 
-    await basePage.waitForNavigation();
+    // Click sign out button
+    await authenticatedPage.click('[data-testid="sign-out-button"]');
+
+    // Wait for redirect
+    await authenticatedPage.waitForURL('**/');
 
     // Should be redirected to landing or home page
     const path = basePage.getCurrentPath();
@@ -83,17 +62,20 @@ test.describe('User Logout', () => {
     const csrfBefore = await basePage.getCsrfToken();
     expect(csrfBefore).toBeTruthy();
 
-    // Logout
-    try {
-      await authenticatedPage.click('[data-testid="user-menu"]');
-      await authenticatedPage.click('button:has-text("Sign out")');
-    } catch {
-      await authenticatedPage.click('button:has-text("Logout"), button:has-text("Sign out")');
-    }
+    // Click avatar dropdown to open menu
+    await authenticatedPage.click('[data-testid="user-avatar-dropdown"]');
 
-    await basePage.waitForNavigation();
+    // Click sign out button
+    await authenticatedPage.click('[data-testid="sign-out-button"]');
 
-    // CSRF token should be cleared or different
+    // Wait for redirect and page to fully load
+    await authenticatedPage.waitForURL('**/');
+    await authenticatedPage.waitForLoadState('networkidle');
+
+    // Wait a moment for cookies to be cleared by the server response
+    await authenticatedPage.waitForTimeout(500);
+
+    // CSRF token should be cleared after logout
     const csrfAfter = await basePage.getCsrfToken();
     expect(csrfAfter).toBeNull();
   });

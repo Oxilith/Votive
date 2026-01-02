@@ -6,6 +6,7 @@
  * - Exports DateBadge component
  * - Exports ExportDropdown component
  * - Exports InkBrushDecoration component
+ * - Exports InkLoader component for consistent loading states
  * - Exports LanguageToggle component
  * - Exports LoadingFallback component for Suspense boundaries
  * - Exports PageNavigation component
@@ -17,6 +18,7 @@
  * - ./DateBadge
  * - ./ExportDropdown
  * - ./InkBrushDecoration
+ * - ./InkLoader
  * - ./LanguageToggle
  * - ./LoadingFallback
  * - ./PageNavigation
@@ -29,6 +31,7 @@ export { default as ChunkErrorBoundary } from './ChunkErrorBoundary';
 export { default as DateBadge } from './DateBadge';
 export { default as ExportDropdown } from './ExportDropdown';
 export { default as InkBrushDecoration } from './InkBrushDecoration';
+export { default as InkLoader } from './InkLoader';
 export { default as LanguageToggle } from './LanguageToggle';
 export { default as LoadingFallback } from './LoadingFallback';
 export { default as PageNavigation } from './PageNavigation';

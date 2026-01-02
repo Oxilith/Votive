@@ -28,12 +28,14 @@
  * - @/utils (importFromJson)
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AssessmentResponses, AssessmentProps } from '@/types';
 import { useUIStore } from '@/stores/useUIStore';
-import { useIsAuthenticated } from '@/stores/useAuthStore';
-import { authService } from '@/services/api/AuthService';
+import { useIsAuthenticated, useAuthStore } from '@/stores/useAuthStore';
+import { authService } from '@/services/api';
+import { logger } from '@/utils';
+import { REQUIRED_FIELDS } from '@votive/shared';
 import {
   IntroStep,
   MultiSelectStep,
@@ -74,10 +76,12 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
   const [responses, setResponses] = useState<Partial<AssessmentResponses>>(effectiveInitialResponses);
   const [importError, setImportError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auth state
   const isAuthenticated = useIsAuthenticated();
+  const invalidateAssessmentsList = useAuthStore((state) => state.invalidateAssessmentsList);
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -306,22 +310,87 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
     }
   }, [currentPhaseData.id, setHasReachedSynthesis]);
 
-  // Update response handler
+  // Auto-set default value (3) for scale steps when they are first rendered
+  useEffect(() => {
+    if (currentStepData?.type === 'scale' && currentStepData.id && !isReadOnly) {
+      const stepId = currentStepData.id as keyof AssessmentResponses;
+      const currentValue = responses[stepId];
+      // Only set default if no value exists yet
+      if (currentValue === undefined) {
+        setResponses((prev) => ({ ...prev, [stepId]: 3 }));
+      }
+    }
+  }, [currentStepData, isReadOnly, responses]);
+
+  // Update response handler - clears validation error when user makes changes
   const updateResponse = (key: string, value: string | number | string[]) => {
     setResponses((prev: Partial<AssessmentResponses>) => ({ ...prev, [key]: value }));
+    // Clear validation error when user makes a change
+    if (validationError) {
+      setValidationError(null);
+    }
   };
+
+  // Check if the current step has valid data
+  const isCurrentStepValid = useMemo(() => {
+    if (!currentStepData) return true;
+
+    // Intro and synthesis steps don't require validation
+    if (currentStepData.type === 'intro' || currentStepData.type === 'synthesis') {
+      return true;
+    }
+
+    const stepId = currentStepData.id as keyof AssessmentResponses;
+    const value = responses[stepId];
+
+    if (value === undefined) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'string') return value.trim().length > 0;
+    if (typeof value === 'number') return true; // Scale steps always have a value (default 3)
+    return false;
+  }, [currentStepData, responses]);
+
+  // Check if all required fields are complete
+  const isAssessmentComplete = useMemo(() => {
+    return REQUIRED_FIELDS.every((field) => {
+      const value = responses[field];
+      if (value === undefined) return false;
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'string') return value.trim().length > 0;
+      return true;
+    });
+  }, [responses]);
+
+  // Validated next handler - only advances if current step is valid
+  const handleNext = useCallback(() => {
+    if (!isCurrentStepValid) {
+      setValidationError(t('validation.required'));
+      return;
+    }
+    setValidationError(null);
+    goNext();
+  }, [isCurrentStepValid, goNext, t]);
 
   // Complete handler - saves assessment to database for authenticated users
   const handleCompleteAsync = async () => {
+    // Validate that assessment is complete before saving
+    if (!isAssessmentComplete) {
+      logger.error('Attempted to save incomplete assessment', undefined, { responses });
+      setValidationError(t('validation.incomplete'));
+      return;
+    }
+
     if (isAuthenticated && !isReadOnly) {
       setIsSaving(true);
       try {
         const hasResponseData = Object.keys(responses).length > 0;
         if (hasResponseData) {
           await authService.saveAssessment(responses as AssessmentResponses);
+          // Invalidate the assessments list so profile page fetches fresh data
+          invalidateAssessmentsList();
         }
       } catch (error) {
-        console.error('Failed to save assessment:', error);
+        logger.error('Failed to save assessment', error);
         // Continue to insights even if save fails - user can still see their results
       } finally {
         setIsSaving(false);
@@ -330,9 +399,10 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
     onComplete(responses as AssessmentResponses);
   };
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     void handleCompleteAsync();
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAssessmentComplete, isAuthenticated, isReadOnly, responses, onComplete]);
 
   // Determine if navigation should be shown (hide only for intro steps)
   const showNavigation = currentStepData?.type !== 'intro';
@@ -481,12 +551,13 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
       {!isReadOnly && (
         <NavigationControls
           onBack={goBack}
-          onNext={goNext}
+          onNext={handleNext}
           isFirstStep={isFirstStep}
           showNavigation={showNavigation}
           isSynthesis={isSynthesisStep}
           onComplete={handleComplete}
           isSaving={isSaving}
+          validationError={validationError}
         />
       )}
 

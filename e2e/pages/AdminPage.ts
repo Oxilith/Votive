@@ -14,9 +14,15 @@
 import { BasePage } from './BasePage';
 
 /**
+ * Admin panel base URL - served by prompt-service
+ */
+const ADMIN_BASE_URL = process.env.PROMPT_SERVICE_URL ?? 'http://localhost:3002';
+
+/**
  * Page object for the admin panel.
  *
- * The admin panel is accessed at /admin and requires API key authentication.
+ * The admin panel is accessed at http://localhost:3002/admin (prompt-service)
+ * and requires API key authentication.
  * After login, admin can:
  * - View and manage prompts
  * - View and manage A/B tests
@@ -26,7 +32,12 @@ export class AdminPage extends BasePage {
   // Login form selectors
   readonly apiKeyInput = 'input#apiKey, input[type="password"], input[name="apiKey"]';
   readonly loginButton = 'button[type="submit"]';
-  readonly loginError = '[class*="error"], [role="alert"], p:has-text("Invalid")';
+  // Error messages are rendered as <p> with inline styles, not CSS classes
+  // Match common error text patterns
+  readonly loginError = 'p:has-text("Invalid"), p:has-text("failed"), p:has-text("error"), p:has-text("required")';
+
+  // Loading state selector (shown during auth verification)
+  readonly loadingIndicator = 'p:has-text("Verifying authentication")';
 
   // Navigation selectors
   readonly promptsNav = 'a:has-text("Prompts"), button:has-text("Prompts")';
@@ -51,9 +62,11 @@ export class AdminPage extends BasePage {
 
   /**
    * Navigate to the admin login page
+   * Note: Admin panel is served by prompt-service on port 3002
    */
   async navigate(): Promise<void> {
-    await this.goto('/admin');
+    await this.page.goto(`${ADMIN_BASE_URL}/admin`);
+    await this.page.waitForLoadState('networkidle');
   }
 
   /**
@@ -68,11 +81,23 @@ export class AdminPage extends BasePage {
     // Wait for either redirect (success) or error (failure)
     try {
       await Promise.race([
-        this.page.waitForURL('**/admin/**', { timeout: 5000 }),
-        this.page.waitForSelector(this.loginError, { timeout: 5000 }),
+        this.page.waitForURL('**/prompts**', { timeout: 10000 }),
+        this.page.waitForSelector(this.loginError, { timeout: 10000 }),
       ]);
     } catch {
       // May still be processing
+    }
+
+    // If redirected, wait for loading state to complete
+    if (this.page.url().includes('prompts')) {
+      // Wait for the "Verifying authentication..." loading to disappear
+      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+        // Loading may have already completed
+      });
+      // Wait for logout button to appear (indicates Layout is rendered)
+      await this.page.locator(this.logoutButton).waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
+        // May still be loading
+      });
     }
 
     await this.waitForNavigation();
@@ -84,7 +109,12 @@ export class AdminPage extends BasePage {
    * @returns True if logout button is visible (indicating logged in state)
    */
   async isLoggedIn(): Promise<boolean> {
-    return await this.page.locator(this.logoutButton).isVisible({ timeout: 2000 }).catch(() => false);
+    // First wait for any loading state to complete
+    await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+      // Loading may not be present or already completed
+    });
+    // Check if logout button is visible (longer timeout to account for navigation)
+    return await this.page.locator(this.logoutButton).isVisible({ timeout: 5000 }).catch(() => false);
   }
 
   /**
@@ -94,8 +124,10 @@ export class AdminPage extends BasePage {
    */
   async getLoginError(): Promise<string | null> {
     try {
-      const error = this.page.locator(this.loginError);
-      if (await error.isVisible({ timeout: 2000 })) {
+      // Wait for error to appear (API response time)
+      await this.page.waitForTimeout(500);
+      const error = this.page.locator(this.loginError).first();
+      if (await error.isVisible({ timeout: 3000 })) {
         return await error.textContent();
       }
     } catch {
@@ -165,6 +197,14 @@ export class AdminPage extends BasePage {
    */
   async logout(): Promise<void> {
     await this.page.click(this.logoutButton);
+    // Wait for redirect to login page
+    await this.page.waitForURL('**/login**', { timeout: 10000 }).catch(() => {
+      // May already be on login page or different URL pattern
+    });
+    // Wait for login form to appear
+    await this.page.locator(this.apiKeyInput).waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
+      // Login form may take time to render
+    });
     await this.waitForNavigation();
   }
 
@@ -174,7 +214,11 @@ export class AdminPage extends BasePage {
    * @returns True if API key input is visible
    */
   async isOnLoginPage(): Promise<boolean> {
-    return await this.page.locator(this.apiKeyInput).isVisible({ timeout: 2000 }).catch(() => false);
+    // Wait for any loading to complete first
+    await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {
+      // Loading may not be present
+    });
+    return await this.page.locator(this.apiKeyInput).isVisible({ timeout: 5000 }).catch(() => false);
   }
 
   /**

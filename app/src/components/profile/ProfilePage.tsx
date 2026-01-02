@@ -28,7 +28,7 @@ import {
   PageNavigation,
   FooterSection,
   CheckIcon,
-  LoadingSpinnerIcon,
+  InkLoader,
   ErrorCircleIcon,
   RefreshIcon,
   InkBrushDecoration,
@@ -38,7 +38,7 @@ import { useCurrentUser } from '@/stores/useAuthStore';
 import { useUIStore } from '@/stores/useUIStore';
 import { useAssessmentStore } from '@/stores/useAssessmentStore';
 import { useAnalysisStore } from '@/stores/useAnalysisStore';
-import { authService } from '@/services/api/AuthService';
+import { authService } from '@/services/api';
 import type { Gender, ProfileUpdateRequest, PasswordChangeRequest } from '@/types';
 import { logger } from '@/utils';
 import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH } from '@votive/shared';
@@ -318,11 +318,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   };
 
   const tabs: { id: ProfileTab; labelKey: string }[] = [
-    { id: 'profile', labelKey: 'profile.tabs.profile' },
-    { id: 'password', labelKey: 'profile.tabs.password' },
-    { id: 'assessments', labelKey: 'profile.tabs.assessments' },
-    { id: 'analyses', labelKey: 'profile.tabs.analyses' },
-    { id: 'danger', labelKey: 'profile.tabs.danger' },
+    { id: 'profile', labelKey: 'tabs.profile' },
+    { id: 'password', labelKey: 'tabs.password' },
+    { id: 'assessments', labelKey: 'tabs.assessments' },
+    { id: 'analyses', labelKey: 'tabs.analyses' },
+    { id: 'danger', labelKey: 'tabs.danger' },
   ];
 
   return (
@@ -361,6 +361,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                 <li key={tab.id}>
                   <button
                     onClick={() => { setActiveTab(tab.id); }}
+                    data-testid={`profile-tab-${tab.id}`}
                     className={`
                       w-full text-left px-4 py-2 font-body text-sm rounded-sm transition-colors whitespace-nowrap
                       ${activeTab === tab.id
@@ -526,10 +527,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                   </h2>
 
                   {assessmentsLoading ? (
-                    <div className="text-center py-12">
-                      <LoadingSpinnerIcon size="lg" className="text-[var(--accent)] mx-auto mb-4" />
-                      <p className="font-body text-[var(--text-secondary)]">{t('assessmentsTab.loading')}</p>
-                    </div>
+                    <InkLoader variant="contained" message={t('assessmentsTab.loading')} />
                   ) : assessmentsError ? (
                     <div className="flex flex-col items-center justify-center gap-3 py-12">
                       <ErrorCircleIcon size="lg" className="text-red-500 dark:text-red-400" />
@@ -553,6 +551,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                       {assessmentsList.map((assessment) => (
                         <li
                           key={assessment.id}
+                          data-testid={`assessment-item-${assessment.id}`}
                           onClick={() => onNavigateToAssessmentById?.(assessment.id)}
                           className="p-4 border border-[var(--border)] rounded-sm hover:border-[var(--accent)] transition-colors cursor-pointer"
                         >
@@ -577,10 +576,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                   </h2>
 
                   {analysesLoading ? (
-                    <div className="text-center py-12">
-                      <LoadingSpinnerIcon size="lg" className="text-[var(--accent)] mx-auto mb-4" />
-                      <p className="font-body text-[var(--text-secondary)]">{t('analysesTab.loading')}</p>
-                    </div>
+                    <InkLoader variant="contained" message={t('analysesTab.loading')} />
                   ) : analysesError ? (
                     <div className="flex flex-col items-center justify-center gap-3 py-12">
                       <ErrorCircleIcon size="lg" className="text-red-500 dark:text-red-400" />
@@ -604,6 +600,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                       {analysesList.map((analysis) => (
                         <li
                           key={analysis.id}
+                          data-testid={`analysis-item-${analysis.id}`}
                           onClick={() => onNavigateToInsightsById?.(analysis.id)}
                           className="p-4 border border-[var(--border)] rounded-sm hover:border-[var(--accent)] transition-colors cursor-pointer"
                         >

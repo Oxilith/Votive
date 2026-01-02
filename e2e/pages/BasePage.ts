@@ -77,26 +77,13 @@ export class BasePage {
    * @returns True if user appears to be authenticated
    */
   async isLoggedIn(): Promise<boolean> {
-    // Look for user menu or avatar in header that indicates logged-in state
-    const userIndicators = [
-      '[data-testid="user-menu"]',
-      '[data-testid="user-avatar"]',
-      'button:has-text("Sign out")',
-      'button:has-text("Logout")',
-    ];
-
-    for (const selector of userIndicators) {
-      try {
-        const isVisible = await this.page.locator(selector).isVisible({ timeout: 2000 });
-        if (isVisible) {
-          return true;
-        }
-      } catch {
-        // Continue checking other indicators
-      }
+    // Look for user avatar dropdown - only check the specific data-testid
+    try {
+      const avatar = this.page.locator('[data-testid="user-avatar-dropdown"]');
+      return await avatar.isVisible({ timeout: 2000 });
+    } catch {
+      return false;
     }
-
-    return false;
   }
 
   /**

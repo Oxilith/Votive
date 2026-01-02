@@ -21,9 +21,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import AuthLayout from './AuthLayout';
-import { CheckIcon, LoadingSpinnerIcon, ErrorCircleIcon } from '@/components';
+import { CheckIcon, InkLoader, ErrorCircleIcon } from '@/components';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { authService } from '@/services/api/AuthService';
+import { authService } from '@/services/api';
 import { useRouting } from '@/hooks';
 
 /**
@@ -115,17 +115,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
       <div className="text-center">
         {/* Loading State */}
         {state === 'loading' && (
-          <>
-            <div className="w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-              <LoadingSpinnerIcon size="lg" className="text-[var(--accent)]" />
-            </div>
-            <h2 className="font-display text-2xl text-[var(--text-primary)] mb-2">
-              {t('verifyEmail.loading.title')}
-            </h2>
-            <p className="font-body text-[var(--text-secondary)]">
-              {t('verifyEmail.loading.description')}
-            </p>
-          </>
+          <InkLoader variant="contained" message={t('verifyEmail.loading.title')} />
         )}
 
         {/* Success State */}

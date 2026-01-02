@@ -29,12 +29,12 @@ export type ProfileTab = 'profile' | 'password' | 'assessments' | 'analyses' | '
  * - Danger: Delete account
  */
 export class ProfilePage extends BasePage {
-  // Tab selectors
-  readonly profileTab = 'button:has-text("Profile"), [role="tab"]:has-text("Profile")';
-  readonly passwordTab = 'button:has-text("Password"), [role="tab"]:has-text("Password")';
-  readonly assessmentsTab = 'button:has-text("Assessments"), [role="tab"]:has-text("Assessments")';
-  readonly analysesTab = 'button:has-text("Analyses"), [role="tab"]:has-text("Analyses")';
-  readonly dangerTab = 'button:has-text("Danger"), [role="tab"]:has-text("Danger")';
+  // Tab selectors - use data-testid for language-independent testing
+  readonly profileTab = '[data-testid="profile-tab-profile"]';
+  readonly passwordTab = '[data-testid="profile-tab-password"]';
+  readonly assessmentsTab = '[data-testid="profile-tab-assessments"]';
+  readonly analysesTab = '[data-testid="profile-tab-analyses"]';
+  readonly dangerTab = '[data-testid="profile-tab-danger"]';
 
   // Profile form selectors
   readonly nameInput = 'input[autocomplete="name"]';
@@ -48,10 +48,15 @@ export class ProfilePage extends BasePage {
   readonly confirmNewPasswordInput = 'input[autocomplete="new-password"]:last-of-type';
   readonly changePasswordButton = 'button:has-text("Change Password")';
 
-  // List selectors
-  readonly assessmentItem = '[class*="assessment-item"], li:has([class*="assessment"]), tr';
-  readonly analysisItem = '[class*="analysis-item"], li:has([class*="analysis"]), tr';
+  // List selectors (use data-testid prefix match for reliable E2E testing)
+  readonly assessmentItem = '[data-testid^="assessment-item-"]';
+  readonly analysisItem = '[data-testid^="analysis-item-"]';
   readonly viewButton = 'button:has-text("View"), a:has-text("View")';
+
+  // Loading and empty state selectors
+  readonly loadingIndicator = '[data-testid="ink-loader"], .animate-spin';
+  readonly emptyAssessmentsMessage = 'text=/no.*assessment|empty/i';
+  readonly emptyAnalysesMessage = 'text=/no.*analysis|empty/i';
 
   // Danger zone selectors
   readonly deleteAccountButton = 'button:has-text("Delete Account")';
@@ -83,6 +88,8 @@ export class ProfilePage extends BasePage {
       danger: this.dangerTab,
     };
 
+    // Wait for tab to be visible before clicking (profile page may take time to render)
+    await this.page.locator(tabSelectors[tab]).waitFor({ state: 'visible', timeout: 10000 });
     await this.page.click(tabSelectors[tab]);
     await this.page.waitForTimeout(300);
   }
@@ -130,13 +137,44 @@ export class ProfilePage extends BasePage {
   }
 
   /**
+   * Wait for the list to finish loading
+   * Waits for loading indicator to disappear and either items or empty state to appear
+   */
+  private async waitForListLoaded(
+    itemSelector: string,
+    emptyMessageSelector: string,
+  ): Promise<void> {
+    // Wait for any loading indicator to disappear (if present)
+    await this.page
+      .locator(this.loadingIndicator)
+      .waitFor({ state: 'hidden', timeout: 10000 })
+      .catch(() => {
+        // Loading might have already finished, ignore
+      });
+
+    // Wait for either items or empty state message
+    await Promise.race([
+      this.page
+        .locator(itemSelector)
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
+      this.page
+        .locator(emptyMessageSelector)
+        .first()
+        .waitFor({ state: 'visible', timeout: 10000 }),
+    ]).catch(() => {
+      // If neither appears within timeout, we'll just count what's there
+    });
+  }
+
+  /**
    * Get the count of saved assessments
    *
    * @returns Number of assessment items
    */
   async getAssessmentCount(): Promise<number> {
     await this.clickTab('assessments');
-    await this.page.waitForTimeout(500);
+    await this.waitForListLoaded(this.assessmentItem, this.emptyAssessmentsMessage);
     return await this.page.locator(this.assessmentItem).count();
   }
 
@@ -147,7 +185,7 @@ export class ProfilePage extends BasePage {
    */
   async getAnalysisCount(): Promise<number> {
     await this.clickTab('analyses');
-    await this.page.waitForTimeout(500);
+    await this.waitForListLoaded(this.analysisItem, this.emptyAnalysesMessage);
     return await this.page.locator(this.analysisItem).count();
   }
 

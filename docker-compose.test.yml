@@ -10,25 +10,14 @@ name: votive-test
 
 services:
   prompt-service:
-    image: oxilith/votive-prompt-service:latest
     build:
       context: .
-      dockerfile: prompt-service/Dockerfile
+      dockerfile: prompt-service/Dockerfile.test
     container_name: votive-prompt-service-test
+    environment:
+      - DOTENV_PRIVATE_KEY_TEST=${DOTENV_PRIVATE_KEY_TEST}
     ports:
       - "3002:3002"
-    environment:
-      - NODE_ENV=test
-      - DATABASE_URL=file:/app/data/test.db
-      - ADMIN_API_KEY=test-admin-key
-      - SESSION_SECRET=test-session-secret-32chars!!
-      - JWT_ACCESS_SECRET=test-jwt-access-secret-32chars!
-      - JWT_REFRESH_SECRET=test-jwt-refresh-secret-32char
-      - DATABASE_KEY=test-database-key-32characters!!
-      # Disable rate limiting for tests
-      - RATE_LIMIT_ENABLED=false
-      # Disable email sending
-      - SMTP_ENABLED=false
     volumes:
       - test-prompt-data:/app/data
     healthcheck:
@@ -41,20 +30,14 @@ services:
       - test-network
 
   backend:
-    image: oxilith/votive-backend:latest
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: backend/Dockerfile.test
     container_name: votive-backend-test
+    environment:
+      - DOTENV_PRIVATE_KEY_TEST=${DOTENV_PRIVATE_KEY_TEST}
     ports:
       - "3001:3001"
-    environment:
-      - NODE_ENV=test
-      - PROMPT_SERVICE_URL=http://prompt-service:3002
-      - THINKING_ENABLED=false
-      # Mock Claude API - return fixture data instead of calling Anthropic
-      - MOCK_CLAUDE_API=true
-      - ANTHROPIC_API_KEY=mock-api-key
     depends_on:
       prompt-service:
         condition: service_healthy
@@ -68,10 +51,9 @@ services:
       - test-network
 
   app:
-    image: oxilith/votive-app:latest
     build:
       context: .
-      dockerfile: app/Dockerfile
+      dockerfile: app/Dockerfile.test
     container_name: votive-app-test
     ports:
       - "443:443"

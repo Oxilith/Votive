@@ -52,18 +52,11 @@ export class RegisterPage extends BasePage {
   readonly signInLink = 'button:has-text("Sign in"), a:has-text("Sign in")';
 
   /**
-   * Navigate to the auth page and switch to register form
+   * Navigate to the sign-up page with register form
    */
   async navigate(): Promise<void> {
-    await this.goto('/auth');
-
-    // Check if we need to switch from login to register
-    const nameInput = this.page.locator(this.nameInput);
-    if (!(await nameInput.isVisible({ timeout: 2000 }).catch(() => false))) {
-      // Click switch to register
-      await this.page.click(this.signInLink);
-      await this.page.waitForSelector(this.nameInput);
-    }
+    await this.goto('/sign-up');
+    await this.page.waitForSelector(this.nameInput);
   }
 
   /**
@@ -106,23 +99,37 @@ export class RegisterPage extends BasePage {
   /**
    * Complete the full registration flow
    *
+   * Handles both client-side validation errors (instant) and server-side
+   * errors (requires API call). Client-side validation errors appear
+   * immediately without an API call, so we check for those first.
+   *
    * @param data - Registration data object
    */
   async register(data: RegistrationData): Promise<void> {
     await this.fillForm(data);
     await this.submit();
 
-    // Wait for either redirect (success) or error message (failure)
+    // First check for immediate client-side validation errors (appear within 500ms)
+    // These don't trigger API calls, so we shouldn't wait for network response
+    const immediateError = await this.page
+      .locator(this.errorAlert)
+      .isVisible({ timeout: 500 })
+      .catch(() => false);
+
+    if (immediateError) {
+      // Client-side validation failed - error already visible, no API call made
+      return;
+    }
+
+    // No immediate error - wait for API response and subsequent result
     try {
       await Promise.race([
-        this.page.waitForURL('**/', { timeout: 10000 }),
+        this.page.waitForURL((url) => !url.pathname.includes('/sign-up'), { timeout: 10000 }),
         this.page.waitForSelector(this.errorAlert, { timeout: 10000 }),
       ]);
     } catch {
-      // May still be processing
+      // May still be processing or timeout
     }
-
-    await this.waitForNavigation();
   }
 
   /**

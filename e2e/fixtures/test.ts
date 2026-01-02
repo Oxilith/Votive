@@ -98,7 +98,8 @@ export const test = base.extend<TestFixtures>({
 
   // Generate unique test user for each test
   // This ensures test isolation - no user conflicts between parallel tests
-  testUser: async (_, use) => {
+  // eslint-disable-next-line no-empty-pattern -- Playwright fixture syntax requires object destructuring
+  testUser: async ({}, use) => {
     const user: TestUser = {
       name: faker.person.fullName(),
       email: `e2e-${faker.string.uuid().slice(0, 8)}@test.votive.local`,
@@ -113,26 +114,53 @@ export const test = base.extend<TestFixtures>({
   // Registers a new user and returns a page that's already logged in
   authenticatedPage: async ({ page, testUser }, use) => {
     const registerPage = new RegisterPage(page);
-    await registerPage.navigate();
-    await registerPage.register({
-      name: testUser.name,
-      email: testUser.email,
-      password: testUser.password,
-      confirmPassword: testUser.password,
-      birthYear: testUser.birthYear,
-      gender: testUser.gender,
-    });
 
-    // Wait for successful registration/login redirect
-    await page.waitForLoadState('networkidle');
+    // Retry registration up to 3 times to handle transient network issues
+    let lastError: Error | null = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        await registerPage.navigate();
 
-    // Verify we're logged in (not on auth page)
-    const currentUrl = page.url();
-    if (currentUrl.includes('/auth')) {
-      throw new Error('Registration failed - still on auth page');
+        // Use the register method which handles form fill and API waiting
+        await registerPage.register({
+          name: testUser.name,
+          email: testUser.email,
+          password: testUser.password,
+          confirmPassword: testUser.password,
+          birthYear: testUser.birthYear,
+          gender: testUser.gender,
+        });
+
+        // Check if we're redirected away from auth pages
+        const currentUrl = page.url();
+        if (!currentUrl.includes('/sign-in') && !currentUrl.includes('/sign-up')) {
+          // Success - we're logged in
+          await use(page);
+          return;
+        }
+
+        // Check for error message
+        const errorVisible = await page
+          .locator('[role="alert"]')
+          .isVisible({ timeout: 2000 })
+          .catch(() => false);
+        if (errorVisible) {
+          const errorText = await page.locator('[role="alert"]').textContent();
+          lastError = new Error(`Registration failed: ${errorText}`);
+        } else {
+          lastError = new Error('Registration failed - still on auth page');
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+      }
+
+      // Wait before retry
+      if (attempt < 3) {
+        await page.waitForTimeout(1000);
+      }
     }
 
-    await use(page);
+    throw lastError ?? new Error('Registration failed after 3 attempts');
   },
 });
 

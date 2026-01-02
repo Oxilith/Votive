@@ -9,6 +9,9 @@
  * - Configures HTTPS handling for local development
  * @dependencies
  * - @playwright/test for configuration types
+ *
+ * @note Run tests with: dotenvx run -f .env.test -- npm run test:e2e
+ *       This loads environment variables from .env.test before running tests
  */
 
 import { defineConfig, devices } from '@playwright/test';

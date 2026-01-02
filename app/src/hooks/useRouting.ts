@@ -289,6 +289,9 @@ export function useRouting() {
   }, [getRouteParams, setView]);
 
   // Sync URL when view changes externally (e.g., from setView calls)
+  // Use a ref to track if initial sync has completed to avoid race conditions
+  const hasInitialSyncCompletedRef = useRef(false);
+
   useEffect(() => {
     // Skip if we're already navigating or not initialized yet
     if (isNavigatingRef.current || !isInitializedRef.current) return;
@@ -299,6 +302,15 @@ export function useRouting() {
     // If current URL already represents this view (including ID-based routes), don't modify
     // This prevents /assessment/123 from being replaced with /assessment
     if (currentParams.view === currentView) {
+      // Mark initial sync as complete when view matches URL
+      hasInitialSyncCompletedRef.current = true;
+      return;
+    }
+
+    // On initial page load, the URL is the source of truth.
+    // Don't push a new URL until we've synced with the initial URL at least once.
+    // This prevents race conditions where we push '/' before setView('profile') takes effect.
+    if (!hasInitialSyncCompletedRef.current) {
       return;
     }
 

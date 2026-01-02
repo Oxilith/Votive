@@ -48,7 +48,7 @@ import type {
 import { useAnalysisStore } from '@/stores/useAnalysisStore';
 import { useIsAuthenticated, useCurrentUser } from '@/stores/useAuthStore';
 import type { UserProfileForAnalysis } from '@votive/shared';
-import { authService } from '@/services/api/AuthService';
+import { authService } from '@/services/api';
 import { cardStyles, textStyles } from '@/styles';
 import InsightCard from './InsightCard';
 import SavePromptModal from './SavePromptModal';
@@ -56,6 +56,7 @@ import {
   FooterSection,
   PageNavigation,
   InkBrushDecoration,
+  InkLoader,
   ErrorCircleIcon,
   SearchIcon,
   SwitchHorizontalIcon,
@@ -395,37 +396,11 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
         )}
 
         {loading && (
-          <div className="text-center py-16">
-            {/* Ink brush loading animation */}
-            <div className="w-20 h-20 mx-auto mb-6 relative">
-              <svg viewBox="0 0 80 80" className="w-full h-full animate-spin" style={{ animationDuration: '3s' }} aria-hidden="true">
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="32"
-                  fill="none"
-                  stroke="var(--accent)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray="60 140"
-                  className="opacity-60"
-                />
-                <circle
-                  cx="40"
-                  cy="40"
-                  r="24"
-                  fill="none"
-                  stroke="var(--accent)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeDasharray="40 120"
-                  className="opacity-30"
-                />
-              </svg>
-            </div>
-            <h2 className="font-display text-xl font-semibold text-[var(--text-primary)] mb-2">{t('loading.title')}</h2>
-            <p className="font-body text-[var(--text-secondary)]">{t('loading.description')}</p>
-          </div>
+          <InkLoader
+            variant="contained"
+            message={t('loading.title')}
+            description={t('loading.description')}
+          />
         )}
 
         {error && (

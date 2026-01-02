@@ -228,5 +228,9 @@
     "continue": "Kontynuuj →",
     "complete": "Zakończ ocenę i zobacz analizę AI",
     "saving": "Zapisywanie..."
+  },
+  "validation": {
+    "required": "Proszę wypełnić ten krok przed kontynuowaniem",
+    "incomplete": "Proszę wypełnić wszystkie kroki przed zakończeniem"
   }
 }

@@ -21,6 +21,9 @@ test.describe('Assessment Save', () => {
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
 
+    // Wait for redirect to insights page
+    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+
     // Should be redirected to insights
     expect(authenticatedPage.url()).toContain('/insights');
 
@@ -43,6 +46,9 @@ test.describe('Assessment Save', () => {
     // Complete a new assessment
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
+
+    // Wait for redirect to insights page
+    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
 
     // Check for new assessment in profile
     await profilePage.navigate();

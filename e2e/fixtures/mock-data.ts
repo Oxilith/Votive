@@ -11,9 +11,9 @@
 
 /**
  * Admin API key for E2E tests
- * Configured via E2E_ADMIN_API_KEY environment variable
+ * Configured via ADMIN_API_KEY environment variable (same as prompt-service)
  */
-export const ADMIN_API_KEY = process.env.E2E_ADMIN_API_KEY ?? 'test-admin-key';
+export const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? 'test-admin-api-key-for-e2e-testing-purposes';
 
 /**
  * Default test user password meeting validation requirements:
@@ -55,7 +55,8 @@ export const MOCK_ASSESSMENT_RESPONSES = {
  */
 export const E2E_ROUTES = {
   home: '/',
-  auth: '/auth',
+  signIn: '/sign-in',
+  signUp: '/sign-up',
   assessment: '/assessment',
   insights: '/insights',
   profile: '/profile',

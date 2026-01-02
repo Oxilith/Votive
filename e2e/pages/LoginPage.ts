@@ -36,10 +36,10 @@ export class LoginPage extends BasePage {
   readonly signUpLink = 'button:has-text("Sign up"), a:has-text("Sign up")';
 
   /**
-   * Navigate to the auth page with login form
+   * Navigate to the sign-in page with login form
    */
   async navigate(): Promise<void> {
-    await this.goto('/auth');
+    await this.goto('/sign-in');
     await this.page.waitForSelector(this.emailInput);
   }
 
@@ -77,12 +77,24 @@ export class LoginPage extends BasePage {
   async login(email: string, password: string): Promise<void> {
     await this.fillEmail(email);
     await this.fillPassword(password);
-    await this.submit();
+
+    // Wait for API response after submit
+    try {
+      await Promise.all([
+        this.page.waitForResponse(
+          (resp) => resp.url().includes('/api/user-auth/login') && resp.status() !== 0,
+          { timeout: 15000 }
+        ),
+        this.submit(),
+      ]);
+    } catch {
+      // API may have already responded or request failed
+    }
 
     // Wait for either redirect (success) or error message (failure)
     try {
       await Promise.race([
-        this.page.waitForURL('**/', { timeout: 10000 }),
+        this.page.waitForURL((url) => !url.pathname.includes('/sign-in'), { timeout: 10000 }),
         this.page.waitForSelector(this.errorAlert, { timeout: 10000 }),
       ]);
     } catch {

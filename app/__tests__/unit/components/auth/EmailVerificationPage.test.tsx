@@ -57,10 +57,10 @@ vi.mock('@/components/auth/AuthLayout', () => ({
   ),
 }));
 
-// Mock icons
+// Mock icons and loader
 vi.mock('@/components', () => ({
   CheckIcon: () => <span data-testid="check-icon" />,
-  LoadingSpinnerIcon: () => <span data-testid="loading-spinner" />,
+  InkLoader: () => <span data-testid="ink-loader" />,
   ErrorCircleIcon: () => <span data-testid="error-icon" />,
 }));
 
@@ -106,8 +106,7 @@ describe('EmailVerificationPage', () => {
 
       render(<EmailVerificationPage token="test-token" />);
 
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-      expect(screen.getByText('verifyEmail.loading.title')).toBeInTheDocument();
+      expect(screen.getByTestId('ink-loader')).toBeInTheDocument();
     });
   });
 

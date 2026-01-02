@@ -21,7 +21,7 @@ import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import FormInput from './FormInput';
 import FormButton from './FormButton';
-import { authService } from '@/services/api/AuthService';
+import { authService } from '@/services/api';
 import { CheckIcon } from '@/components';
 import { PASSWORD_REGEX, PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH } from '@votive/shared';
 
