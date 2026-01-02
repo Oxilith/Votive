@@ -86,6 +86,8 @@ const configSchema = z.object({
     tokenRefresh: z.coerce.number().default(20), // 20 req/min - normal auth flow
     userData: z.coerce.number().default(30), // 30 req/min - assessment/analysis
     profile: z.coerce.number().default(15), // 15 req/min - profile operations
+    adminApi: z.coerce.number().default(100), // 100 req/window - admin API operations
+    adminWindowMs: z.coerce.number().default(15 * 60 * 1000), // 15 minutes - admin window
   }),
 
   // Account Lockout Configuration (progressive lockout after failed login attempts)
@@ -191,6 +193,8 @@ function loadConfig(): Config {
       tokenRefresh: process.env.RATE_LIMIT_TOKEN_REFRESH,
       userData: process.env.RATE_LIMIT_USER_DATA,
       profile: process.env.RATE_LIMIT_PROFILE,
+      adminApi: process.env.RATE_LIMIT_ADMIN_API,
+      adminWindowMs: process.env.RATE_LIMIT_ADMIN_WINDOW_MS,
     },
     // Account Lockout
     lockout: {

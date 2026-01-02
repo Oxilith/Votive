@@ -4,7 +4,7 @@
  * @functionality
  * - Combines auth, prompt, A/B test, resolve, and user-auth routes
  * - Applies admin auth middleware to protected routes (prompts, ab-tests)
- * - Applies rate limiting to admin routes (100 req/15min)
+ * - Applies configurable rate limiting to admin routes (RATE_LIMIT_ADMIN_API, RATE_LIMIT_ADMIN_WINDOW_MS)
  * - Auth routes use per-route rate limiting (login only, see auth.routes.ts)
  * - User-auth routes use per-route rate limiting (see user-auth.routes.ts)
  * - Applies lenient rate limiting to resolve routes (1000 req/min) for service-to-service
@@ -12,6 +12,7 @@
  * @dependencies
  * - express Router
  * - express-rate-limit for rate limiting
+ * - @/config for rate limit configuration
  * - @/routes/auth.routes
  * - @/routes/prompt.routes
  * - @/routes/ab-test.routes
@@ -28,13 +29,14 @@ import { abTestRoutes } from './ab-test.routes';
 import { resolveRoutes } from './resolve.routes';
 import { userAuthRoutes } from './user-auth.routes';
 import { adminAuthMiddleware } from '@/middleware';
+import { config } from '@/config';
 
 const router = Router();
 
-// Rate limiter for admin endpoints
+// Rate limiter for admin endpoints (configurable via RATE_LIMIT_ADMIN_API and RATE_LIMIT_ADMIN_WINDOW_MS)
 const adminRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  windowMs: config.rateLimit.adminWindowMs,
+  max: config.rateLimit.adminApi,
   message: { error: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
