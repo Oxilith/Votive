@@ -6,6 +6,8 @@
  * - Handles loading and error states
  * - Provides tab navigation for different insight categories
  * - Shows identity synthesis section
+ * - Detects dirty state warning alert
+ * - Handles pending changes alert visibility
  * @dependencies
  * - BasePage for common functionality
  * - @playwright/test for Page type
@@ -49,6 +51,17 @@ export class InsightsPage extends BasePage {
   readonly insightCard = '[data-testid="insight-card"], [class*="card"], article';
   readonly synthesisSection = '[data-testid="synthesis"], [class*="synthesis"]';
   readonly noAssessmentMessage = '[class*="no-assessment"], p:has-text("no assessment")';
+
+  // Dirty state selectors
+  readonly dirtyWarning = '[data-testid="insights-dirty-warning"]';
+  readonly pendingChangesAlert = '[data-testid="pending-changes-alert"]';
+  readonly reanalyzeDirtyWarning = '[data-testid="insights-reanalyze-dirty-warning"]';
+  readonly readyState = '[data-testid="insights-ready"]';
+  readonly noAssessmentState = '[data-testid="insights-no-assessment"]';
+  readonly insightsPage = '[data-testid="insights-page"]';
+  readonly insightsTabs = '[data-testid="insights-tabs"]';
+  readonly analyzeTestId = '[data-testid="insights-btn-analyze"]';
+  readonly reanalyzeTestId = '[data-testid="insights-btn-reanalyze"]';
 
   /**
    * Navigate to the insights page
@@ -185,5 +198,86 @@ export class InsightsPage extends BasePage {
    */
   async isAnalyzeButtonVisible(): Promise<boolean> {
     return await this.page.locator(this.analyzeButton).isVisible({ timeout: 2000 }).catch(() => false);
+  }
+
+  /**
+   * Check if the dirty state warning is visible
+   *
+   * @returns True if dirty warning is visible
+   */
+  async hasDirtyWarning(): Promise<boolean> {
+    return await this.page
+      .locator(this.dirtyWarning)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if the pending changes alert is visible
+   *
+   * @returns True if pending changes alert is visible
+   */
+  async hasPendingChangesAlert(): Promise<boolean> {
+    return await this.page
+      .locator(this.pendingChangesAlert)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if the reanalyze dirty warning is visible
+   *
+   * @returns True if reanalyze dirty warning is visible
+   */
+  async hasReanalyzeDirtyWarning(): Promise<boolean> {
+    return await this.page
+      .locator(this.reanalyzeDirtyWarning)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if the ready state is shown (has assessment, no analysis)
+   *
+   * @returns True if ready state is visible
+   */
+  async isReadyState(): Promise<boolean> {
+    return await this.page
+      .locator(this.readyState)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if the no assessment state is shown
+   *
+   * @returns True if no assessment state is visible
+   */
+  async isNoAssessmentState(): Promise<boolean> {
+    return await this.page
+      .locator(this.noAssessmentState)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Check if the insights tabs are visible (has analysis results)
+   *
+   * @returns True if insights tabs are visible
+   */
+  async hasAnalysisResults(): Promise<boolean> {
+    return await this.page
+      .locator(this.insightsTabs)
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+  }
+
+  /**
+   * Navigate to a specific analysis by ID
+   *
+   * @param analysisId - The ID of the analysis to view
+   */
+  async viewAnalysis(analysisId: string): Promise<void> {
+    await this.goto(`/insights/${analysisId}`);
   }
 }
