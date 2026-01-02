@@ -16,17 +16,19 @@
  * - Supports internationalization (English/Polish)
  * - Prompts unauthenticated users to save their analysis
  * - Auto-saves analysis for authenticated users
+ * - Blocks analysis when assessment has unsaved changes (dirty state)
  * @dependencies
  * - React (useState, useCallback, useRef, useEffect)
  * - react-i18next (useTranslation)
  * - @/types/assessment.types (InsightsProps)
- * - @/stores (useAnalysisStore)
+ * - @/stores (useAnalysisStore, useAssessmentStore)
  * - @/stores/useAuthStore (useIsAuthenticated, useCurrentUser)
  * - @/services/api/AuthService
  * - @/styles/theme (cardStyles, textStyles)
  * - shared (UserProfileForAnalysis)
  * - @/components/landing/sections/FooterSection
  * - @/components/shared/PageNavigation
+ * - @/components/shared/PendingChangesAlert
  * - @/components/insights/InsightsPageHeader
  * - @/components/shared/InkBrushDecoration
  * - @/components/shared/icons (ErrorCircleIcon, SearchIcon, etc.)
@@ -46,6 +48,7 @@ import type {
   AnalysisRisk,
 } from '@/types';
 import { useAnalysisStore } from '@/stores/useAnalysisStore';
+import { useAssessmentStore } from '@/stores/useAssessmentStore';
 import { useIsAuthenticated, useCurrentUser } from '@/stores/useAuthStore';
 import type { UserProfileForAnalysis } from '@votive/shared';
 import { authService } from '@/services/api';
@@ -57,6 +60,7 @@ import {
   PageNavigation,
   InkBrushDecoration,
   InkLoader,
+  PendingChangesAlert,
   ErrorCircleIcon,
   SearchIcon,
   SwitchHorizontalIcon,
@@ -116,6 +120,9 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
   const isAuthenticated = useIsAuthenticated();
   const currentUser = useCurrentUser();
   const [showSavePrompt, setShowSavePrompt] = useState(false);
+
+  // Check if assessment has unsaved changes (blocks analysis)
+  const isDirty = useAssessmentStore((state) => state.isDirty());
   const [hasSaved, setHasSaved] = useState(false);
   const prevAnalysisRef = useRef(storeAnalysis);
 
@@ -385,14 +392,25 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
             </div>
             <h2 className="font-display text-xl font-semibold text-[var(--text-primary)] mb-2">{t('ready.title')}</h2>
             <p className="font-body text-[var(--text-secondary)] mb-6 max-w-md mx-auto">{t('ready.description')}</p>
-            <button
-              onClick={analyzeWithClaude}
-              className="cta-button px-6 py-3 bg-[var(--accent)] text-white font-body font-medium rounded-sm inline-flex items-center gap-2"
-              data-testid="insights-btn-analyze"
-            >
-              <span>{t('ready.button')}</span>
-              <span>→</span>
-            </button>
+
+            {/* Show warning alert when assessment has unsaved changes */}
+            {isDirty && onNavigateToAssessment ? (
+              <div className="max-w-lg mx-auto" data-testid="insights-dirty-warning">
+                <PendingChangesAlert
+                  onNavigateToAssessment={onNavigateToAssessment}
+                  data-testid="insights-pending-changes-alert"
+                />
+              </div>
+            ) : isDirty ? null : (
+              <button
+                onClick={analyzeWithClaude}
+                className="cta-button px-6 py-3 bg-[var(--accent)] text-white font-body font-medium rounded-sm inline-flex items-center gap-2"
+                data-testid="insights-btn-analyze"
+              >
+                <span>{t('ready.button')}</span>
+                <span>→</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -562,18 +580,29 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
               )}
             </div>
 
-            {/* Re-analyze button - hide in view-only mode */}
+            {/* Re-analyze button - hide in view-only mode, show warning when dirty */}
             {!isReadOnly && (
               <div className="mt-8 text-center">
-                <button
-                  onClick={analyzeWithClaude}
-                  className="px-5 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-sm font-body font-medium hover:bg-[var(--bg-tertiary)] border border-[var(--border)] transition-colors inline-flex items-center gap-2"
-                  data-testid="insights-btn-reanalyze"
-                >
-                  <RefreshIcon size="sm" />
-                  <span>{t('reanalyze.button')}</span>
-                </button>
-                <p className="font-body text-[var(--text-muted)] text-sm mt-2">{t('reanalyze.description')}</p>
+                {isDirty && onNavigateToAssessment ? (
+                  <div className="max-w-lg mx-auto" data-testid="insights-reanalyze-dirty-warning">
+                    <PendingChangesAlert
+                      onNavigateToAssessment={onNavigateToAssessment}
+                      data-testid="insights-reanalyze-pending-changes-alert"
+                    />
+                  </div>
+                ) : isDirty ? null : (
+                  <>
+                    <button
+                      onClick={analyzeWithClaude}
+                      className="px-5 py-2.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] rounded-sm font-body font-medium hover:bg-[var(--bg-tertiary)] border border-[var(--border)] transition-colors inline-flex items-center gap-2"
+                      data-testid="insights-btn-reanalyze"
+                    >
+                      <RefreshIcon size="sm" />
+                      <span>{t('reanalyze.button')}</span>
+                    </button>
+                    <p className="font-body text-[var(--text-muted)] text-sm mt-2">{t('reanalyze.description')}</p>
+                  </>
+                )}
               </div>
             )}
           </>
