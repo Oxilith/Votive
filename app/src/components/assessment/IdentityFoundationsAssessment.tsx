@@ -8,10 +8,10 @@
  * - Manages response state for all questions
  * - Handles completion callback with explicit save for authenticated users
  * - Tracks when user reaches synthesis phase for navigation state
- * - Supports view-only mode for viewing saved assessments with PageHeader
+ * - Supports view-only mode showing only synthesis (no progress bar or navigation)
  * - Supports dark mode and internationalization
  * - Uses shared PageNavigation component for consistent navigation
- * - Includes progress bar and footer for consistent design
+ * - Includes progress bar and footer for consistent design (edit mode only)
  * - Includes decorative ink brush SVG
  * @dependencies
  * - React (useState, useEffect, useRef)
@@ -534,18 +534,26 @@ const IdentityFoundationsAssessment: React.FC<AssessmentProps> = ({
         </div>
       )}
 
-      {/* Progress Header - with top padding for floating nav (extra padding when view-only header is shown) */}
-      <div className={isReadOnly && viewOnlyAssessment ? 'pt-32 lg:pt-36' : 'pt-20 lg:pt-24'}>
-        <AssessmentProgress
-          phaseTitle={currentPhaseData.title}
-          phaseSubtitle={currentPhaseData.subtitle}
-          currentStep={currentTotalStep}
-          totalSteps={totalSteps}
-        />
-      </div>
+      {/* Progress Header - hidden in readonly mode (synthesis only) */}
+      {!isReadOnly && (
+        <div className="pt-20 lg:pt-24">
+          <AssessmentProgress
+            phaseTitle={currentPhaseData.title}
+            phaseSubtitle={currentPhaseData.subtitle}
+            currentStep={currentTotalStep}
+            totalSteps={totalSteps}
+          />
+        </div>
+      )}
 
-      {/* Content */}
-      <div className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">{renderStep()}</div>
+      {/* Content - in readonly mode, show synthesis directly */}
+      <div className={`flex-1 max-w-6xl mx-auto px-6 py-8 w-full ${isReadOnly && viewOnlyAssessment ? 'pt-32 lg:pt-36' : ''}`}>
+        {isReadOnly ? (
+          <SynthesisStep responses={responses} phases={phases} />
+        ) : (
+          renderStep()
+        )}
+      </div>
 
       {/* Navigation - hide in read-only mode */}
       {!isReadOnly && (
