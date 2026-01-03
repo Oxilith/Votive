@@ -154,7 +154,8 @@ describe('HealthService', () => {
       service.register({
         name: 'slow-check',
         check: async () => {
-          await new Promise((resolve) => setTimeout(resolve, 10));
+          // Use 20ms delay for CI stability (timer precision varies)
+          await new Promise((resolve) => setTimeout(resolve, 20));
           return { status: 'healthy' };
         },
         critical: false,
@@ -163,7 +164,8 @@ describe('HealthService', () => {
       const result = await service.evaluate();
 
       expect(result.checks['slow-check'].latencyMs).toBeDefined();
-      expect(result.checks['slow-check'].latencyMs).toBeGreaterThanOrEqual(10);
+      // Use >= 15 to account for timer precision variance in CI
+      expect(result.checks['slow-check'].latencyMs).toBeGreaterThanOrEqual(15);
     });
   });
 
