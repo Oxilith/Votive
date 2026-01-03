@@ -416,13 +416,19 @@ apiClient.setUnauthorizedHandler(async () => {
     useAuthStore.getState().setAccessToken(response.accessToken);
     return response.accessToken;
   } catch (error) {
-    // Only clear auth for actual auth failures, not network errors
+    // Clear auth only for actual auth failures (401)
     if (error instanceof ApiClientError && error.status === 401) {
       logger.debug('Token refresh failed with 401, clearing auth');
       useAuthStore.getState().clearAuth();
+    } else if (error instanceof ApiClientError && error.status >= 500) {
+      // Server errors might be temporary - don't clear auth, let user retry
+      logger.warn('Token refresh failed with server error', { error, status: error.status });
+    } else if (!(error instanceof ApiClientError)) {
+      // Network errors (TypeError, fetch failures) - don't clear auth
+      logger.warn('Token refresh failed with network error', { error });
     } else {
-      logger.warn('Token refresh failed with non-auth error', { error });
-      // Still clear auth for other errors as we can't recover
+      // Other client errors (4xx except 401) - clear auth as these are unrecoverable
+      logger.warn('Token refresh failed with client error', { error, status: error.status });
       useAuthStore.getState().clearAuth();
     }
     return null;

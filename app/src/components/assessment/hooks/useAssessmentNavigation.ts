@@ -1,5 +1,5 @@
 /**
- * @file components/assessment/hooks/useAssessmentNavigation.ts
+ * @file app/src/components/assessment/hooks/useAssessmentNavigation.ts
  * @purpose Custom hook for managing assessment navigation state
  * @functionality
  * - Tracks current phase and step indices

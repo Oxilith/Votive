@@ -1,5 +1,5 @@
 /**
- * @file components/assessment/navigation/NavigationControls.tsx
+ * @file app/src/components/assessment/navigation/NavigationControls.tsx
  * @purpose Back and Continue/Complete navigation buttons with Ink & Stone styling
  * @functionality
  * - Renders back button (disabled on first step)

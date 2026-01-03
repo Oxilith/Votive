@@ -71,7 +71,7 @@ import {
   ArrowRightIcon,
 } from '@/components';
 import InsightsPageHeader from './InsightsPageHeader';
-import { importFromJson } from '@/utils';
+import { importFromJson, logger } from '@/utils';
 
 interface Tab {
   id: string;
@@ -150,7 +150,7 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
           } catch (error) {
             // If fetching assessments fails, proceed without linking
             // Log for debugging purposes
-            console.debug('Failed to fetch assessments for analysis linking:', error);
+            logger.debug('Failed to fetch assessments for analysis linking', { error });
           }
         }
 

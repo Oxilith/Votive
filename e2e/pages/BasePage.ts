@@ -15,12 +15,12 @@ import type { Page, Locator } from '@playwright/test';
 import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
- * CSRF cookie name as defined in prompt-service/src/utils/csrf.ts
+ * CSRF cookie name (matches CSRF_COOKIE in prompt-service/src/utils/csrf.ts)
  */
 export const CSRF_COOKIE_NAME = 'csrf-token';
 
 /**
- * CSRF header name for state-changing requests
+ * CSRF header name (matches CSRF_HEADER in prompt-service/src/utils/csrf.ts)
  */
 export const CSRF_HEADER_NAME = 'x-csrf-token';
 

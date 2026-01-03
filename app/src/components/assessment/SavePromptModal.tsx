@@ -1,5 +1,5 @@
 /**
- * @file src/components/assessment/SavePromptModal.tsx
+ * @file app/src/components/assessment/SavePromptModal.tsx
  * @purpose Modal to prompt users to sign in to save assessment and access AI analysis
  * @functionality
  * - Shows at synthesis step for unauthenticated users
