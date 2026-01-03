@@ -63,21 +63,24 @@ const NavSection: FC<NavSectionProps> = ({ onStartDiscovery, onNavigateToAuth, o
       {/* Right Side - Links, CTA, Controls */}
       <div className="flex items-center gap-6 lg:gap-10">
         {/* Navigation Links - Hidden on mobile */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-6" data-testid="landing-nav-links">
           <a
             href="#philosophy"
+            data-testid="nav-link-philosophy"
             className="nav-link font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             {t('nav.philosophy')}
           </a>
           <a
             href="#journey"
+            data-testid="nav-link-journey"
             className="nav-link font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             {t('nav.journey')}
           </a>
           <a
             href="#insights"
+            data-testid="nav-link-insights"
             className="nav-link font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             {t('nav.insights')}
@@ -144,12 +147,14 @@ const NavSection: FC<NavSectionProps> = ({ onStartDiscovery, onNavigateToAuth, o
             <div className="hidden sm:flex items-center gap-3">
               <button
                 onClick={onNavigateToAuth}
+                data-testid="nav-btn-signin"
                 className="font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 {t('nav.signIn')}
               </button>
               <button
                 onClick={onNavigateToSignUp}
+                data-testid="nav-btn-signup"
                 className="px-3 py-1.5 font-body text-sm font-medium text-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition-colors"
               >
                 {t('nav.signUp')}

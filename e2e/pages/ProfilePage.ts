@@ -40,32 +40,33 @@ export class ProfilePage extends BasePage {
   readonly nameInput = 'input[autocomplete="name"]';
   readonly birthYearInput = 'input[type="number"]';
   readonly genderSelect = 'select#gender, select[name="gender"]';
-  readonly saveProfileButton = 'button:has-text("Save")';
+  readonly saveProfileButton = '[data-testid="profile-btn-save"]';
 
   // Password form selectors
   readonly currentPasswordInput = 'input[autocomplete="current-password"]';
   readonly newPasswordInput = 'input[autocomplete="new-password"]:first-of-type';
   readonly confirmNewPasswordInput = 'input[autocomplete="new-password"]:last-of-type';
-  readonly changePasswordButton = 'button:has-text("Change Password")';
+  readonly changePasswordButton = '[data-testid="profile-btn-change-password"]';
 
   // List selectors (use data-testid prefix match for reliable E2E testing)
   readonly assessmentItem = '[data-testid^="assessment-item-"]';
   readonly analysisItem = '[data-testid^="analysis-item-"]';
-  readonly viewButton = 'button:has-text("View"), a:has-text("View")';
 
   // Loading and empty state selectors
-  readonly loadingIndicator = '[data-testid="ink-loader"], .animate-spin';
+  readonly loadingIndicator = '[data-testid="ink-loader"]';
   readonly emptyAssessmentsMessage = 'text=/no.*assessment|empty/i';
   readonly emptyAnalysesMessage = 'text=/no.*analysis|empty/i';
 
-  // Danger zone selectors
-  readonly deleteAccountButton = 'button:has-text("Delete Account")';
-  readonly confirmDeleteButton = 'button:has-text("Confirm"), button:has-text("Yes")';
-  readonly cancelDeleteButton = 'button:has-text("Cancel"), button:has-text("No")';
+  // Danger zone selectors (using data-testid for reliability)
+  readonly deleteAccountButton = '[data-testid="profile-btn-delete-account"]';
+  readonly confirmDeleteButton = '[data-testid="profile-btn-confirm-delete"]';
+  readonly cancelDeleteButton = '[data-testid="profile-btn-cancel-delete"]';
 
-  // Status messages
-  readonly successMessage = '[class*="success"], [role="status"]';
-  readonly errorMessage = '[role="alert"], [class*="error"]';
+  // Status messages (profile and password tabs)
+  readonly profileSuccessMessage = '[data-testid="profile-success"]';
+  readonly profileErrorMessage = '[data-testid="profile-error"]';
+  readonly passwordSuccessMessage = '[data-testid="password-success"]';
+  readonly passwordErrorMessage = '[data-testid="password-error"]';
 
   /**
    * Navigate to the profile page
@@ -91,7 +92,8 @@ export class ProfilePage extends BasePage {
     // Wait for tab to be visible before clicking (profile page may take time to render)
     await this.page.locator(tabSelectors[tab]).waitFor({ state: 'visible', timeout: 10000 });
     await this.page.click(tabSelectors[tab]);
-    await this.page.waitForTimeout(300);
+    // Wait for tab panel to be visible
+    await this.page.locator(`[data-testid="profile-tabpanel-${tab}"]`).waitFor({ state: 'visible', timeout: 5000 });
   }
 
   /**
@@ -138,33 +140,51 @@ export class ProfilePage extends BasePage {
 
   /**
    * Wait for the list to finish loading
+   * Uses Playwright's toPass() for reliable auto-retrying assertions
    * Waits for loading indicator to disappear and either items or empty state to appear
    */
   private async waitForListLoaded(
     itemSelector: string,
     emptyMessageSelector: string,
   ): Promise<void> {
-    // Wait for any loading indicator to disappear (if present)
-    await this.page
-      .locator(this.loadingIndicator)
-      .waitFor({ state: 'hidden', timeout: 10000 })
-      .catch(() => {
-        // Loading might have already finished, ignore
-      });
+    const { expect } = await import('@playwright/test');
+    const loader = this.page.locator(this.loadingIndicator);
+    const items = this.page.locator(itemSelector).first();
+    const emptyMessage = this.page.locator(emptyMessageSelector).first();
 
-    // Wait for either items or empty state message
-    await Promise.race([
-      this.page
-        .locator(itemSelector)
-        .first()
-        .waitFor({ state: 'visible', timeout: 10000 }),
-      this.page
-        .locator(emptyMessageSelector)
-        .first()
-        .waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {
-      // If neither appears within timeout, we'll just count what's there
-    });
+    // Wait for content to settle: loader gone AND (items OR empty message visible)
+    await expect(async () => {
+      const loaderVisible = await loader.isVisible();
+      const hasItems = await items.isVisible();
+      const hasEmptyMessage = await emptyMessage.isVisible();
+
+      expect(loaderVisible).toBe(false);
+      expect(hasItems || hasEmptyMessage).toBe(true);
+    }).toPass({ timeout: 15000 });
+  }
+
+  /**
+   * Wait for at least a minimum number of assessment items to appear
+   * Uses Playwright's toPass() for reliable auto-retrying
+   *
+   * @param minCount - Minimum number of items to wait for (default: 1)
+   * @param timeout - Maximum time to wait in ms (default: 15000)
+   */
+  async waitForAssessments(minCount = 1, timeout = 15000): Promise<void> {
+    const { expect } = await import('@playwright/test');
+    await this.clickTab('assessments');
+
+    // Wait for loader to hide and items to appear
+    const loader = this.page.locator(this.loadingIndicator);
+    const items = this.page.locator(this.assessmentItem);
+
+    await expect(async () => {
+      const loaderVisible = await loader.isVisible();
+      const count = await items.count();
+
+      expect(loaderVisible).toBe(false);
+      expect(count).toBeGreaterThanOrEqual(minCount);
+    }).toPass({ timeout });
   }
 
   /**
@@ -198,14 +218,21 @@ export class ProfilePage extends BasePage {
     await this.clickTab('assessments');
     // Wait for list to load
     await this.waitForListLoaded(this.assessmentItem, this.emptyAssessmentsMessage);
+
+    // Get all assessment items
     const items = await this.page.locator(this.assessmentItem).all();
-    if (items[index]) {
-      // Click the entire item (it's a clickable li element, no separate View button)
-      await items[index].click();
-      // Wait for URL to change to /assessment/:id
-      await this.page.waitForURL(/\/assessment\/[^/]+$/, { timeout: 10000 });
-      await this.waitForNavigation();
+    if (items.length === 0) {
+      throw new Error('No assessment items found in the list');
     }
+    if (!items[index]) {
+      throw new Error(`Assessment item at index ${index} not found (${items.length} items available)`);
+    }
+
+    // Click the entire item (it's a clickable li element, no separate View button)
+    await items[index].click();
+    // Wait for URL to change to /assessment/:id
+    await this.page.waitForURL(/\/assessment\/[^/]+$/, { timeout: 10000 });
+    await this.waitForNavigation();
   }
 
   /**
@@ -217,14 +244,21 @@ export class ProfilePage extends BasePage {
     await this.clickTab('analyses');
     // Wait for list to load
     await this.waitForListLoaded(this.analysisItem, this.emptyAnalysesMessage);
+
+    // Get all analysis items
     const items = await this.page.locator(this.analysisItem).all();
-    if (items[index]) {
-      // Click the entire item (it's a clickable li element, no separate View button)
-      await items[index].click();
-      // Wait for URL to change to /insights/:id
-      await this.page.waitForURL(/\/insights\/[^/]+$/, { timeout: 10000 });
-      await this.waitForNavigation();
+    if (items.length === 0) {
+      throw new Error('No analysis items found in the list');
     }
+    if (!items[index]) {
+      throw new Error(`Analysis item at index ${index} not found (${items.length} items available)`);
+    }
+
+    // Click the entire item (it's a clickable li element, no separate View button)
+    await items[index].click();
+    // Wait for URL to change to /insights/:id
+    await this.page.waitForURL(/\/insights\/[^/]+$/, { timeout: 10000 });
+    await this.waitForNavigation();
   }
 
   /**
@@ -246,21 +280,67 @@ export class ProfilePage extends BasePage {
   }
 
   /**
-   * Check if success message is displayed
+   * Check if profile success message is displayed
    *
-   * @returns True if success message visible
+   * @returns True if profile success message visible
    */
-  async hasSuccessMessage(): Promise<boolean> {
-    return await this.page.locator(this.successMessage).isVisible({ timeout: 3000 }).catch(() => false);
+  async hasProfileSuccessMessage(): Promise<boolean> {
+    try {
+      return await this.page.locator(this.profileSuccessMessage).isVisible({ timeout: 3000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Profile success message check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**
-   * Check if error message is displayed
+   * Check if profile error message is displayed
    *
-   * @returns True if error message visible
+   * @returns True if profile error message visible
    */
-  async hasErrorMessage(): Promise<boolean> {
-    return await this.page.locator(this.errorMessage).isVisible({ timeout: 3000 }).catch(() => false);
+  async hasProfileErrorMessage(): Promise<boolean> {
+    try {
+      return await this.page.locator(this.profileErrorMessage).isVisible({ timeout: 3000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Profile error message check failed:', error.message);
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Check if password success message is displayed
+   *
+   * @returns True if password success message visible
+   */
+  async hasPasswordSuccessMessage(): Promise<boolean> {
+    try {
+      return await this.page.locator(this.passwordSuccessMessage).isVisible({ timeout: 3000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Password success message check failed:', error.message);
+      }
+      return false;
+    }
+  }
+
+  /**
+   * Check if password error message is displayed
+   *
+   * @returns True if password error message visible
+   */
+  async hasPasswordErrorMessage(): Promise<boolean> {
+    try {
+      return await this.page.locator(this.passwordErrorMessage).isVisible({ timeout: 3000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Password error message check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**

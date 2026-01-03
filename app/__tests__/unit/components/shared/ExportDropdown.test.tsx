@@ -75,20 +75,20 @@ describe('ExportDropdown', () => {
       const user = userEvent.setup();
       render(<ExportDropdown onExportAssessment={vi.fn()} />);
 
-      await user.click(screen.getByText('Export'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
 
-      expect(screen.getByText('Export Assessment')).toBeInTheDocument();
+      expect(screen.getByTestId('export-btn-assessment')).toBeInTheDocument();
     });
 
     it('should close dropdown when button is clicked again', async () => {
       const user = userEvent.setup();
       render(<ExportDropdown onExportAssessment={vi.fn()} />);
 
-      await user.click(screen.getByText('Export'));
-      expect(screen.getByText('Export Assessment')).toBeInTheDocument();
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
+      expect(screen.getByTestId('export-btn-assessment')).toBeInTheDocument();
 
-      await user.click(screen.getByText('Export'));
-      expect(screen.queryByText('Export Assessment')).not.toBeInTheDocument();
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
+      expect(screen.queryByTestId('export-btn-assessment')).not.toBeInTheDocument();
     });
 
     it('should set aria-expanded to true when open', async () => {
@@ -109,7 +109,7 @@ describe('ExportDropdown', () => {
       const chevron = screen.getByTestId('chevron-icon');
       expect(chevron).not.toHaveClass('rotate-180');
 
-      await user.click(screen.getByText('Export'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
       expect(chevron).toHaveClass('rotate-180');
     });
   });
@@ -119,20 +119,20 @@ describe('ExportDropdown', () => {
       const user = userEvent.setup();
       render(<ExportDropdown onExportAssessment={vi.fn()} />);
 
-      await user.click(screen.getByText('Export'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
 
-      expect(screen.getByText('Export Assessment')).toBeInTheDocument();
-      expect(screen.queryByText('Export Insights')).not.toBeInTheDocument();
+      expect(screen.getByTestId('export-btn-assessment')).toBeInTheDocument();
+      expect(screen.queryByTestId('export-btn-analysis')).not.toBeInTheDocument();
     });
 
     it('should show only analysis option when only onExportAnalysis provided', async () => {
       const user = userEvent.setup();
       render(<ExportDropdown onExportAnalysis={vi.fn()} />);
 
-      await user.click(screen.getByText('Export'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
 
-      expect(screen.queryByText('Export Assessment')).not.toBeInTheDocument();
-      expect(screen.getByText('Export Insights')).toBeInTheDocument();
+      expect(screen.queryByTestId('export-btn-assessment')).not.toBeInTheDocument();
+      expect(screen.getByTestId('export-btn-analysis')).toBeInTheDocument();
     });
 
     it('should show both options when both callbacks provided', async () => {
@@ -144,10 +144,10 @@ describe('ExportDropdown', () => {
         />
       );
 
-      await user.click(screen.getByText('Export'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
 
-      expect(screen.getByText('Export Assessment')).toBeInTheDocument();
-      expect(screen.getByText('Export Insights')).toBeInTheDocument();
+      expect(screen.getByTestId('export-btn-assessment')).toBeInTheDocument();
+      expect(screen.getByTestId('export-btn-analysis')).toBeInTheDocument();
     });
   });
 
@@ -157,11 +157,11 @@ describe('ExportDropdown', () => {
       const onExportAssessment = vi.fn();
       render(<ExportDropdown onExportAssessment={onExportAssessment} />);
 
-      await user.click(screen.getByText('Export'));
-      await user.click(screen.getByText('Export Assessment'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
+      await user.click(screen.getByTestId('export-btn-assessment'));
 
       expect(onExportAssessment).toHaveBeenCalled();
-      expect(screen.queryByText('Export Assessment')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('export-btn-assessment')).not.toBeInTheDocument();
     });
 
     it('should call onExportAnalysis and close when analysis option clicked', async () => {
@@ -169,11 +169,11 @@ describe('ExportDropdown', () => {
       const onExportAnalysis = vi.fn();
       render(<ExportDropdown onExportAnalysis={onExportAnalysis} />);
 
-      await user.click(screen.getByText('Export'));
-      await user.click(screen.getByText('Export Insights'));
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
+      await user.click(screen.getByTestId('export-btn-analysis'));
 
       expect(onExportAnalysis).toHaveBeenCalled();
-      expect(screen.queryByText('Export Insights')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('export-btn-analysis')).not.toBeInTheDocument();
     });
   });
 
@@ -187,13 +187,13 @@ describe('ExportDropdown', () => {
         </div>
       );
 
-      await user.click(screen.getByText('Export'));
-      expect(screen.getByText('Export Assessment')).toBeInTheDocument();
+      await user.click(screen.getByTestId('export-dropdown-trigger'));
+      expect(screen.getByTestId('export-btn-assessment')).toBeInTheDocument();
 
       // Click outside the dropdown
       fireEvent.mouseDown(screen.getByTestId('outside'));
 
-      expect(screen.queryByText('Export Assessment')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('export-btn-assessment')).not.toBeInTheDocument();
     });
   });
 });

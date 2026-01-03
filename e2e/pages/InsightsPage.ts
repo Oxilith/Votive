@@ -32,25 +32,25 @@ export type InsightTab = 'patterns' | 'contradictions' | 'blindSpots' | 'leverag
  * - Identity Synthesis: Integrated identity narrative
  */
 export class InsightsPage extends BasePage {
-  // Action buttons
-  readonly analyzeButton = 'button:has-text("Analyze"), button:has-text("Get Insights")';
+  // Action buttons (using data-testid for reliability)
+  readonly analyzeButton = '[data-testid="insights-btn-analyze"]';
 
   // Loading and error states
-  readonly loadingIndicator = '[data-testid="loading"], [class*="loading"], [class*="spinner"]';
-  readonly errorMessage = '[role="alert"], [class*="error"]';
+  readonly loadingIndicator = '[data-testid="ink-loader"]';
+  readonly errorMessage = '[data-testid="insights-error"]';
 
-  // Tab navigation
-  readonly tabList = '[role="tablist"]';
-  readonly patternsTab = 'button:has-text("Patterns"), [role="tab"]:has-text("Patterns")';
-  readonly contradictionsTab = 'button:has-text("Contradictions"), [role="tab"]:has-text("Contradictions")';
-  readonly blindSpotsTab = 'button:has-text("Blind Spots"), [role="tab"]:has-text("Blind")';
-  readonly leverageTab = 'button:has-text("Leverage"), [role="tab"]:has-text("Leverage")';
-  readonly risksTab = 'button:has-text("Risks"), [role="tab"]:has-text("Risks")';
+  // Tab navigation (using data-testid for reliability)
+  readonly tabList = '[data-testid="insights-tabs"]';
+  readonly patternsTab = '[data-testid="insights-tab-patterns"]';
+  readonly contradictionsTab = '[data-testid="insights-tab-contradictions"]';
+  readonly blindSpotsTab = '[data-testid="insights-tab-blindSpots"]';
+  readonly leverageTab = '[data-testid="insights-tab-leverage"]';
+  readonly risksTab = '[data-testid="insights-tab-risks"]';
 
-  // Content sections
-  readonly insightCard = '[data-testid="insight-card"], [class*="card"], article';
-  readonly synthesisSection = '[data-testid="synthesis"], [class*="synthesis"]';
-  readonly noAssessmentMessage = '[class*="no-assessment"], p:has-text("no assessment")';
+  // Content sections (using data-testid for reliability)
+  readonly insightCard = '[data-testid="insight-card"]';
+  readonly synthesisSection = '[data-testid="insights-tabpanel-synthesis"]';
+  readonly noAssessmentMessage = '[data-testid="insights-no-assessment"]';
 
   // Incomplete assessment state selectors
   readonly incompleteWarning = '[data-testid="insights-incomplete-warning"]';
@@ -93,8 +93,11 @@ export class InsightsPage extends BasePage {
     // Wait for loading to disappear and content to appear
     try {
       await this.page.waitForSelector(this.loadingIndicator, { state: 'hidden', timeout });
-    } catch {
+    } catch (error) {
       // Loading indicator might not be visible
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Analysis loading indicator wait failed:', error.message);
+      }
     }
 
     // Wait for insight cards to appear
@@ -107,7 +110,14 @@ export class InsightsPage extends BasePage {
    * @returns True if loading indicator is visible
    */
   async isLoading(): Promise<boolean> {
-    return await this.page.locator(this.loadingIndicator).isVisible({ timeout: 1000 }).catch(() => false);
+    try {
+      return await this.page.locator(this.loadingIndicator).isVisible({ timeout: 1000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Loading indicator check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**
@@ -116,7 +126,14 @@ export class InsightsPage extends BasePage {
    * @returns True if error message is visible
    */
   async hasError(): Promise<boolean> {
-    return await this.page.locator(this.errorMessage).isVisible({ timeout: 2000 }).catch(() => false);
+    try {
+      return await this.page.locator(this.errorMessage).isVisible({ timeout: 2000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Error message check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**
@@ -130,8 +147,11 @@ export class InsightsPage extends BasePage {
       if (await error.isVisible()) {
         return await error.textContent();
       }
-    } catch {
-      // No error
+    } catch (error) {
+      // Timeout expected when no error displayed
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Error message retrieval failed:', error.message);
+      }
     }
     return null;
   }
@@ -151,7 +171,8 @@ export class InsightsPage extends BasePage {
     };
 
     await this.page.click(tabSelectors[tab]);
-    await this.page.waitForTimeout(300);
+    // Wait for tab panel to be visible
+    await this.page.locator(`[data-testid="insights-tabpanel-${tab}"]`).waitFor({ state: 'visible', timeout: 5000 });
   }
 
   /**
@@ -183,8 +204,11 @@ export class InsightsPage extends BasePage {
       if (await synthesis.isVisible()) {
         return await synthesis.textContent();
       }
-    } catch {
-      // Synthesis not visible
+    } catch (error) {
+      // Timeout expected when synthesis not visible
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Synthesis content retrieval failed:', error.message);
+      }
     }
     return null;
   }
@@ -195,7 +219,14 @@ export class InsightsPage extends BasePage {
    * @returns True if no assessment message is visible
    */
   async hasNoAssessmentMessage(): Promise<boolean> {
-    return await this.page.locator(this.noAssessmentMessage).isVisible({ timeout: 2000 }).catch(() => false);
+    try {
+      return await this.page.locator(this.noAssessmentMessage).isVisible({ timeout: 2000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('No assessment message check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**
@@ -211,7 +242,14 @@ export class InsightsPage extends BasePage {
    * @returns True if analyze button is visible
    */
   async isAnalyzeButtonVisible(): Promise<boolean> {
-    return await this.page.locator(this.analyzeButton).isVisible({ timeout: 2000 }).catch(() => false);
+    try {
+      return await this.page.locator(this.analyzeButton).isVisible({ timeout: 2000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Analyze button visibility check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**

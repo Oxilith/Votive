@@ -65,20 +65,20 @@ describe('NavigationControls', () => {
     it('should render back button', () => {
       render(<NavigationControls {...defaultProps} />);
 
-      expect(screen.getByText('Back')).toBeInTheDocument();
+      expect(screen.getByTestId('assessment-back-button')).toBeInTheDocument();
     });
 
     it('should be disabled on first step', () => {
       render(<NavigationControls {...defaultProps} isFirstStep />);
 
-      const backButton = screen.getByText('Back');
+      const backButton = screen.getByTestId('assessment-back-button');
       expect(backButton).toBeDisabled();
     });
 
     it('should be enabled when not first step', () => {
       render(<NavigationControls {...defaultProps} isFirstStep={false} />);
 
-      const backButton = screen.getByText('Back');
+      const backButton = screen.getByTestId('assessment-back-button');
       expect(backButton).not.toBeDisabled();
     });
 
@@ -87,7 +87,7 @@ describe('NavigationControls', () => {
       const onBack = vi.fn();
 
       render(<NavigationControls {...defaultProps} onBack={onBack} />);
-      await user.click(screen.getByText('Back'));
+      await user.click(screen.getByTestId('assessment-back-button'));
 
       expect(onBack).toHaveBeenCalled();
     });
@@ -95,7 +95,7 @@ describe('NavigationControls', () => {
     it('should be disabled when saving', () => {
       render(<NavigationControls {...defaultProps} isSaving />);
 
-      const backButton = screen.getByText('Back');
+      const backButton = screen.getByTestId('assessment-back-button');
       expect(backButton).toBeDisabled();
     });
   });
@@ -104,7 +104,7 @@ describe('NavigationControls', () => {
     it('should render continue button', () => {
       render(<NavigationControls {...defaultProps} />);
 
-      expect(screen.getByText('Continue')).toBeInTheDocument();
+      expect(screen.getByTestId('assessment-continue-button')).toBeInTheDocument();
     });
 
     it('should call onNext when clicked', async () => {
@@ -112,7 +112,7 @@ describe('NavigationControls', () => {
       const onNext = vi.fn();
 
       render(<NavigationControls {...defaultProps} onNext={onNext} />);
-      await user.click(screen.getByText('Continue'));
+      await user.click(screen.getByTestId('assessment-continue-button'));
 
       expect(onNext).toHaveBeenCalled();
     });
@@ -130,8 +130,8 @@ describe('NavigationControls', () => {
         />
       );
 
-      expect(screen.getByText('Complete')).toBeInTheDocument();
-      expect(screen.queryByText('Continue')).not.toBeInTheDocument();
+      expect(screen.getByTestId('assessment-complete-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('assessment-continue-button')).not.toBeInTheDocument();
     });
 
     it('should call onComplete when complete button is clicked', async () => {
@@ -146,7 +146,7 @@ describe('NavigationControls', () => {
         />
       );
 
-      await user.click(screen.getByText('Complete'));
+      await user.click(screen.getByTestId('assessment-complete-button'));
 
       expect(onComplete).toHaveBeenCalled();
     });
@@ -164,7 +164,7 @@ describe('NavigationControls', () => {
       );
 
       // Without onComplete, it uses onNext but still shows Complete text
-      await user.click(screen.getByText('Complete'));
+      await user.click(screen.getByTestId('assessment-complete-button'));
 
       expect(onNext).toHaveBeenCalled();
     });
@@ -181,7 +181,7 @@ describe('NavigationControls', () => {
         />
       );
 
-      expect(screen.getByText('Saving...')).toBeInTheDocument();
+      expect(screen.getByTestId('assessment-complete-button')).toHaveTextContent('Saving...');
     });
 
     it('should disable primary button when saving', () => {
@@ -194,7 +194,7 @@ describe('NavigationControls', () => {
         />
       );
 
-      const saveButton = screen.getByText('Saving...');
+      const saveButton = screen.getByTestId('assessment-complete-button');
       expect(saveButton).toBeDisabled();
     });
 
@@ -206,7 +206,7 @@ describe('NavigationControls', () => {
         />
       );
 
-      const continueButton = screen.getByText('Saving...');
+      const continueButton = screen.getByTestId('assessment-continue-button');
       expect(continueButton).toHaveClass('opacity-70');
     });
   });
@@ -222,7 +222,7 @@ describe('NavigationControls', () => {
     it('should render continue button with accent background', () => {
       render(<NavigationControls {...defaultProps} />);
 
-      const continueButton = screen.getByText('Continue');
+      const continueButton = screen.getByTestId('assessment-continue-button');
       expect(continueButton).toHaveClass('bg-[var(--accent)]');
     });
   });

@@ -63,14 +63,14 @@ describe('SingleSelectStep', () => {
     const onChange = vi.fn();
 
     render(<SingleSelectStep step={mockStep} value={undefined} onChange={onChange} />);
-    await user.click(screen.getByText('Option 2'));
+    await user.click(screen.getByTestId('single-select-option-opt2'));
 
     expect(onChange).toHaveBeenCalledWith('opt2');
   });
 
   it('should highlight the selected option', () => {
     render(<SingleSelectStep step={mockStep} value="opt1" onChange={() => {}} />);
-    const button = screen.getByText('Option 1').closest('button');
+    const button = screen.getByTestId('single-select-option-opt1');
     expect(button).toHaveClass('border-[var(--accent)]');
   });
 
@@ -88,7 +88,7 @@ describe('SingleSelectStep', () => {
     const onChange = vi.fn();
 
     render(<SingleSelectStep step={mockStep} value="opt1" onChange={onChange} />);
-    await user.click(screen.getByText('Option 3'));
+    await user.click(screen.getByTestId('single-select-option-opt3'));
 
     expect(onChange).toHaveBeenCalledWith('opt3');
   });
@@ -98,7 +98,7 @@ describe('SingleSelectStep', () => {
     const onChange = vi.fn();
 
     render(<SingleSelectStep step={mockStep} value="opt1" onChange={onChange} isReadOnly />);
-    await user.click(screen.getByText('Option 2'));
+    await user.click(screen.getByTestId('single-select-option-opt2'));
 
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -113,7 +113,7 @@ describe('SingleSelectStep', () => {
 
   it('should apply read-only styling', () => {
     render(<SingleSelectStep step={mockStep} value="opt1" onChange={() => {}} isReadOnly />);
-    const button = screen.getByText('Option 1').closest('button');
+    const button = screen.getByTestId('single-select-option-opt1');
     expect(button).toHaveClass('cursor-not-allowed');
     expect(button).toHaveClass('opacity-75');
   });

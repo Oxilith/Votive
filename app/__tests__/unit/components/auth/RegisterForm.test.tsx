@@ -417,7 +417,7 @@ describe('RegisterForm', () => {
       const user = userEvent.setup();
       render(<RegisterForm {...defaultProps} />);
 
-      await user.click(screen.getByText('Sign in'));
+      await user.click(screen.getByTestId('register-btn-login'));
 
       expect(defaultProps.onSwitchToLogin).toHaveBeenCalled();
     });

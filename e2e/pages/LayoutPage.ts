@@ -35,7 +35,10 @@ export class LayoutPage extends BasePage {
   readonly userAvatarDropdown = '[data-testid="user-avatar-dropdown"]';
 
   // Landing page navigation (anchor links to sections)
-  readonly landingNavLinks = '.nav-link';
+  readonly landingNavLinks = '[data-testid="landing-nav-links"]';
+  readonly landingNavLinkPhilosophy = '[data-testid="nav-link-philosophy"]';
+  readonly landingNavLinkJourney = '[data-testid="nav-link-journey"]';
+  readonly landingNavLinkInsights = '[data-testid="nav-link-insights"]';
 
   // Theme and Language selectors
   readonly themeToggle = '[data-testid="theme-toggle"]';
@@ -43,22 +46,22 @@ export class LayoutPage extends BasePage {
   readonly languageBtnEn = '[data-testid="language-btn-en"]';
   readonly languageBtnPl = '[data-testid="language-btn-pl"]';
 
-  // Footer selector (text-based fallback if no data-testid)
-  readonly footer = 'footer, [data-testid="footer-section"]';
+  // Footer selector
+  readonly footer = '[data-testid="footer-section"]';
 
   // Decorative element selector
   readonly inkBrushDecoration = '[data-testid="ink-brush-decoration"]';
 
   // Mobile menu selectors
-  readonly mobileMenuButton = '[data-testid="mobile-menu-btn"], button[aria-label*="menu" i]';
+  readonly mobileMenuButton = '[data-testid="mobile-menu-btn"]';
   readonly mobileMenu = '[data-testid="mobile-menu"]';
 
   // Page container selectors
-  readonly landingPage = '[data-testid="landing-page"], .min-h-screen';
+  readonly landingPage = '[data-testid="landing-page"]';
   readonly assessmentPage = '[data-testid="assessment-page"]';
   readonly insightsPage = '[data-testid="insights-page"]';
   readonly profilePage = '[data-testid="profile-page"]';
-  readonly authPage = '[data-testid="auth-page"], [data-testid="login-form"], [data-testid="register-form"]';
+  readonly authPage = '[data-testid="auth-page"]';
 
   /**
    * Set viewport to a specific size
@@ -97,11 +100,10 @@ export class LayoutPage extends BasePage {
    */
   async areNavLinksVisible(): Promise<boolean> {
     try {
-      // On landing page, check for anchor links (class="nav-link")
+      // On landing page, check for the nav links container
       // Must check actual visibility since they're hidden on mobile via CSS
       if (this.isOnLandingPage()) {
-        const navLink = this.page.locator(this.landingNavLinks).first();
-        return await navLink.isVisible({ timeout: 3000 });
+        return await this.page.locator(this.landingNavLinks).isVisible({ timeout: 3000 });
       }
       // On other pages, check for route links
       const assessment = await this.page.locator(this.navLinkAssessment).isVisible({ timeout: 3000 });
@@ -383,22 +385,4 @@ export class LayoutPage extends BasePage {
     return await this.page.locator('body').innerText();
   }
 
-  /**
-   * Check if text matches untranslated key pattern (e.g., "landing.hero.title")
-   */
-  hasUntranslatedKeys(text: string): boolean {
-    // Pattern matches: word.word.word (typical i18n key format)
-    const keyPattern = /\b[a-z]+\.[a-z]+\.[a-z]+\b/gi;
-    const matches = text.match(keyPattern);
-
-    // Filter out false positives like URLs, file extensions, version numbers
-    if (!matches) return false;
-
-    return matches.some((match) => {
-      // Skip common false positives
-      if (match.includes('www.') || match.includes('.com') || match.includes('.org')) return false;
-      if (/\d/.test(match)) return false; // Skip if contains numbers
-      return true;
-    });
-  }
 }

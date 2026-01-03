@@ -59,7 +59,7 @@ export const MultiSelectStep: React.FC<MultiSelectStepProps> = ({ step, value, o
             aria-checked={selected.includes(option.id)}
             onClick={() => { toggleOption(option.id); }}
             disabled={isReadOnly}
-            data-testid="multi-select-option"
+            data-testid={`multi-select-option-${option.id}`}
             className={`text-left p-4 border-2 rounded-sm transition-all ${
               selected.includes(option.id)
                 ? 'border-[var(--accent)] bg-[var(--accent)]/5'

@@ -29,8 +29,9 @@ test.describe('Assessment Readonly Mode', () => {
     const profilePage = new ProfilePage(authenticatedPage);
     const assessmentPage = new AssessmentPage(authenticatedPage);
 
-    // Navigate to profile and view the saved assessment
+    // Navigate to profile and wait for assessment to appear, then view it
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     await profilePage.viewAssessment(0);
 
     // Wait for synthesis step to be visible (readonly mode loads synthesis directly)
@@ -47,8 +48,9 @@ test.describe('Assessment Readonly Mode', () => {
   test('should show synthesis step directly in readonly mode', async ({ authenticatedPage }) => {
     const profilePage = new ProfilePage(authenticatedPage);
 
-    // Navigate to profile and view the saved assessment
+    // Navigate to profile and wait for assessment to appear, then view it
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     await profilePage.viewAssessment(0);
 
     // Wait for synthesis step to be visible
@@ -68,8 +70,9 @@ test.describe('Assessment Readonly Mode', () => {
     const profilePage = new ProfilePage(authenticatedPage);
     const assessmentPage = new AssessmentPage(authenticatedPage);
 
-    // Navigate to profile and view the saved assessment
+    // Navigate to profile and wait for assessment to appear, then view it
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     await profilePage.viewAssessment(0);
 
     // Wait for synthesis step to be visible
@@ -87,8 +90,9 @@ test.describe('Assessment Readonly Mode', () => {
     const profilePage = new ProfilePage(authenticatedPage);
     const assessmentPage = new AssessmentPage(authenticatedPage);
 
-    // Navigate to profile and view the saved assessment
+    // Navigate to profile and wait for assessment to appear, then view it
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     await profilePage.viewAssessment(0);
 
     // Wait for page to load
@@ -123,8 +127,9 @@ test.describe('Assessment Readonly Mode', () => {
     const profilePage = new ProfilePage(authenticatedPage);
     const assessmentPage = new AssessmentPage(authenticatedPage);
 
-    // Navigate to profile and view the saved assessment
+    // Navigate to profile and wait for assessment to appear, then view it
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     await profilePage.viewAssessment(0);
 
     // Wait for synthesis step to be visible

@@ -29,7 +29,9 @@
     "db:studio": "npm run db:studio -w prompt-service",
     "test:e2e": "npm run e2e -w e2e",
     "test:e2e:headed": "npm run e2e:headed -w e2e",
-    "test:e2e:ui": "npm run e2e:ui -w e2e"
+    "test:e2e:ui": "npm run e2e:ui -w e2e",
+    "test:e2e:failed": "npm run e2e:failed -w e2e",
+    "test:e2e:grep": "npm run e2e:grep -w e2e"
   },
   "engines": {
     "node": ">=20.0.0"

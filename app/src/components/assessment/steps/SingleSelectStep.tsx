@@ -52,7 +52,7 @@ export const SingleSelectStep: React.FC<SingleSelectStepProps> = ({ step, value,
             aria-checked={value === option.id}
             onClick={() => { handleClick(option.id); }}
             disabled={isReadOnly}
-            data-testid="single-select-option"
+            data-testid={`single-select-option-${option.id}`}
             className={`text-left p-4 border-2 rounded-sm transition-all ${
               value === option.id
                 ? 'border-[var(--accent)] bg-[var(--accent)]/5'

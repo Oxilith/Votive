@@ -58,7 +58,7 @@ test.describe('Prompt Management', () => {
     await adminPage.navigateToPrompts();
 
     // Should have create button
-    const createButton = adminPage.page.locator(adminPage.createPromptButton);
+    const createButton = adminPage.page.locator(adminPage.promptCreateButton);
     expect(await createButton.isVisible()).toBe(true);
   });
 });

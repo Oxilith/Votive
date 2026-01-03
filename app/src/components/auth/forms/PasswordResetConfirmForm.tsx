@@ -122,6 +122,7 @@ const PasswordResetConfirmForm: React.FC<PasswordResetConfirmFormProps> = ({
         <button
           type="button"
           onClick={onNavigateToLogin}
+          data-testid="password-reset-confirm-btn-login"
           className="font-body font-medium text-[var(--accent)] hover:text-[var(--accent-soft)] transition-colors"
         >
           {t('resetPassword.goToLogin')}
@@ -131,7 +132,7 @@ const PasswordResetConfirmForm: React.FC<PasswordResetConfirmFormProps> = ({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto" data-testid="password-reset-confirm-form">
       <div className="text-center mb-8">
         <h2 className="font-display text-3xl text-[var(--text-primary)] mb-2">
           {t('resetPassword.title')}
@@ -183,6 +184,7 @@ const PasswordResetConfirmForm: React.FC<PasswordResetConfirmFormProps> = ({
         <button
           type="button"
           onClick={onNavigateToLogin}
+          data-testid="password-reset-confirm-btn-signin"
           className="font-medium text-[var(--accent)] hover:text-[var(--accent-soft)] transition-colors"
         >
           {t('resetPassword.signIn')}

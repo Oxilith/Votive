@@ -52,8 +52,12 @@ export const AssessmentProgress: React.FC<AssessmentProgressProps> = ({
             {t('progress.stepOf', { current: currentStep, total: totalSteps })}
           </span>
         </div>
-        <div className="h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+        <div
+          data-testid="assessment-progress-track"
+          className="h-1 bg-[var(--bg-tertiary)] rounded-full overflow-hidden"
+        >
           <div
+            data-testid="assessment-progress-bar"
             className="h-full bg-[var(--accent)] transition-all duration-300 rounded-full"
             style={{ width: `${String(progressPercent)}%` }}
           />

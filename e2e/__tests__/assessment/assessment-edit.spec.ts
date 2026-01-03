@@ -97,8 +97,9 @@ test.describe('Assessment Editing', () => {
     await assessmentPage.completeFullAssessment();
     await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
 
-    // Check count increased
+    // Check count increased - wait for expected count
     await profilePage.navigate();
+    await profilePage.waitForAssessments(initialCount + 1);
     const countAfterFirst = await profilePage.getAssessmentCount();
     expect(countAfterFirst).toBe(initialCount + 1);
 
@@ -116,8 +117,9 @@ test.describe('Assessment Editing', () => {
     await assessmentPage.completeFullAssessment();
     await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
 
-    // Check count increased again
+    // Check count increased again - wait for expected count
     await profilePage.navigate();
+    await profilePage.waitForAssessments(initialCount + 2);
     const countAfterSecond = await profilePage.getAssessmentCount();
     expect(countAfterSecond).toBe(initialCount + 2);
   });
@@ -161,8 +163,9 @@ test.describe('Assessment Editing - Authenticated User', () => {
     await assessmentPage.completeFullAssessment();
     await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
 
-    // Verify assessment was saved
+    // Verify assessment was saved - wait for at least 1 item
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     const count = await profilePage.getAssessmentCount();
     expect(count).toBeGreaterThan(0);
 

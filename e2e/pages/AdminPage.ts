@@ -30,30 +30,24 @@ const ADMIN_BASE_URL = process.env.PROMPT_SERVICE_URL ?? 'http://localhost:3002'
  * - Logout
  */
 export class AdminPage extends BasePage {
-  // Login form selectors
-  readonly apiKeyInput = 'input#apiKey, input[type="password"], input[name="apiKey"]';
-  readonly loginButton = 'button[type="submit"]';
-  // Error messages are rendered as <p> with inline styles, not CSS classes
-  // Match common error text patterns
-  readonly loginError = 'p:has-text("Invalid"), p:has-text("failed"), p:has-text("error"), p:has-text("required")';
+  // Login form selectors (using data-testid for reliability)
+  readonly apiKeyInput = '[data-testid="admin-input-apikey"]';
+  readonly loginButton = '[data-testid="admin-btn-login"]';
+  readonly loginError = '[data-testid="admin-login-error"]';
 
   // Loading state selector (shown during auth verification)
-  readonly loadingIndicator = 'p:has-text("Verifying authentication")';
+  readonly loadingIndicator = '[data-testid="admin-loading"]';
 
-  // Navigation selectors
-  readonly promptsNav = 'a:has-text("Prompts"), button:has-text("Prompts")';
-  readonly abTestsNav = 'a:has-text("A/B Tests"), button:has-text("A/B Tests")';
-  readonly logoutButton = 'button:has-text("Logout"), button:has-text("Sign out")';
+  // Navigation selectors (using data-testid for reliability)
+  readonly promptsNav = '[data-testid="admin-nav-prompts"]';
+  readonly abTestsNav = '[data-testid="admin-nav-abtests"]';
+  readonly logoutButton = '[data-testid="admin-btn-logout"]';
 
-  // Prompt list selectors
-  readonly promptItem = 'tr, [class*="prompt-item"], li';
-  readonly createPromptButton = 'button:has-text("Create"), a:has-text("Create")';
-  readonly editPromptButton = 'button:has-text("Edit"), a:has-text("Edit")';
-  readonly deletePromptButton = 'button:has-text("Delete")';
+  // Prompt list selectors (using data-testid for reliability)
+  readonly promptRowPattern = '[data-testid^="prompt-row-"]';
 
-  // A/B test list selectors
-  readonly abTestItem = 'tr, [class*="ab-test-item"], li';
-  readonly createAbTestButton = 'button:has-text("Create"), a:has-text("Create")';
+  // A/B test list selectors (using data-testid for reliability)
+  readonly abTestRowPattern = '[data-testid^="abtest-row-"]';
 
   // Form selectors (using data-testid for reliability)
   readonly promptKeyInput = '[data-testid="prompt-input-key"]';
@@ -90,9 +84,6 @@ export class AdminPage extends BasePage {
   readonly abTestListError = '[data-testid="abtest-list-error"]';
   readonly abTestCreateButton = '[data-testid="abtest-btn-create"]';
 
-  // Legacy saveButton for backwards compatibility
-  readonly saveButton = 'button:has-text("Save")';
-
   /**
    * Navigate to the admin login page
    * Note: Admin panel is served by prompt-service on port 3002
@@ -111,26 +102,42 @@ export class AdminPage extends BasePage {
     await this.page.fill(this.apiKeyInput, apiKey);
     await this.page.click(this.loginButton);
 
+    let loginVerified = false;
+
     // Wait for either redirect (success) or error (failure)
     try {
       await Promise.race([
         this.page.waitForURL('**/prompts**', { timeout: 10000 }),
         this.page.waitForSelector(this.loginError, { timeout: 10000 }),
       ]);
-    } catch {
-      // May still be processing
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin login redirect/error wait failed:', error.message);
+      }
     }
 
     // If redirected, wait for loading state to complete
     if (this.page.url().includes('prompts')) {
       // Wait for the "Verifying authentication..." loading to disappear
-      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+      try {
+        await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 });
+        loginVerified = true;
+      } catch (error) {
         // Loading may have already completed
-      });
+        if (error instanceof Error && !error.message.includes('Timeout')) {
+          console.debug('Admin loading indicator wait failed:', error.message);
+        }
+      }
+
       // Wait for logout button to appear (indicates Layout is rendered)
-      await this.page.locator(this.logoutButton).waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
-        // May still be loading
-      });
+      try {
+        await this.page.locator(this.logoutButton).waitFor({ state: 'visible', timeout: 10000 });
+        loginVerified = true;
+      } catch (error) {
+        if (!loginVerified && error instanceof Error) {
+          console.debug('Admin logout button wait failed:', error.message);
+        }
+      }
     }
 
     await this.waitForNavigation();
@@ -143,11 +150,23 @@ export class AdminPage extends BasePage {
    */
   async isLoggedIn(): Promise<boolean> {
     // First wait for any loading state to complete
-    await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+    try {
+      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 });
+    } catch (error) {
       // Loading may not be present or already completed
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin loading check failed:', error.message);
+      }
+    }
     // Check if logout button is visible (longer timeout to account for navigation)
-    return await this.page.locator(this.logoutButton).isVisible({ timeout: 5000 }).catch(() => false);
+    try {
+      return await this.page.locator(this.logoutButton).isVisible({ timeout: 5000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin logged in check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**
@@ -158,13 +177,16 @@ export class AdminPage extends BasePage {
   async getLoginError(): Promise<string | null> {
     try {
       // Wait for error to appear (API response time)
-      await this.page.waitForTimeout(500);
+      await this.page.waitForLoadState('networkidle');
       const error = this.page.locator(this.loginError).first();
       if (await error.isVisible({ timeout: 3000 })) {
         return await error.textContent();
       }
-    } catch {
-      // No error
+    } catch (error) {
+      // Timeout expected when no error displayed
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin login error check failed:', error.message);
+      }
     }
     return null;
   }
@@ -191,10 +213,9 @@ export class AdminPage extends BasePage {
    * @returns Number of prompt items
    */
   async getPromptCount(): Promise<number> {
-    await this.page.waitForTimeout(500);
-    const count = await this.page.locator(this.promptItem).count();
-    // Subtract 1 if there's a header row
-    return Math.max(0, count - 1);
+    await this.page.waitForLoadState('networkidle');
+    // Use data-testid pattern for reliable selection
+    return await this.page.locator(this.promptRowPattern).count();
   }
 
   /**
@@ -203,17 +224,16 @@ export class AdminPage extends BasePage {
    * @returns Number of A/B test items
    */
   async getAbTestCount(): Promise<number> {
-    await this.page.waitForTimeout(500);
-    const count = await this.page.locator(this.abTestItem).count();
-    // Subtract 1 if there's a header row
-    return Math.max(0, count - 1);
+    await this.page.waitForLoadState('networkidle');
+    // Use data-testid pattern for reliable selection
+    return await this.page.locator(this.abTestRowPattern).count();
   }
 
   /**
    * Click create new prompt button
    */
   async clickCreatePrompt(): Promise<void> {
-    await this.page.click(this.createPromptButton);
+    await this.page.click(this.promptCreateButton);
     await this.waitForNavigation();
   }
 
@@ -221,7 +241,7 @@ export class AdminPage extends BasePage {
    * Click create new A/B test button
    */
   async clickCreateAbTest(): Promise<void> {
-    await this.page.click(this.createAbTestButton);
+    await this.page.click(this.abTestCreateButton);
     await this.waitForNavigation();
   }
 
@@ -231,13 +251,23 @@ export class AdminPage extends BasePage {
   async logout(): Promise<void> {
     await this.page.click(this.logoutButton);
     // Wait for redirect to login page
-    await this.page.waitForURL('**/login**', { timeout: 10000 }).catch(() => {
+    try {
+      await this.page.waitForURL('**/login**', { timeout: 10000 });
+    } catch (error) {
       // May already be on login page or different URL pattern
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin logout redirect wait failed:', error.message);
+      }
+    }
     // Wait for login form to appear
-    await this.page.locator(this.apiKeyInput).waitFor({ state: 'visible', timeout: 10000 }).catch(() => {
+    try {
+      await this.page.locator(this.apiKeyInput).waitFor({ state: 'visible', timeout: 10000 });
+    } catch (error) {
       // Login form may take time to render
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin login form wait failed:', error.message);
+      }
+    }
     await this.waitForNavigation();
   }
 
@@ -248,10 +278,22 @@ export class AdminPage extends BasePage {
    */
   async isOnLoginPage(): Promise<boolean> {
     // Wait for any loading to complete first
-    await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {
+    try {
+      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 5000 });
+    } catch (error) {
       // Loading may not be present
-    });
-    return await this.page.locator(this.apiKeyInput).isVisible({ timeout: 5000 }).catch(() => false);
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin loading check on login page failed:', error.message);
+      }
+    }
+    try {
+      return await this.page.locator(this.apiKeyInput).isVisible({ timeout: 5000 });
+    } catch (error) {
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Admin login page check failed:', error.message);
+      }
+      return false;
+    }
   }
 
   /**
@@ -329,12 +371,17 @@ export class AdminPage extends BasePage {
   async submitPromptForm(): Promise<void> {
     await this.page.click(this.promptSubmitButton);
     // Wait for navigation or error
-    await Promise.race([
-      this.page.waitForURL('**/prompts', { timeout: 10000 }),
-      this.page.locator(this.promptCreateError).waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {
+    try {
+      await Promise.race([
+        this.page.waitForURL('**/prompts', { timeout: 10000 }),
+        this.page.locator(this.promptCreateError).waitFor({ state: 'visible', timeout: 10000 }),
+      ]);
+    } catch (error) {
       // May still be processing
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Prompt form submission wait failed:', error.message);
+      }
+    }
     await this.waitForNavigation();
   }
 
@@ -362,8 +409,11 @@ export class AdminPage extends BasePage {
       if (await error.isVisible({ timeout: 2000 })) {
         return await error.textContent();
       }
-    } catch {
-      // No error
+    } catch (error) {
+      // Timeout expected when no error displayed
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Prompt create error check failed:', error.message);
+      }
     }
     return null;
   }
@@ -387,8 +437,9 @@ export class AdminPage extends BasePage {
    * Check if prompt exists in list by key
    */
   async promptExistsInList(key: string): Promise<boolean> {
-    await this.page.waitForTimeout(500);
-    const promptRows = this.page.locator(`${this.promptListTable} tbody tr`);
+    await this.page.waitForLoadState('networkidle');
+    // Use data-testid pattern for reliable selection
+    const promptRows = this.page.locator(this.promptRowPattern);
     const count = await promptRows.count();
     for (let i = 0; i < count; i++) {
       const row = promptRows.nth(i);
@@ -421,12 +472,17 @@ export class AdminPage extends BasePage {
   async submitAbTestForm(): Promise<void> {
     await this.page.click(this.abTestSubmitButton);
     // Wait for navigation or error
-    await Promise.race([
-      this.page.waitForURL('**/ab-tests/**', { timeout: 10000 }),
-      this.page.locator(this.abTestCreateError).waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {
+    try {
+      await Promise.race([
+        this.page.waitForURL('**/ab-tests/**', { timeout: 10000 }),
+        this.page.locator(this.abTestCreateError).waitFor({ state: 'visible', timeout: 10000 }),
+      ]);
+    } catch (error) {
       // May still be processing
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('A/B test form submission wait failed:', error.message);
+      }
+    }
     await this.waitForNavigation();
   }
 
@@ -439,8 +495,11 @@ export class AdminPage extends BasePage {
       if (await error.isVisible({ timeout: 2000 })) {
         return await error.textContent();
       }
-    } catch {
-      // No error
+    } catch (error) {
+      // Timeout expected when no error displayed
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('A/B test create error check failed:', error.message);
+      }
     }
     return null;
   }
@@ -450,7 +509,8 @@ export class AdminPage extends BasePage {
    */
   async clickToggleAbTest(testId: string): Promise<void> {
     await this.page.click(`[data-testid="abtest-btn-toggle-${testId}"]`);
-    await this.page.waitForTimeout(1000); // Wait for toggle to complete
+    // Wait for toggle to complete
+    await this.page.waitForLoadState('networkidle');
   }
 
   /**
@@ -472,8 +532,9 @@ export class AdminPage extends BasePage {
    * Check if A/B test exists in list by name
    */
   async abTestExistsInList(name: string): Promise<boolean> {
-    await this.page.waitForTimeout(500);
-    const testRows = this.page.locator(`${this.abTestListTable} tbody tr`);
+    await this.page.waitForLoadState('networkidle');
+    // Use data-testid pattern for reliable selection
+    const testRows = this.page.locator(this.abTestRowPattern);
     const count = await testRows.count();
     for (let i = 0; i < count; i++) {
       const row = testRows.nth(i);
@@ -490,16 +551,26 @@ export class AdminPage extends BasePage {
    */
   async waitForPromptList(): Promise<void> {
     // Wait for loading to disappear
-    await this.page.locator(this.promptListLoading).waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+    try {
+      await this.page.locator(this.promptListLoading).waitFor({ state: 'hidden', timeout: 10000 });
+    } catch (error) {
       // May not have loading state
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Prompt list loading wait failed:', error.message);
+      }
+    }
     // Wait for either table or empty state
-    await Promise.race([
-      this.page.locator(this.promptListTable).waitFor({ state: 'visible', timeout: 10000 }),
-      this.page.locator(this.promptListEmpty).waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {
+    try {
+      await Promise.race([
+        this.page.locator(this.promptListTable).waitFor({ state: 'visible', timeout: 10000 }),
+        this.page.locator(this.promptListEmpty).waitFor({ state: 'visible', timeout: 10000 }),
+      ]);
+    } catch (error) {
       // May still be loading
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Prompt list content wait failed:', error.message);
+      }
+    }
   }
 
   /**
@@ -507,15 +578,25 @@ export class AdminPage extends BasePage {
    */
   async waitForAbTestList(): Promise<void> {
     // Wait for loading to disappear
-    await this.page.locator(this.abTestListLoading).waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+    try {
+      await this.page.locator(this.abTestListLoading).waitFor({ state: 'hidden', timeout: 10000 });
+    } catch (error) {
       // May not have loading state
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('A/B test list loading wait failed:', error.message);
+      }
+    }
     // Wait for either table or empty state
-    await Promise.race([
-      this.page.locator(this.abTestListTable).waitFor({ state: 'visible', timeout: 10000 }),
-      this.page.locator(this.abTestListEmpty).waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {
+    try {
+      await Promise.race([
+        this.page.locator(this.abTestListTable).waitFor({ state: 'visible', timeout: 10000 }),
+        this.page.locator(this.abTestListEmpty).waitFor({ state: 'visible', timeout: 10000 }),
+      ]);
+    } catch (error) {
       // May still be loading
-    });
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('A/B test list content wait failed:', error.message);
+      }
+    }
   }
 }

@@ -29,11 +29,13 @@ export class LoginPage extends BasePage {
   readonly submitButton = 'button[type="submit"]';
 
   // Error display
-  readonly errorAlert = '[role="alert"]';
+  readonly errorAlert = '[data-testid="login-error"]';
+  // Inline validation errors (from FormInput)
+  readonly validationError = '[role="alert"]';
 
   // Navigation links
-  readonly forgotPasswordLink = 'button:has-text("forgot"), a:has-text("forgot")';
-  readonly signUpLink = 'button:has-text("Sign up"), a:has-text("Sign up")';
+  readonly forgotPasswordLink = '[data-testid="login-btn-forgot-password"]';
+  readonly signUpLink = '[data-testid="login-btn-register"]';
 
   /**
    * Navigate to the sign-in page with login form
@@ -87,8 +89,11 @@ export class LoginPage extends BasePage {
         ),
         this.submit(),
       ]);
-    } catch {
-      // API may have already responded or request failed
+    } catch (error) {
+      // Only log non-timeout errors - timeouts are expected if response was already received
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Login API response wait failed:', error.message);
+      }
     }
 
     // Wait for either redirect (success) or error message (failure)
@@ -97,8 +102,12 @@ export class LoginPage extends BasePage {
         this.page.waitForURL((url) => !url.pathname.includes('/sign-in'), { timeout: 10000 }),
         this.page.waitForSelector(this.errorAlert, { timeout: 10000 }),
       ]);
-    } catch {
-      // May still be processing, continue
+    } catch (error) {
+      // Timeout expected when neither redirect nor error appeared within timeout
+      // Only log non-timeout errors for debugging
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Login completion wait failed:', error.message);
+      }
     }
 
     await this.waitForNavigation();
@@ -106,18 +115,35 @@ export class LoginPage extends BasePage {
 
   /**
    * Get the error message displayed after failed login
+   * Checks both main error alert and inline validation errors
    *
    * @returns Error message text or null if no error displayed
    */
   async getErrorMessage(): Promise<string | null> {
     try {
+      // First check main error alert (API errors)
       const alert = this.page.locator(this.errorAlert);
-      if (await alert.isVisible({ timeout: 3000 })) {
+      if (await alert.isVisible({ timeout: 1000 })) {
         return await alert.textContent();
       }
     } catch {
-      // No error displayed
+      // Main alert not visible, check inline validation errors
     }
+
+    try {
+      // Check inline validation errors (form field errors from FormInput)
+      const validationErrors = this.page.locator(this.validationError);
+      const count = await validationErrors.count();
+      if (count > 0) {
+        const firstError = validationErrors.first();
+        if (await firstError.isVisible({ timeout: 1000 })) {
+          return await firstError.textContent();
+        }
+      }
+    } catch {
+      // No validation errors either
+    }
+
     return null;
   }
 

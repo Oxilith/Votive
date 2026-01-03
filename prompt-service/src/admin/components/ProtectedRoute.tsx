@@ -45,7 +45,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, []);
 
   if (authState === 'loading') {
-    return <InkLoader variant="fullscreen" message="Verifying authentication..." />;
+    return <InkLoader variant="fullscreen" message="Verifying authentication..." data-testid="admin-loading" />;
   }
 
   if (authState === 'unauthenticated') {

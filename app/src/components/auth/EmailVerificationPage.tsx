@@ -132,6 +132,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
             </p>
             <button
               onClick={handleNavigateToProfile}
+              data-testid="email-verify-btn-profile"
               className="cta-button px-6 py-3 font-body font-medium text-white bg-[var(--accent)]"
             >
               {t('verifyEmail.success.goToProfile')}
@@ -155,6 +156,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
               <button
                 onClick={handleResendVerification}
                 disabled={resendLoading || resendSuccess}
+                data-testid="email-verify-btn-resend-error"
                 className="cta-button w-full py-3 px-6 font-body font-medium text-white bg-[var(--accent)] disabled:opacity-50"
               >
                 {resendLoading ? t('verifyEmail.resending') : resendSuccess ? t('verifyEmail.resent') : t('verifyEmail.resend')}
@@ -166,6 +168,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
               )}
               <button
                 onClick={handleNavigateToLanding}
+                data-testid="email-verify-btn-home-error"
                 className="w-full py-2 font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 {t('verifyEmail.backToHome')}
@@ -200,6 +203,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
               <button
                 onClick={handleResendVerification}
                 disabled={resendLoading || resendSuccess}
+                data-testid="email-verify-btn-resend"
                 className="w-full py-3 px-6 font-body font-medium text-[var(--text-primary)] bg-[var(--bg-primary)] border border-[var(--border)] transition-colors hover:border-[var(--accent)] disabled:opacity-50"
               >
                 {resendLoading ? t('verifyEmail.resending') : resendSuccess ? t('verifyEmail.resent') : t('verifyEmail.resend')}
@@ -211,6 +215,7 @@ const EmailVerificationPage: React.FC<EmailVerificationPageProps> = ({
               )}
               <button
                 onClick={handleNavigateToLanding}
+                data-testid="email-verify-btn-home"
                 className="w-full py-2 font-body text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 {t('verifyEmail.backToHome')}

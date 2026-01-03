@@ -81,7 +81,11 @@ export class BasePage {
     try {
       const avatar = this.page.locator('[data-testid="user-avatar-dropdown"]');
       return await avatar.isVisible({ timeout: 2000 });
-    } catch {
+    } catch (error) {
+      // Timeout is expected when element not visible
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Login state check failed:', error.message);
+      }
       return false;
     }
   }
@@ -142,30 +146,6 @@ export class BasePage {
       path: `test-results/screenshots/${name}.png`,
       fullPage: true,
     });
-  }
-
-  /**
-   * Wait for a specific text to appear on the page
-   *
-   * @param text - Text to wait for
-   * @param timeout - Maximum wait time in milliseconds
-   */
-  async waitForText(text: string, timeout = 10000): Promise<void> {
-    await this.page.getByText(text).waitFor({ state: 'visible', timeout });
-  }
-
-  /**
-   * Check if specific text is visible on the page
-   *
-   * @param text - Text to check for
-   * @returns True if text is visible
-   */
-  async hasText(text: string): Promise<boolean> {
-    try {
-      return await this.page.getByText(text).isVisible({ timeout: 2000 });
-    } catch {
-      return false;
-    }
   }
 
   /**

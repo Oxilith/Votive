@@ -65,7 +65,7 @@ export const IntroStep: React.FC<IntroStepProps> = ({
         {!isFirstStep && onBack && (
           <button
             onClick={onBack}
-            data-testid="intro-back-button"
+            data-testid="assessment-back-button"
             className="px-6 py-3 font-body text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] rounded-sm transition-colors"
           >
             {t('navigation.back')}
@@ -73,7 +73,7 @@ export const IntroStep: React.FC<IntroStepProps> = ({
         )}
         <button
           onClick={onNext}
-          data-testid="intro-next-button"
+          data-testid="assessment-continue-button"
           className="cta-button px-6 py-3 bg-[var(--accent)] text-white font-body font-medium rounded-sm"
         >
           {content.buttonText}

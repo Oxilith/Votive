@@ -31,15 +31,15 @@ import { BasePage } from './BasePage';
  * - textarea: Free text input
  */
 export class AssessmentPage extends BasePage {
-  // Navigation button selectors
-  readonly nextButton = 'button:has-text("Next"), button:has-text("Continue")';
-  readonly backButton = 'button:has-text("Back"), button:has-text("Previous")';
-  readonly beginButton = 'button:has-text("Begin"), button:has-text("Start")';
+  // Navigation button selectors (using data-testid for reliability)
+  readonly nextButton = '[data-testid="assessment-continue-button"]';
+  readonly backButton = '[data-testid="assessment-back-button"]';
+  readonly beginButton = '[data-testid="assessment-btn-begin"], button:has-text("Begin"), button:has-text("Start")';
   readonly completeButton = '[data-testid="assessment-complete-button"]';
 
   // Progress indicators
-  readonly progressBar = '[role="progressbar"]';
-  readonly progressIndicator = '[class*="progress"]';
+  readonly progressBar = '[data-testid="assessment-progress-bar"]';
+  readonly progressTrack = '[data-testid="assessment-progress-track"]';
   readonly phaseTitle = 'h1, h2';
 
   // Step type selectors - use data-testid for reliable detection
@@ -50,9 +50,9 @@ export class AssessmentPage extends BasePage {
   readonly introStep = '[data-testid="intro-step"]';
   readonly synthesisStep = '[data-testid="synthesis-step"]';
 
-  // Input element selectors
-  readonly multiSelectOption = '[data-testid="multi-select-option"]';
-  readonly singleSelectOption = '[data-testid="single-select-option"]';
+  // Input element selectors (using prefix pattern to match dynamic option IDs)
+  readonly multiSelectOption = '[data-testid^="multi-select-option-"]';
+  readonly singleSelectOption = '[data-testid^="single-select-option-"]';
   readonly scaleOption = '[data-testid="scale-option"]';
   readonly textareaInput = '[data-testid="textarea-input"]';
 
@@ -155,8 +155,8 @@ export class AssessmentPage extends BasePage {
    */
   async clickNext(): Promise<void> {
     await this.page.click(this.nextButton);
-    // Wait for animation/transition
-    await this.page.waitForTimeout(300);
+    // Wait for step transition to complete
+    await this.page.waitForLoadState('networkidle');
   }
 
   /**
@@ -164,7 +164,8 @@ export class AssessmentPage extends BasePage {
    */
   async clickBack(): Promise<void> {
     await this.page.click(this.backButton);
-    await this.page.waitForTimeout(300);
+    // Wait for step transition to complete
+    await this.page.waitForLoadState('networkidle');
   }
 
   /**

@@ -174,18 +174,35 @@ test.describe('Assessment Flow', () => {
     assessmentPage,
   }) => {
     await assessmentPage.navigate();
-    await assessmentPage.completeFullAssessment().catch(() => {
-      // completeFullAssessment may throw because modal blocks Complete button
-      // That's expected - we're testing the modal visibility
-    });
 
-    // Wait a moment for synthesis to render with modal
-    await assessmentPage.page.waitForTimeout(500);
+    // Navigate to synthesis step manually instead of using completeFullAssessment
+    // which may throw when modal blocks Complete button
+    await assessmentPage.startAssessment();
 
-    // Check if modal is visible (it should be, but might be dismissed by completeFullAssessment)
-    // At synthesis step, the modal should be visible for unauthenticated users
-    const stepType = await assessmentPage.getCurrentStepType();
+    // Complete steps until we reach synthesis
+    let stepType = await assessmentPage.getCurrentStepType();
+    while (stepType !== 'synthesis') {
+      if (stepType === 'multiSelect') {
+        await assessmentPage.selectMultipleOptions([0, 1]);
+      } else if (stepType === 'singleSelect') {
+        await assessmentPage.selectSingleOption(0);
+      } else if (stepType === 'scale') {
+        await assessmentPage.setScaleValue(3);
+      } else if (stepType === 'textarea') {
+        await assessmentPage.fillTextarea('Test response for E2E');
+      } else if (stepType === 'intro') {
+        // Just click next for intro steps
+      }
+      await assessmentPage.clickNext();
+      stepType = await assessmentPage.getCurrentStepType();
+    }
+
+    // Verify we reached synthesis
     expect(stepType).toBe('synthesis');
+
+    // For unauthenticated users, SavePromptModal should appear at synthesis
+    const modalVisible = await assessmentPage.isSavePromptModalVisible();
+    expect(modalVisible).toBe(true);
   });
 });
 

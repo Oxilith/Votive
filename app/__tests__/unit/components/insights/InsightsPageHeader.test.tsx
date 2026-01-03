@@ -146,7 +146,7 @@ describe('InsightsPageHeader', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('Export Insights'));
+      fireEvent.click(screen.getByTestId('export-analysis-btn'));
 
       expect(mockExportAnalysis).toHaveBeenCalledTimes(1);
     });
@@ -159,7 +159,7 @@ describe('InsightsPageHeader', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('Export Assessment'));
+      fireEvent.click(screen.getByTestId('export-assessment-btn'));
 
       expect(mockExportAssessment).toHaveBeenCalledTimes(1);
     });

@@ -27,8 +27,9 @@ test.describe('Assessment Save', () => {
     // Should be redirected to insights
     expect(authenticatedPage.url()).toContain('/insights');
 
-    // Check profile for saved assessment
+    // Check profile for saved assessment - wait for at least 1 item
     await profilePage.navigate();
+    await profilePage.waitForAssessments(1);
     const assessmentCount = await profilePage.getAssessmentCount();
 
     // Should have at least one saved assessment
@@ -50,8 +51,9 @@ test.describe('Assessment Save', () => {
     // Wait for redirect to insights page
     await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
 
-    // Check for new assessment in profile
+    // Check for new assessment in profile - wait for expected count
     await profilePage.navigate();
+    await profilePage.waitForAssessments(initialCount + 1);
     const newCount = await profilePage.getAssessmentCount();
 
     // Should have one more assessment

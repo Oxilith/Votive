@@ -82,7 +82,7 @@ describe('EmailVerificationPage', () => {
       mockResendVerification.mockResolvedValue({});
 
       render(<EmailVerificationPage />);
-      await user.click(screen.getByText('verifyEmail.resend'));
+      await user.click(screen.getByTestId('email-verify-btn-resend'));
 
       await waitFor(() => {
         expect(mockResendVerification).toHaveBeenCalled();
@@ -94,7 +94,7 @@ describe('EmailVerificationPage', () => {
       const user = userEvent.setup();
       render(<EmailVerificationPage />);
 
-      await user.click(screen.getByText('verifyEmail.backToHome'));
+      await user.click(screen.getByTestId('email-verify-btn-home'));
 
       expect(mockNavigate).toHaveBeenCalledWith('landing');
     });
@@ -143,7 +143,7 @@ describe('EmailVerificationPage', () => {
         expect(screen.getByText('verifyEmail.success.goToProfile')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('verifyEmail.success.goToProfile'));
+      await user.click(screen.getByTestId('email-verify-btn-profile'));
 
       expect(mockNavigate).toHaveBeenCalledWith('profile');
     });
@@ -189,10 +189,10 @@ describe('EmailVerificationPage', () => {
       render(<EmailVerificationPage token="invalid-token" />);
 
       await waitFor(() => {
-        expect(screen.getByText('verifyEmail.resend')).toBeInTheDocument();
+        expect(screen.getByTestId('email-verify-btn-resend-error')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('verifyEmail.resend'));
+      await user.click(screen.getByTestId('email-verify-btn-resend-error'));
 
       await waitFor(() => {
         expect(mockResendVerification).toHaveBeenCalled();
@@ -208,10 +208,10 @@ describe('EmailVerificationPage', () => {
       render(<EmailVerificationPage token="invalid-token" />);
 
       await waitFor(() => {
-        expect(screen.getByText('verifyEmail.resend')).toBeInTheDocument();
+        expect(screen.getByTestId('email-verify-btn-resend-error')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('verifyEmail.resend'));
+      await user.click(screen.getByTestId('email-verify-btn-resend-error'));
 
       await waitFor(() => {
         expect(screen.getByText('Rate limited')).toBeInTheDocument();
@@ -226,10 +226,10 @@ describe('EmailVerificationPage', () => {
       render(<EmailVerificationPage token="invalid-token" />);
 
       await waitFor(() => {
-        expect(screen.getByText('verifyEmail.resend')).toBeInTheDocument();
+        expect(screen.getByTestId('email-verify-btn-resend-error')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('verifyEmail.resend'));
+      await user.click(screen.getByTestId('email-verify-btn-resend-error'));
 
       await waitFor(() => {
         expect(screen.getByText('verifyEmail.resendError')).toBeInTheDocument();
@@ -243,10 +243,10 @@ describe('EmailVerificationPage', () => {
       render(<EmailVerificationPage token="invalid-token" />);
 
       await waitFor(() => {
-        expect(screen.getByText('verifyEmail.backToHome')).toBeInTheDocument();
+        expect(screen.getByTestId('email-verify-btn-home-error')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('verifyEmail.backToHome'));
+      await user.click(screen.getByTestId('email-verify-btn-home-error'));
 
       expect(mockNavigate).toHaveBeenCalledWith('landing');
     });

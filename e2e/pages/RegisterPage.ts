@@ -46,10 +46,12 @@ export class RegisterPage extends BasePage {
   readonly submitButton = 'button[type="submit"]';
 
   // Error display
-  readonly errorAlert = '[role="alert"]';
+  readonly errorAlert = '[data-testid="register-error"]';
+  // Inline validation errors (from FormInput)
+  readonly validationError = '[role="alert"]';
 
   // Navigation
-  readonly signInLink = 'button:has-text("Sign in"), a:has-text("Sign in")';
+  readonly signInLink = '[data-testid="register-btn-login"]';
 
   /**
    * Navigate to the sign-up page with register form
@@ -127,25 +129,45 @@ export class RegisterPage extends BasePage {
         this.page.waitForURL((url) => !url.pathname.includes('/sign-up'), { timeout: 10000 }),
         this.page.waitForSelector(this.errorAlert, { timeout: 10000 }),
       ]);
-    } catch {
-      // May still be processing or timeout
+    } catch (error) {
+      // Log non-timeout errors for debugging
+      if (error instanceof Error && !error.message.includes('Timeout')) {
+        console.debug('Registration completion wait failed:', error.message);
+      }
     }
   }
 
   /**
    * Get the error message displayed after failed registration
+   * Checks both main error alert and inline validation errors
    *
    * @returns Error message text or null if no error displayed
    */
   async getErrorMessage(): Promise<string | null> {
     try {
+      // First check main error alert (API errors)
       const alert = this.page.locator(this.errorAlert);
-      if (await alert.isVisible({ timeout: 3000 })) {
+      if (await alert.isVisible({ timeout: 1000 })) {
         return await alert.textContent();
       }
     } catch {
-      // No error displayed
+      // Main alert not visible, check inline validation errors
     }
+
+    try {
+      // Check inline validation errors (form field errors from FormInput)
+      const validationErrors = this.page.locator(this.validationError);
+      const count = await validationErrors.count();
+      if (count > 0) {
+        const firstError = validationErrors.first();
+        if (await firstError.isVisible({ timeout: 1000 })) {
+          return await firstError.textContent();
+        }
+      }
+    } catch {
+      // No validation errors either
+    }
+
     return null;
   }
 

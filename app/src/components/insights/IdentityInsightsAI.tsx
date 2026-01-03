@@ -147,8 +147,10 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
               );
               assessmentIdToLink = sorted[0].id;
             }
-          } catch {
+          } catch (error) {
             // If fetching assessments fails, proceed without linking
+            // Log for debugging purposes
+            console.debug('Failed to fetch assessments for analysis linking:', error);
           }
         }
 
@@ -312,6 +314,7 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
             <p className="font-body text-[var(--text-secondary)] mb-6 max-w-md mx-auto">{t('noAssessment.description')}</p>
             <button
               onClick={onNavigateToAssessment}
+              data-testid="insights-btn-start-assessment"
               className="cta-button px-6 py-3 bg-[var(--accent)] text-white font-body font-medium rounded-sm inline-flex items-center gap-2"
             >
               <span>{t('noAssessment.button')}</span>
@@ -432,6 +435,7 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
               {rawResponse && (
                 <button
                   onClick={downloadRawResponse}
+                  data-testid="insights-btn-download-raw"
                   className="px-4 py-2.5 text-amber-600 hover:bg-amber-500/10 border border-amber-500/30 font-body font-medium rounded-sm transition-colors"
                 >
                   {t('error.downloadRaw')}
@@ -439,6 +443,7 @@ const IdentityInsightsAI: React.FC<InsightsProps> = ({
               )}
               <button
                 onClick={analyzeWithClaude}
+                data-testid="insights-btn-try-again"
                 className="cta-button px-6 py-3 bg-[var(--accent)] text-white font-body font-medium rounded-sm"
               >
                 {t('error.tryAgain')}

@@ -75,12 +75,9 @@ test.describe('User Login', () => {
     await loginPage.navigate();
     await loginPage.clickForgotPassword();
 
-    // Should show password reset form - check for title or email input
-    const hasResetTitle = await loginPage.hasText('Reset Password');
-    const hasResetLink = await loginPage.hasText('Send Reset Link');
-    const urlContainsForgot = loginPage.page.url().includes('forgot');
-
-    expect(hasResetTitle || hasResetLink || urlContainsForgot).toBe(true);
+    // Should show password reset form
+    const forgotPasswordForm = loginPage.page.locator('[data-testid="forgot-password-form"]');
+    await expect(forgotPasswordForm).toBeVisible({ timeout: 5000 });
   });
 
   test('should navigate to register form', async ({ loginPage }) => {

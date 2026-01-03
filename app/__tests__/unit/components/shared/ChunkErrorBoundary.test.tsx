@@ -181,7 +181,7 @@ describe('ChunkErrorBoundary', () => {
       shouldThrow = false;
 
       // Click retry
-      fireEvent.click(screen.getByText('Try again'));
+      fireEvent.click(screen.getByTestId('chunk-error-btn-retry'));
 
       // Re-render to trigger the state change
       rerender(
@@ -204,9 +204,9 @@ describe('ChunkErrorBoundary', () => {
       );
 
       // Click retry 3 times (MAX_RETRIES is 2, so 3rd click should reload)
-      fireEvent.click(screen.getByText('Try again'));
-      fireEvent.click(screen.getByText('Try again'));
-      fireEvent.click(screen.getByText('Try again'));
+      fireEvent.click(screen.getByTestId('chunk-error-btn-retry'));
+      fireEvent.click(screen.getByTestId('chunk-error-btn-retry'));
+      fireEvent.click(screen.getByTestId('chunk-error-btn-retry'));
 
       expect(mockReload).toHaveBeenCalledTimes(1);
     });
@@ -222,7 +222,7 @@ describe('ChunkErrorBoundary', () => {
         </ChunkErrorBoundary>
       );
 
-      fireEvent.click(screen.getByText('Reload page'));
+      fireEvent.click(screen.getByTestId('chunk-error-btn-reload'));
 
       expect(mockReload).toHaveBeenCalledTimes(1);
     });

@@ -237,7 +237,7 @@ describe('IdentityInsightsAI', () => {
         />
       );
 
-      await user.click(screen.getByText('noAssessment.button'));
+      await user.click(screen.getByTestId('insights-btn-start-assessment'));
 
       expect(onNavigateToAssessment).toHaveBeenCalled();
     });
@@ -256,7 +256,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('ready.button'));
+      await user.click(screen.getByTestId('insights-btn-analyze'));
 
       expect(mockAnalyze).toHaveBeenCalledWith(mockResponses, 'english', undefined);
     });
@@ -295,7 +295,7 @@ describe('IdentityInsightsAI', () => {
       mockAnalysisError = 'Analysis failed';
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('error.tryAgain'));
+      await user.click(screen.getByTestId('insights-btn-try-again'));
 
       expect(mockAnalyze).toHaveBeenCalled();
     });
@@ -306,7 +306,7 @@ describe('IdentityInsightsAI', () => {
 
       render(<IdentityInsightsAI {...defaultProps} />);
 
-      expect(screen.getByText('error.downloadRaw')).toBeInTheDocument();
+      expect(screen.getByTestId('insights-btn-download-raw')).toBeInTheDocument();
     });
 
     it('should call downloadRawResponse when download button is clicked', async () => {
@@ -315,7 +315,7 @@ describe('IdentityInsightsAI', () => {
       mockRawResponse = '{"some": "data"}';
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('error.downloadRaw'));
+      await user.click(screen.getByTestId('insights-btn-download-raw'));
 
       expect(mockDownloadRawResponse).toHaveBeenCalled();
     });
@@ -348,7 +348,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('tabs.contradictions'));
+      await user.click(screen.getByTestId('insights-tab-contradictions'));
 
       const insightCards = screen.getAllByTestId('insight-card');
       expect(insightCards[0]).toHaveTextContent('Values health');
@@ -358,7 +358,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('tabs.synthesis'));
+      await user.click(screen.getByTestId('insights-tab-synthesis'));
 
       expect(screen.getByText('synthesisTab.whoYouAre')).toBeInTheDocument();
       expect(screen.getByText('You are a dedicated professional')).toBeInTheDocument();
@@ -368,7 +368,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('tabs.synthesis'));
+      await user.click(screen.getByTestId('insights-tab-synthesis'));
 
       expect(screen.getByText('synthesisTab.hiddenStrengths')).toBeInTheDocument();
       expect(screen.getByText('Empathy')).toBeInTheDocument();
@@ -379,7 +379,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('tabs.synthesis'));
+      await user.click(screen.getByTestId('insights-tab-synthesis'));
 
       expect(screen.getByText('synthesisTab.keyTension')).toBeInTheDocument();
       expect(screen.getByText('Balance work and life')).toBeInTheDocument();
@@ -389,7 +389,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('tabs.synthesis'));
+      await user.click(screen.getByTestId('insights-tab-synthesis'));
 
       expect(screen.getByText('synthesisTab.nextStep')).toBeInTheDocument();
       expect(screen.getByText('Practice saying no')).toBeInTheDocument();
@@ -417,7 +417,7 @@ describe('IdentityInsightsAI', () => {
       const user = userEvent.setup();
 
       render(<IdentityInsightsAI {...defaultProps} />);
-      await user.click(screen.getByText('reanalyze.button'));
+      await user.click(screen.getByTestId('insights-btn-reanalyze'));
 
       expect(mockAnalyze).toHaveBeenCalled();
     });

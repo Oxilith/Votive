@@ -11,7 +11,7 @@
 
 /**
  * Admin API key for E2E tests
- * Configured via ADMIN_API_KEY environment variable (same as prompt-service)
+ * Supports ADMIN_API_KEY (prompt-service) environment variables
  */
 export const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? 'test-admin-api-key-for-e2e-testing-purposes';
 

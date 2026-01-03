@@ -440,11 +440,11 @@ describe('ProfilePage', () => {
       render(<ProfilePage />);
 
       await user.click(screen.getByTestId('profile-tab-danger'));
-      await user.click(screen.getByText('dangerTab.deleteButton'));
+      await user.click(screen.getByTestId('profile-btn-delete-account'));
 
       expect(screen.getByText('dangerTab.confirmPrompt')).toBeInTheDocument();
-      expect(screen.getByText('dangerTab.confirmDelete')).toBeInTheDocument();
-      expect(screen.getByText('dangerTab.cancel')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-btn-confirm-delete')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-btn-cancel-delete')).toBeInTheDocument();
     });
 
     it('should cancel deletion when cancel is clicked', async () => {
@@ -452,8 +452,8 @@ describe('ProfilePage', () => {
       render(<ProfilePage />);
 
       await user.click(screen.getByTestId('profile-tab-danger'));
-      await user.click(screen.getByText('dangerTab.deleteButton'));
-      await user.click(screen.getByText('dangerTab.cancel'));
+      await user.click(screen.getByTestId('profile-btn-delete-account'));
+      await user.click(screen.getByTestId('profile-btn-cancel-delete'));
 
       expect(screen.queryByText('dangerTab.confirmPrompt')).not.toBeInTheDocument();
     });
@@ -465,8 +465,8 @@ describe('ProfilePage', () => {
       render(<ProfilePage />);
 
       await user.click(screen.getByTestId('profile-tab-danger'));
-      await user.click(screen.getByText('dangerTab.deleteButton'));
-      await user.click(screen.getByText('dangerTab.confirmDelete'));
+      await user.click(screen.getByTestId('profile-btn-delete-account'));
+      await user.click(screen.getByTestId('profile-btn-confirm-delete'));
 
       await waitFor(() => {
         expect(mockDeleteAccount).toHaveBeenCalled();
@@ -482,8 +482,8 @@ describe('ProfilePage', () => {
       render(<ProfilePage />);
 
       await user.click(screen.getByTestId('profile-tab-danger'));
-      await user.click(screen.getByText('dangerTab.deleteButton'));
-      await user.click(screen.getByText('dangerTab.confirmDelete'));
+      await user.click(screen.getByTestId('profile-btn-delete-account'));
+      await user.click(screen.getByTestId('profile-btn-confirm-delete'));
 
       await waitFor(() => {
         expect(screen.getByText('dangerTab.deleteFailed')).toBeInTheDocument();

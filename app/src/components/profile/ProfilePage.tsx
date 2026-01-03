@@ -458,19 +458,25 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                   </div>
 
                   {profileError && (
-                    <p className="font-body text-sm text-red-600 dark:text-red-400">
+                    <p
+                      data-testid="profile-error"
+                      className="font-body text-sm text-red-600 dark:text-red-400"
+                    >
                       {profileError}
                     </p>
                   )}
 
                   {profileSuccess && (
-                    <p className="font-body text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+                    <p
+                      data-testid="profile-success"
+                      className="font-body text-sm text-green-600 dark:text-green-400 flex items-center gap-2"
+                    >
                       <CheckIcon size="sm" />
                       {t('profileTab.updated')}
                     </p>
                   )}
 
-                  <FormButton isLoading={profileLoading}>
+                  <FormButton isLoading={profileLoading} data-testid="profile-btn-save">
                     {t('profileTab.saveChanges')}
                   </FormButton>
                 </form>
@@ -512,19 +518,25 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                   />
 
                   {passwordError && (
-                    <p className="font-body text-sm text-red-600 dark:text-red-400">
+                    <p
+                      data-testid="password-error"
+                      className="font-body text-sm text-red-600 dark:text-red-400"
+                    >
                       {passwordError}
                     </p>
                   )}
 
                   {passwordSuccess && (
-                    <p className="font-body text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+                    <p
+                      data-testid="password-success"
+                      className="font-body text-sm text-green-600 dark:text-green-400 flex items-center gap-2"
+                    >
                       <CheckIcon size="sm" />
                       {t('passwordTab.changed')}
                     </p>
                   )}
 
-                  <FormButton isLoading={passwordLoading}>
+                  <FormButton isLoading={passwordLoading} data-testid="profile-btn-change-password">
                     {t('passwordTab.changePassword')}
                   </FormButton>
                 </form>
@@ -656,6 +668,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                         type="button"
                         onClick={() => { setShowDeleteConfirm(true); }}
                         className="px-4 py-2 font-body text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-sm transition-colors"
+                        data-testid="profile-btn-delete-account"
                       >
                         {t('dangerTab.deleteButton')}
                       </button>
@@ -670,6 +683,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                             onClick={handleDeleteAccount}
                             disabled={deleteLoading}
                             className="px-4 py-2 font-body text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-sm transition-colors disabled:opacity-50"
+                            data-testid="profile-btn-confirm-delete"
                           >
                             {deleteLoading ? t('dangerTab.deleting') : t('dangerTab.confirmDelete')}
                           </button>
@@ -677,6 +691,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                             type="button"
                             onClick={() => { setShowDeleteConfirm(false); }}
                             className="px-4 py-2 font-body text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                            data-testid="profile-btn-cancel-delete"
                           >
                             {t('dangerTab.cancel')}
                           </button>
