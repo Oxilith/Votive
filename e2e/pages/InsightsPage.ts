@@ -14,6 +14,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Insight tab types corresponding to analysis categories
@@ -76,7 +77,7 @@ export class InsightsPage extends BasePage {
    *
    * @param timeout - Maximum wait time (default 10 seconds)
    */
-  async waitForPageReady(timeout = 10000): Promise<void> {
+  async waitForPageReady(timeout = E2E_TIMEOUTS.navigation): Promise<void> {
     // Wait for any of the possible content states to be visible
     await this.page.waitForSelector(
       `${this.readyState}, ${this.noAssessmentState}, ${this.insightsTabs}, ${this.pendingChangesAlert}`,
@@ -89,7 +90,7 @@ export class InsightsPage extends BasePage {
    *
    * @param timeout - Maximum wait time (default 2 minutes for AI analysis)
    */
-  async waitForAnalysis(timeout = 120000): Promise<void> {
+  async waitForAnalysis(timeout = E2E_TIMEOUTS.analysis): Promise<void> {
     // Wait for loading to disappear and content to appear
     try {
       await this.page.waitForSelector(this.loadingIndicator, { state: 'hidden', timeout });
@@ -111,7 +112,7 @@ export class InsightsPage extends BasePage {
    */
   async isLoading(): Promise<boolean> {
     try {
-      return await this.page.locator(this.loadingIndicator).isVisible({ timeout: 1000 });
+      return await this.page.locator(this.loadingIndicator).isVisible({ timeout: E2E_TIMEOUTS.elementQuick });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Loading indicator check failed:', error.message);
@@ -127,7 +128,7 @@ export class InsightsPage extends BasePage {
    */
   async hasError(): Promise<boolean> {
     try {
-      return await this.page.locator(this.errorMessage).isVisible({ timeout: 2000 });
+      return await this.page.locator(this.errorMessage).isVisible({ timeout: E2E_TIMEOUTS.elementQuick });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Error message check failed:', error.message);
@@ -172,7 +173,7 @@ export class InsightsPage extends BasePage {
 
     await this.page.click(tabSelectors[tab]);
     // Wait for tab panel to be visible
-    await this.page.locator(`[data-testid="insights-tabpanel-${tab}"]`).waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.locator(`[data-testid="insights-tabpanel-${tab}"]`).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.elementVisible });
   }
 
   /**
@@ -220,7 +221,7 @@ export class InsightsPage extends BasePage {
    */
   async hasNoAssessmentMessage(): Promise<boolean> {
     try {
-      return await this.page.locator(this.noAssessmentMessage).isVisible({ timeout: 2000 });
+      return await this.page.locator(this.noAssessmentMessage).isVisible({ timeout: E2E_TIMEOUTS.elementQuick });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('No assessment message check failed:', error.message);
@@ -243,7 +244,7 @@ export class InsightsPage extends BasePage {
    */
   async isAnalyzeButtonVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.analyzeButton).isVisible({ timeout: 2000 });
+      return await this.page.locator(this.analyzeButton).isVisible({ timeout: E2E_TIMEOUTS.elementQuick });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Analyze button visibility check failed:', error.message);
@@ -260,7 +261,7 @@ export class InsightsPage extends BasePage {
   async hasIncompleteWarning(): Promise<boolean> {
     return await this.page
       .locator(this.incompleteWarning)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -272,7 +273,7 @@ export class InsightsPage extends BasePage {
   async hasPendingChangesAlert(): Promise<boolean> {
     return await this.page
       .locator(this.pendingChangesAlert)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -284,7 +285,7 @@ export class InsightsPage extends BasePage {
   async hasReanalyzeIncompleteWarning(): Promise<boolean> {
     return await this.page
       .locator(this.reanalyzeIncompleteWarning)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -296,7 +297,7 @@ export class InsightsPage extends BasePage {
   async isReadyState(): Promise<boolean> {
     return await this.page
       .locator(this.readyState)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -308,7 +309,7 @@ export class InsightsPage extends BasePage {
   async isNoAssessmentState(): Promise<boolean> {
     return await this.page
       .locator(this.noAssessmentState)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -320,7 +321,7 @@ export class InsightsPage extends BasePage {
   async hasAnalysisResults(): Promise<boolean> {
     return await this.page
       .locator(this.insightsTabs)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 

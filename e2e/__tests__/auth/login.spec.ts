@@ -12,6 +12,7 @@
  */
 
 import { test, expect, createTestUser } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 import { LoginPage, RegisterPage } from '../../pages';
 
 test.describe('User Login', () => {
@@ -39,7 +40,8 @@ test.describe('User Login', () => {
 
     const error = await loginPage.getErrorMessage();
     expect(error).toBeTruthy();
-    expect(error?.toLowerCase()).toMatch(/invalid|incorrect|wrong|failed/);
+    // API returns "Invalid email or password" for failed login
+    expect(error?.toLowerCase()).toContain('invalid');
   });
 
   test('should login successfully with valid credentials', async ({ page }) => {
@@ -77,7 +79,7 @@ test.describe('User Login', () => {
 
     // Should show password reset form
     const forgotPasswordForm = loginPage.page.locator('[data-testid="forgot-password-form"]');
-    await expect(forgotPasswordForm).toBeVisible({ timeout: 5000 });
+    await expect(forgotPasswordForm).toBeVisible({ timeout: E2E_TIMEOUTS.elementVisible });
   });
 
   test('should navigate to register form', async ({ loginPage }) => {

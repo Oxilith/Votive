@@ -12,6 +12,7 @@
  */
 
 import type { Page, Locator } from '@playwright/test';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * CSRF cookie name as defined in prompt-service/src/utils/csrf.ts
@@ -80,7 +81,7 @@ export class BasePage {
     // Look for user avatar dropdown - only check the specific data-testid
     try {
       const avatar = this.page.locator('[data-testid="user-avatar-dropdown"]');
-      return await avatar.isVisible({ timeout: 2000 });
+      return await avatar.isVisible({ timeout: E2E_TIMEOUTS.elementQuick });
     } catch (error) {
       // Timeout is expected when element not visible
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -97,7 +98,7 @@ export class BasePage {
    * @param timeout - Maximum time to wait in milliseconds
    * @returns The located element
    */
-  async waitForElement(selector: string, timeout = 10000): Promise<Locator> {
+  async waitForElement(selector: string, timeout = E2E_TIMEOUTS.navigation): Promise<Locator> {
     const locator = this.page.locator(selector);
     await locator.waitFor({ state: 'visible', timeout });
     return locator;

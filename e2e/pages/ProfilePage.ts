@@ -12,6 +12,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Profile tab types
@@ -90,10 +91,10 @@ export class ProfilePage extends BasePage {
     };
 
     // Wait for tab to be visible before clicking (profile page may take time to render)
-    await this.page.locator(tabSelectors[tab]).waitFor({ state: 'visible', timeout: 10000 });
+    await this.page.locator(tabSelectors[tab]).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.navigation });
     await this.page.click(tabSelectors[tab]);
     // Wait for tab panel to be visible
-    await this.page.locator(`[data-testid="profile-tabpanel-${tab}"]`).waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.locator(`[data-testid="profile-tabpanel-${tab}"]`).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.elementVisible });
   }
 
   /**
@@ -160,7 +161,7 @@ export class ProfilePage extends BasePage {
 
       expect(loaderVisible).toBe(false);
       expect(hasItems || hasEmptyMessage).toBe(true);
-    }).toPass({ timeout: 15000 });
+    }).toPass({ timeout: E2E_TIMEOUTS.apiResponse });
   }
 
   /**
@@ -170,7 +171,7 @@ export class ProfilePage extends BasePage {
    * @param minCount - Minimum number of items to wait for (default: 1)
    * @param timeout - Maximum time to wait in ms (default: 15000)
    */
-  async waitForAssessments(minCount = 1, timeout = 15000): Promise<void> {
+  async waitForAssessments(minCount = 1, timeout = E2E_TIMEOUTS.apiResponse): Promise<void> {
     const { expect } = await import('@playwright/test');
     await this.clickTab('assessments');
 
@@ -231,7 +232,7 @@ export class ProfilePage extends BasePage {
     // Click the entire item (it's a clickable li element, no separate View button)
     await items[index].click();
     // Wait for URL to change to /assessment/:id
-    await this.page.waitForURL(/\/assessment\/[^/]+$/, { timeout: 10000 });
+    await this.page.waitForURL(/\/assessment\/[^/]+$/, { timeout: E2E_TIMEOUTS.navigation });
     await this.waitForNavigation();
   }
 
@@ -257,7 +258,7 @@ export class ProfilePage extends BasePage {
     // Click the entire item (it's a clickable li element, no separate View button)
     await items[index].click();
     // Wait for URL to change to /insights/:id
-    await this.page.waitForURL(/\/insights\/[^/]+$/, { timeout: 10000 });
+    await this.page.waitForURL(/\/insights\/[^/]+$/, { timeout: E2E_TIMEOUTS.navigation });
     await this.waitForNavigation();
   }
 
@@ -286,7 +287,7 @@ export class ProfilePage extends BasePage {
    */
   async hasProfileSuccessMessage(): Promise<boolean> {
     try {
-      return await this.page.locator(this.profileSuccessMessage).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.profileSuccessMessage).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Profile success message check failed:', error.message);
@@ -302,7 +303,7 @@ export class ProfilePage extends BasePage {
    */
   async hasProfileErrorMessage(): Promise<boolean> {
     try {
-      return await this.page.locator(this.profileErrorMessage).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.profileErrorMessage).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Profile error message check failed:', error.message);
@@ -318,7 +319,7 @@ export class ProfilePage extends BasePage {
    */
   async hasPasswordSuccessMessage(): Promise<boolean> {
     try {
-      return await this.page.locator(this.passwordSuccessMessage).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.passwordSuccessMessage).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Password success message check failed:', error.message);
@@ -334,7 +335,7 @@ export class ProfilePage extends BasePage {
    */
   async hasPasswordErrorMessage(): Promise<boolean> {
     try {
-      return await this.page.locator(this.passwordErrorMessage).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.passwordErrorMessage).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Password error message check failed:', error.message);

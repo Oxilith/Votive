@@ -14,6 +14,7 @@
  */
 
 import { test, expect, ADMIN_API_KEY } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('A/B Test CRUD Operations', () => {
   test.beforeEach(async ({ adminPage }) => {
@@ -60,9 +61,9 @@ test.describe('A/B Test CRUD Operations', () => {
       await adminPage.navigateToCreateAbTest();
 
       // Wait for form fields to render (prompt select loads async)
-      await adminPage.page.waitForSelector(adminPage.abTestNameInput, { state: 'visible', timeout: 5000 });
+      await adminPage.page.waitForSelector(adminPage.abTestNameInput, { state: 'visible', timeout: E2E_TIMEOUTS.elementVisible });
       // Wait for prompts to load - the select element appears after loading
-      await adminPage.page.waitForSelector(adminPage.abTestSelectPrompt, { state: 'visible', timeout: 10000 });
+      await adminPage.page.waitForSelector(adminPage.abTestSelectPrompt, { state: 'visible', timeout: E2E_TIMEOUTS.navigation });
 
       // Check all form fields are visible
       expect(await adminPage.page.locator(adminPage.abTestSelectPrompt).isVisible()).toBe(true);
@@ -109,7 +110,7 @@ test.describe('A/B Test CRUD Operations', () => {
       await adminPage.navigateToCreateAbTest();
 
       // Wait for form to fully render before checking select
-      await adminPage.page.waitForSelector(adminPage.abTestSelectPrompt, { state: 'visible', timeout: 5000 });
+      await adminPage.page.waitForSelector(adminPage.abTestSelectPrompt, { state: 'visible', timeout: E2E_TIMEOUTS.elementVisible });
 
       // Check that the prompt select has options (at least the placeholder)
       const promptSelect = adminPage.page.locator(adminPage.abTestSelectPrompt);

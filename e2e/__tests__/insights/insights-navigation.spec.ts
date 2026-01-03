@@ -12,6 +12,7 @@
  */
 
 import { test, expect } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 import { AssessmentPage, InsightsPage, ProfilePage } from '../../pages';
 
 test.describe('Insights Navigation - Unauthenticated', () => {
@@ -29,7 +30,7 @@ test.describe('Insights Navigation - Unauthenticated', () => {
     await insightsPage.navigate();
 
     // Should redirect to sign-in page
-    await page.waitForURL('**/sign-in', { timeout: 10000 });
+    await page.waitForURL('**/sign-in', { timeout: E2E_TIMEOUTS.navigation });
     expect(page.url()).toContain('/sign-in');
   });
 });
@@ -42,7 +43,7 @@ test.describe('Insights Navigation - Authenticated', () => {
     // Page should load (either insights page or no-assessment state)
     const pageVisible = await authenticatedPage
       .locator(insightsPage.insightsPage)
-      .isVisible({ timeout: 5000 });
+      .isVisible({ timeout: E2E_TIMEOUTS.elementVisible });
     expect(pageVisible).toBe(true);
   });
 
@@ -58,7 +59,7 @@ test.describe('Insights Navigation - Authenticated', () => {
     // Wait for auth hydration to complete (user avatar appears when logged in)
     await authenticatedPage.waitForSelector('[data-testid="user-avatar-dropdown"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
 
     await authenticatedPage.evaluate(() => {
@@ -84,7 +85,7 @@ test.describe('Insights Navigation - Authenticated', () => {
     await assessmentPage.completeFullAssessment();
 
     // Should be on insights in ready state
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Wait for page content to load before checking state
     await insightsPage.waitForPageReady();
@@ -103,7 +104,7 @@ test.describe('Insights Navigation - Authenticated', () => {
     await assessmentPage.completeFullAssessment();
 
     // Should redirect to insights
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Wait for page content to load before checking state
     await insightsPage.waitForPageReady();
@@ -124,7 +125,7 @@ test.describe('Insights Navigation - Authenticated User', () => {
     // Complete an assessment
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Note: To test viewing a specific analysis, we'd need to:
     // 1. Run the actual analysis (long operation)
@@ -151,7 +152,7 @@ test.describe('Insights Navigation - Authenticated User', () => {
     // Complete an assessment
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Wait for page content to load
     await insightsPage.waitForPageReady();
@@ -159,7 +160,7 @@ test.describe('Insights Navigation - Authenticated User', () => {
     // Insights page should be visible
     const pageVisible = await authenticatedPage
       .locator(insightsPage.insightsPage)
-      .isVisible({ timeout: 5000 });
+      .isVisible({ timeout: E2E_TIMEOUTS.elementVisible });
     expect(pageVisible).toBe(true);
   });
 
@@ -170,7 +171,7 @@ test.describe('Insights Navigation - Authenticated User', () => {
     // Complete an assessment to get to insights
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // We should be in ready state (no analysis yet)
     const isReady = await insightsPage.isReadyState();
@@ -181,7 +182,7 @@ test.describe('Insights Navigation - Authenticated User', () => {
       // Verify analyze button is present
       const analyzeVisible = await authenticatedPage
         .locator(insightsPage.analyzeTestId)
-        .isVisible({ timeout: 3000 })
+        .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
         .catch(() => false);
 
       // Either analyze button is visible or we see an incomplete assessment warning

@@ -12,6 +12,7 @@
  */
 
 import { test, expect, createTestUser } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('User Registration', () => {
   test('should register new user successfully', async ({ registerPage, testUser }) => {
@@ -40,8 +41,11 @@ test.describe('User Registration', () => {
       birthYear: testUser.birthYear,
     });
 
-    // Ensure first registration is fully complete
-    await registerPage.page.waitForTimeout(500);
+    // Ensure first registration is fully complete (redirected away from sign-up)
+    await registerPage.page.waitForURL(
+      url => !url.pathname.includes('/sign-up'),
+      { timeout: E2E_TIMEOUTS.navigation }
+    );
 
     // Clear cookies to log out
     await registerPage.clearCookies();
@@ -57,14 +61,13 @@ test.describe('User Registration', () => {
       birthYear: secondUser.birthYear,
     });
 
-    // Wait for error message with retries
-    let error: string | null = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      error = await registerPage.getErrorMessage();
-      if (error) break;
-      await registerPage.page.waitForTimeout(500);
-    }
+    // Wait for error message to appear
+    await registerPage.page.waitForSelector(
+      '[data-testid="register-error"], [role="alert"]',
+      { state: 'visible', timeout: E2E_TIMEOUTS.elementVisible }
+    );
 
+    const error = await registerPage.getErrorMessage();
     expect(error).toBeTruthy();
     expect(error?.toLowerCase()).toMatch(/already|exists|registered|duplicate|email/);
   });

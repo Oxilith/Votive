@@ -11,9 +11,18 @@
 
 /**
  * Admin API key for E2E tests
- * Supports ADMIN_API_KEY (prompt-service) environment variables
+ * Required environment variable - tests fail fast if missing
  */
-export const ADMIN_API_KEY = process.env.ADMIN_API_KEY ?? 'test-admin-api-key-for-e2e-testing-purposes';
+export const ADMIN_API_KEY = (() => {
+  const key = process.env.ADMIN_API_KEY;
+  if (!key) {
+    throw new Error(
+      'ADMIN_API_KEY environment variable is required for E2E tests. ' +
+        'Set it in .env.test or pass via environment.'
+    );
+  }
+  return key;
+})();
 
 /**
  * Default test user password meeting validation requirements:
@@ -91,14 +100,23 @@ export const E2E_API_ENDPOINTS = {
 
 /**
  * Timeout values for E2E tests
+ * Use these constants instead of hardcoded numbers for consistency
  */
 export const E2E_TIMEOUTS = {
-  /** Standard page navigation */
+  /** Standard page navigation and URL changes */
   navigation: 10000,
   /** Form submission and API response */
   apiResponse: 15000,
   /** AI analysis (can take 2-3 minutes) */
   analysis: 180000,
-  /** Element visibility check */
+  /** Standard element visibility check */
   elementVisible: 5000,
+  /** Quick element check (validation errors, instant feedback) */
+  elementQuick: 1000,
+  /** Medium element check (error messages, state changes) */
+  elementMedium: 3000,
+  /** Loading state transitions */
+  loadingState: 10000,
+  /** Client-side validation (instant, no API) */
+  clientValidation: 500,
 } as const;

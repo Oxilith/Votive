@@ -23,7 +23,7 @@ import {
   AdminPage,
   LayoutPage,
 } from '../pages';
-import { DEFAULT_TEST_PASSWORD } from './mock-data';
+import { DEFAULT_TEST_PASSWORD, E2E_TIMEOUTS } from './mock-data';
 
 /**
  * Test user interface with all required registration fields
@@ -105,7 +105,7 @@ export const test = base.extend<TestFixtures>({
 
   // Generate unique test user for each test
   // This ensures test isolation - no user conflicts between parallel tests
-  testUser: async (_, use) => {
+  testUser: async ({}, use) => {
     const user: TestUser = {
       name: faker.person.fullName(),
       email: `e2e-${faker.string.uuid().slice(0, 8)}@test.votive.local`,
@@ -123,6 +123,8 @@ export const test = base.extend<TestFixtures>({
 
     // Retry registration up to 3 times to handle transient network issues
     let lastError: Error | null = null;
+    const baseDelay = 1000; // Exponential backoff starting point
+
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         await registerPage.navigate();
@@ -141,28 +143,43 @@ export const test = base.extend<TestFixtures>({
         const currentUrl = page.url();
         if (!currentUrl.includes('/sign-in') && !currentUrl.includes('/sign-up')) {
           // Success - we're logged in
+          if (attempt > 1) {
+            console.log(`[authenticatedPage] Registration succeeded on attempt ${attempt}`);
+          }
           await use(page);
+          // Cleanup: clear cookies to prevent state leakage
+          await page.context().clearCookies();
           return;
         }
 
         // Check for error message
         const errorVisible = await page
           .locator('[role="alert"]')
-          .isVisible({ timeout: 2000 })
+          .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
           .catch(() => false);
         if (errorVisible) {
           const errorText = await page.locator('[role="alert"]').textContent();
+          // Check for duplicate user error - don't retry if user already exists
+          if (errorText?.toLowerCase().includes('already exists') || errorText?.toLowerCase().includes('already registered')) {
+            throw new Error(`Registration failed: ${errorText} (not retrying - duplicate user)`);
+          }
           lastError = new Error(`Registration failed: ${errorText}`);
         } else {
           lastError = new Error('Registration failed - still on auth page');
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
+        // Don't retry if it's a duplicate user error
+        if (lastError.message.includes('not retrying')) {
+          throw lastError;
+        }
       }
 
-      // Wait before retry
+      // Exponential backoff before retry
       if (attempt < 3) {
-        await page.waitForTimeout(1000);
+        const delay = baseDelay * Math.pow(2, attempt - 1); // 1s, 2s
+        console.log(`[authenticatedPage] Attempt ${attempt} failed, retrying in ${delay}ms...`);
+        await page.waitForTimeout(delay);
       }
     }
 

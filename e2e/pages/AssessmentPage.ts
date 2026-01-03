@@ -16,6 +16,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Page object for the assessment questionnaire.
@@ -90,7 +91,7 @@ export class AssessmentPage extends BasePage {
   async startAssessment(): Promise<void> {
     // Wait for and click the begin/start button
     const beginBtn = this.page.locator(this.beginButton).first();
-    if (await beginBtn.isVisible({ timeout: 5000 })) {
+    if (await beginBtn.isVisible({ timeout: E2E_TIMEOUTS.elementVisible })) {
       await beginBtn.click();
       await this.waitForNavigation();
     }
@@ -106,8 +107,8 @@ export class AssessmentPage extends BasePage {
     for (const index of indices) {
       if (options[index]) {
         await options[index].click();
-        // Small delay between clicks for stability
-        await this.page.waitForTimeout(100);
+        // Wait for click to register (aria-pressed change)
+        await options[index].waitFor({ state: 'attached' });
       }
     }
   }
@@ -173,7 +174,7 @@ export class AssessmentPage extends BasePage {
    */
   async clickComplete(): Promise<void> {
     // Wait for complete button to be visible before clicking
-    await this.page.waitForSelector(this.completeButton, { state: 'visible', timeout: 10000 });
+    await this.page.waitForSelector(this.completeButton, { state: 'visible', timeout: E2E_TIMEOUTS.navigation });
     await this.page.click(this.completeButton);
     await this.waitForNavigation();
   }
@@ -213,22 +214,22 @@ export class AssessmentPage extends BasePage {
    * @returns The step type or 'unknown'
    */
   async getCurrentStepType(): Promise<'intro' | 'multiSelect' | 'singleSelect' | 'scale' | 'textarea' | 'synthesis' | 'unknown'> {
-    if (await this.page.locator(this.introStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.introStep).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return 'intro';
     }
-    if (await this.page.locator(this.multiSelectStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.multiSelectStep).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return 'multiSelect';
     }
-    if (await this.page.locator(this.singleSelectStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.singleSelectStep).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return 'singleSelect';
     }
-    if (await this.page.locator(this.scaleStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.scaleStep).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return 'scale';
     }
-    if (await this.page.locator(this.textareaStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.textareaStep).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return 'textarea';
     }
-    if (await this.page.locator(this.synthesisStep).isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await this.page.locator(this.synthesisStep).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return 'synthesis';
     }
     return 'unknown';
@@ -324,7 +325,7 @@ export class AssessmentPage extends BasePage {
    * @returns True if validation error is visible
    */
   async isValidationErrorVisible(): Promise<boolean> {
-    return await this.page.locator(this.validationError).isVisible({ timeout: 1000 }).catch(() => false);
+    return await this.page.locator(this.validationError).isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false);
   }
 
   /**
@@ -334,20 +335,28 @@ export class AssessmentPage extends BasePage {
    */
   async getValidationErrorText(): Promise<string> {
     const errorElement = this.page.locator(this.validationError);
-    if (await errorElement.isVisible({ timeout: 1000 }).catch(() => false)) {
+    if (await errorElement.isVisible({ timeout: E2E_TIMEOUTS.elementQuick }).catch(() => false)) {
       return (await errorElement.textContent()) ?? '';
     }
     return '';
   }
 
   /**
-   * Attempt to click next without filling the step (for validation testing)
-   * Does not wait for navigation since validation should prevent it
+   * Click next and check if validation error appears
+   * Used for testing validation behavior
+   *
+   * @returns True if validation error appeared, false if navigation proceeded
    */
-  async tryClickNextWithoutWait(): Promise<void> {
+  async clickNextExpectingPossibleValidationError(): Promise<boolean> {
     await this.page.click(this.nextButton);
-    // Small delay to allow validation error to appear
-    await this.page.waitForTimeout(200);
+
+    try {
+      await this.page.locator(this.validationError)
+        .waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.clientValidation });
+      return true; // validation error appeared
+    } catch {
+      return false; // no validation error (success case)
+    }
   }
 
   /**
@@ -359,11 +368,11 @@ export class AssessmentPage extends BasePage {
     // In readonly mode, synthesis step is shown and progress header is hidden
     const hasSynthesis = await this.page
       .locator(this.synthesisStep)
-      .isVisible({ timeout: 2000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
       .catch(() => false);
     const hasProgressHeader = await this.page
       .locator(this.progressHeader)
-      .isVisible({ timeout: 1000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
       .catch(() => false);
 
     // Readonly mode = synthesis visible, progress header hidden
@@ -378,7 +387,7 @@ export class AssessmentPage extends BasePage {
   async hasViewOnlyBadge(): Promise<boolean> {
     return await this.page
       .locator(this.viewOnlyBadge)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -390,7 +399,7 @@ export class AssessmentPage extends BasePage {
   async hasPageHeader(): Promise<boolean> {
     return await this.page
       .locator(this.assessmentHeader)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -402,7 +411,7 @@ export class AssessmentPage extends BasePage {
   async hasProgressHeader(): Promise<boolean> {
     return await this.page
       .locator(this.progressHeader)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -417,18 +426,36 @@ export class AssessmentPage extends BasePage {
 
   /**
    * Click the Skip to Last button in the header
+   *
+   * @returns True if synthesis step became visible, false otherwise
    */
-  async clickSkipToLast(): Promise<void> {
+  async clickSkipToLast(): Promise<boolean> {
     await this.page.click(this.skipToLastButton);
-    await this.page.waitForTimeout(300);
+
+    try {
+      await this.page.locator(this.synthesisStep)
+        .waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.elementMedium });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
    * Click the Retake button in the header (only visible for readonly assessments)
+   *
+   * @returns True if progress header became visible (assessment reset), false otherwise
    */
-  async clickRetake(): Promise<void> {
+  async clickRetake(): Promise<boolean> {
     await this.page.click(this.retakeButton);
-    await this.page.waitForTimeout(300);
+
+    try {
+      await this.page.locator(this.progressHeader)
+        .waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.elementMedium });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -448,7 +475,7 @@ export class AssessmentPage extends BasePage {
   async hasAssessmentHeader(): Promise<boolean> {
     return await this.page
       .locator(this.assessmentHeader)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -460,7 +487,7 @@ export class AssessmentPage extends BasePage {
   async isRetakeButtonVisible(): Promise<boolean> {
     return await this.page
       .locator(this.retakeButton)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -472,7 +499,7 @@ export class AssessmentPage extends BasePage {
   async isImportButtonVisible(): Promise<boolean> {
     return await this.page
       .locator(this.importButton)
-      .isVisible({ timeout: 3000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementMedium })
       .catch(() => false);
   }
 
@@ -484,19 +511,29 @@ export class AssessmentPage extends BasePage {
   async isSavePromptModalVisible(): Promise<boolean> {
     return await this.page
       .locator(this.savePromptModal)
-      .isVisible({ timeout: 2000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
       .catch(() => false);
   }
 
   /**
    * Dismiss the SavePromptModal if visible
+   *
+   * @returns True if modal was dismissed, false if it wasn't visible
    */
-  async dismissSavePromptModal(): Promise<void> {
+  async dismissSavePromptModal(): Promise<boolean> {
     const modal = this.page.locator(this.savePromptModal);
-    if (await modal.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await this.page.click(this.savePromptDismiss);
-      await this.page.waitForTimeout(300);
+
+    const isVisible = await modal
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
+      .catch(() => false); // Only catches visibility check timeout
+
+    if (!isVisible) {
+      return false;
     }
+
+    await this.page.click(this.savePromptDismiss);
+    await modal.waitFor({ state: 'hidden', timeout: E2E_TIMEOUTS.elementQuick });
+    return true;
   }
 
   /**

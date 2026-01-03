@@ -13,6 +13,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Viewport presets for responsive testing
@@ -76,7 +77,7 @@ export class LayoutPage extends BasePage {
    */
   async isHeaderVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.header).isVisible({ timeout: 5000 });
+      return await this.page.locator(this.header).isVisible({ timeout: E2E_TIMEOUTS.elementVisible });
     } catch {
       return false;
     }
@@ -87,7 +88,7 @@ export class LayoutPage extends BasePage {
    */
   async isFooterVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.footer).first().isVisible({ timeout: 5000 });
+      return await this.page.locator(this.footer).first().isVisible({ timeout: E2E_TIMEOUTS.elementVisible });
     } catch {
       return false;
     }
@@ -103,11 +104,11 @@ export class LayoutPage extends BasePage {
       // On landing page, check for the nav links container
       // Must check actual visibility since they're hidden on mobile via CSS
       if (this.isOnLandingPage()) {
-        return await this.page.locator(this.landingNavLinks).isVisible({ timeout: 3000 });
+        return await this.page.locator(this.landingNavLinks).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
       }
       // On other pages, check for route links
-      const assessment = await this.page.locator(this.navLinkAssessment).isVisible({ timeout: 3000 });
-      const insights = await this.page.locator(this.navLinkInsights).isVisible({ timeout: 3000 });
+      const assessment = await this.page.locator(this.navLinkAssessment).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
+      const insights = await this.page.locator(this.navLinkInsights).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
       return assessment && insights;
     } catch {
       return false;
@@ -119,7 +120,7 @@ export class LayoutPage extends BasePage {
    */
   async isThemeToggleVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.themeToggle).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.themeToggle).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch {
       return false;
     }
@@ -130,7 +131,7 @@ export class LayoutPage extends BasePage {
    */
   async isLanguageToggleVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.languageToggle).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.languageToggle).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch {
       return false;
     }
@@ -141,7 +142,7 @@ export class LayoutPage extends BasePage {
    */
   async isInkBrushDecorationVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.inkBrushDecoration).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.inkBrushDecoration).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch {
       return false;
     }
@@ -193,9 +194,18 @@ export class LayoutPage extends BasePage {
    * Toggle theme and wait for change
    */
   async toggleTheme(): Promise<void> {
+    const currentClass = await this.page.locator('html').getAttribute('class');
     await this.page.locator(this.themeToggle).click();
-    // Wait for class change
-    await this.page.waitForTimeout(300);
+    // Wait for theme class to change
+    await this.page.locator('html').waitFor({
+      state: 'attached',
+    });
+    // Wait for the class attribute to actually change
+    await this.page.waitForFunction(
+      (oldClass) => document.documentElement.getAttribute('class') !== oldClass,
+      currentClass,
+      { timeout: E2E_TIMEOUTS.elementQuick }
+    );
   }
 
   /**
@@ -210,7 +220,8 @@ export class LayoutPage extends BasePage {
    */
   async switchToEnglish(): Promise<void> {
     await this.page.locator(this.languageBtnEn).click();
-    await this.page.waitForTimeout(300);
+    // Wait for language attribute to change
+    await this.page.locator('html[lang="en"]').waitFor({ state: 'attached', timeout: E2E_TIMEOUTS.elementQuick });
   }
 
   /**
@@ -218,7 +229,8 @@ export class LayoutPage extends BasePage {
    */
   async switchToPolish(): Promise<void> {
     await this.page.locator(this.languageBtnPl).click();
-    await this.page.waitForTimeout(300);
+    // Wait for language attribute to change
+    await this.page.locator('html[lang="pl"]').waitFor({ state: 'attached', timeout: E2E_TIMEOUTS.elementQuick });
   }
 
   /**
@@ -226,7 +238,7 @@ export class LayoutPage extends BasePage {
    */
   async isMobileMenuVisible(): Promise<boolean> {
     try {
-      return await this.page.locator(this.mobileMenuButton).isVisible({ timeout: 3000 });
+      return await this.page.locator(this.mobileMenuButton).isVisible({ timeout: E2E_TIMEOUTS.elementMedium });
     } catch {
       return false;
     }
@@ -237,7 +249,8 @@ export class LayoutPage extends BasePage {
    */
   async openMobileMenu(): Promise<void> {
     await this.page.locator(this.mobileMenuButton).click();
-    await this.page.waitForTimeout(300);
+    // Wait for mobile menu to become visible
+    await this.page.locator(this.mobileMenu).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.elementQuick });
   }
 
   /**
@@ -327,12 +340,36 @@ export class LayoutPage extends BasePage {
 
   /**
    * Scroll to bottom of page
+   * Handles case where page content is shorter than viewport (no scroll needed)
    */
   async scrollToBottom(): Promise<void> {
+    // Wait for layout to stabilize before checking scrollability
+    await this.waitForViewportTransition();
+
+    // Check if page is scrollable
+    const maxScroll = await this.page.evaluate(() => {
+      return document.body.scrollHeight - window.innerHeight;
+    });
+
+    if (maxScroll <= 0) {
+      // Page content fits in viewport, no scroll needed
+      return;
+    }
+
     await this.page.evaluate(() => {
       window.scrollTo(0, document.body.scrollHeight);
     });
-    await this.page.waitForTimeout(500);
+
+    // Wait for scroll to complete with medium timeout for complex layouts
+    await this.page.waitForFunction(
+      () => {
+        const scrollY = window.scrollY;
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        return scrollY >= maxScroll - 10; // Allow small tolerance
+      },
+      undefined,
+      { timeout: E2E_TIMEOUTS.elementMedium }
+    );
   }
 
   /**
@@ -342,7 +379,12 @@ export class LayoutPage extends BasePage {
     await this.page.evaluate(() => {
       window.scrollTo(0, 0);
     });
-    await this.page.waitForTimeout(500);
+    // Wait for scroll to complete
+    await this.page.waitForFunction(
+      () => window.scrollY === 0,
+      undefined,
+      { timeout: E2E_TIMEOUTS.elementQuick }
+    );
   }
 
   /**
@@ -354,13 +396,32 @@ export class LayoutPage extends BasePage {
 
   /**
    * Check if header is sticky (stays visible when scrolled)
+   * Handles case where page content is shorter than scroll target
    */
   async isHeaderSticky(): Promise<boolean> {
-    // Scroll down
-    await this.page.evaluate(() => {
-      window.scrollTo(0, 500);
+    // Check if page is scrollable
+    const maxScroll = await this.page.evaluate(() => {
+      return document.body.scrollHeight - window.innerHeight;
     });
-    await this.page.waitForTimeout(300);
+
+    if (maxScroll <= 0) {
+      // Page is not scrollable, assume header is sticky since we can't test
+      // (header would be visible regardless)
+      return await this.isHeaderVisible();
+    }
+
+    // Scroll to lesser of 500px or max scroll
+    const scrollTarget = Math.min(500, maxScroll);
+    await this.page.evaluate((target) => {
+      window.scrollTo(0, target);
+    }, scrollTarget);
+
+    // Wait for scroll to complete with medium timeout
+    await this.page.waitForFunction(
+      (target: number) => window.scrollY >= target - 10,
+      scrollTarget,
+      { timeout: E2E_TIMEOUTS.elementMedium }
+    );
 
     // Check if header is still visible
     const isVisible = await this.isHeaderVisible();
@@ -383,6 +444,55 @@ export class LayoutPage extends BasePage {
    */
   async getVisibleText(): Promise<string> {
     return await this.page.locator('body').innerText();
+  }
+
+  /**
+   * Wait for viewport transition to complete (CSS media queries to apply)
+   * Waits for layout to stabilize after viewport resize
+   */
+  async waitForViewportTransition(): Promise<void> {
+    // Wait for two animation frames to ensure resize has been processed
+    await this.page.evaluate(() =>
+      new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    );
+  }
+
+  /**
+   * Wait for smooth scroll animation to complete
+   * Waits until scroll position stabilizes for 3 consecutive frames
+   */
+  async waitForScrollComplete(): Promise<void> {
+    const MAX_SCROLL_CHECK_ITERATIONS = 120; // ~2s safety cap at 60fps
+
+    await this.page.waitForFunction(
+      (maxIterations: number) => {
+        return new Promise<boolean>(resolve => {
+          let lastScrollY = window.scrollY;
+          let stableCount = 0;
+          let iterations = 0;
+          const check = () => {
+            if (iterations++ > maxIterations) {
+              resolve(true);
+              return;
+            }
+            if (window.scrollY === lastScrollY) {
+              stableCount++;
+              if (stableCount >= 3) {
+                resolve(true);
+                return;
+              }
+            } else {
+              stableCount = 0;
+              lastScrollY = window.scrollY;
+            }
+            requestAnimationFrame(check);
+          };
+          requestAnimationFrame(check);
+        });
+      },
+      MAX_SCROLL_CHECK_ITERATIONS,
+      { timeout: E2E_TIMEOUTS.elementMedium }
+    );
   }
 
 }

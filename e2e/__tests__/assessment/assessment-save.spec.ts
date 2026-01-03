@@ -11,6 +11,7 @@
 
 import { test, expect } from '../../fixtures';
 import { AssessmentPage, ProfilePage } from '../../pages';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('Assessment Save', () => {
   test('should save assessment for authenticated user', async ({ authenticatedPage }) => {
@@ -22,7 +23,7 @@ test.describe('Assessment Save', () => {
     await assessmentPage.completeFullAssessment();
 
     // Wait for redirect to insights page
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Should be redirected to insights
     expect(authenticatedPage.url()).toContain('/insights');
@@ -49,7 +50,7 @@ test.describe('Assessment Save', () => {
     await assessmentPage.completeFullAssessment();
 
     // Wait for redirect to insights page
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Check for new assessment in profile - wait for expected count
     await profilePage.navigate();

@@ -13,6 +13,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Admin panel base URL - served by prompt-service
@@ -107,8 +108,8 @@ export class AdminPage extends BasePage {
     // Wait for either redirect (success) or error (failure)
     try {
       await Promise.race([
-        this.page.waitForURL('**/prompts**', { timeout: 10000 }),
-        this.page.waitForSelector(this.loginError, { timeout: 10000 }),
+        this.page.waitForURL('**/prompts**', { timeout: E2E_TIMEOUTS.navigation }),
+        this.page.waitForSelector(this.loginError, { timeout: E2E_TIMEOUTS.navigation }),
       ]);
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -120,7 +121,7 @@ export class AdminPage extends BasePage {
     if (this.page.url().includes('prompts')) {
       // Wait for the "Verifying authentication..." loading to disappear
       try {
-        await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 });
+        await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: E2E_TIMEOUTS.loadingState });
         loginVerified = true;
       } catch (error) {
         // Loading may have already completed
@@ -131,7 +132,7 @@ export class AdminPage extends BasePage {
 
       // Wait for logout button to appear (indicates Layout is rendered)
       try {
-        await this.page.locator(this.logoutButton).waitFor({ state: 'visible', timeout: 10000 });
+        await this.page.locator(this.logoutButton).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.loadingState });
         loginVerified = true;
       } catch (error) {
         if (!loginVerified && error instanceof Error) {
@@ -149,24 +150,11 @@ export class AdminPage extends BasePage {
    * @returns True if logout button is visible (indicating logged in state)
    */
   async isLoggedIn(): Promise<boolean> {
-    // First wait for any loading state to complete
-    try {
-      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 10000 });
-    } catch (error) {
-      // Loading may not be present or already completed
-      if (error instanceof Error && !error.message.includes('Timeout')) {
-        console.debug('Admin loading check failed:', error.message);
-      }
-    }
-    // Check if logout button is visible (longer timeout to account for navigation)
-    try {
-      return await this.page.locator(this.logoutButton).isVisible({ timeout: 5000 });
-    } catch (error) {
-      if (error instanceof Error && !error.message.includes('Timeout')) {
-        console.debug('Admin logged in check failed:', error.message);
-      }
-      return false;
-    }
+    // Simple check - if logout button is visible, user is logged in
+    return await this.page
+      .locator(this.logoutButton)
+      .isVisible({ timeout: E2E_TIMEOUTS.elementVisible })
+      .catch(() => false);
   }
 
   /**
@@ -179,7 +167,7 @@ export class AdminPage extends BasePage {
       // Wait for error to appear (API response time)
       await this.page.waitForLoadState('networkidle');
       const error = this.page.locator(this.loginError).first();
-      if (await error.isVisible({ timeout: 3000 })) {
+      if (await error.isVisible({ timeout: E2E_TIMEOUTS.elementMedium })) {
         return await error.textContent();
       }
     } catch (error) {
@@ -252,7 +240,7 @@ export class AdminPage extends BasePage {
     await this.page.click(this.logoutButton);
     // Wait for redirect to login page
     try {
-      await this.page.waitForURL('**/login**', { timeout: 10000 });
+      await this.page.waitForURL('**/login**', { timeout: E2E_TIMEOUTS.navigation });
     } catch (error) {
       // May already be on login page or different URL pattern
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -261,7 +249,7 @@ export class AdminPage extends BasePage {
     }
     // Wait for login form to appear
     try {
-      await this.page.locator(this.apiKeyInput).waitFor({ state: 'visible', timeout: 10000 });
+      await this.page.locator(this.apiKeyInput).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.navigation });
     } catch (error) {
       // Login form may take time to render
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -279,7 +267,7 @@ export class AdminPage extends BasePage {
   async isOnLoginPage(): Promise<boolean> {
     // Wait for any loading to complete first
     try {
-      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: 5000 });
+      await this.page.locator(this.loadingIndicator).waitFor({ state: 'hidden', timeout: E2E_TIMEOUTS.elementVisible });
     } catch (error) {
       // Loading may not be present
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -287,7 +275,7 @@ export class AdminPage extends BasePage {
       }
     }
     try {
-      return await this.page.locator(this.apiKeyInput).isVisible({ timeout: 5000 });
+      return await this.page.locator(this.apiKeyInput).isVisible({ timeout: E2E_TIMEOUTS.elementVisible });
     } catch (error) {
       if (error instanceof Error && !error.message.includes('Timeout')) {
         console.debug('Admin login page check failed:', error.message);
@@ -373,8 +361,8 @@ export class AdminPage extends BasePage {
     // Wait for navigation or error
     try {
       await Promise.race([
-        this.page.waitForURL('**/prompts', { timeout: 10000 }),
-        this.page.locator(this.promptCreateError).waitFor({ state: 'visible', timeout: 10000 }),
+        this.page.waitForURL('**/prompts', { timeout: E2E_TIMEOUTS.navigation }),
+        this.page.locator(this.promptCreateError).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.navigation }),
       ]);
     } catch (error) {
       // May still be processing
@@ -406,7 +394,7 @@ export class AdminPage extends BasePage {
   async getPromptCreateError(): Promise<string | null> {
     try {
       const error = this.page.locator(this.promptCreateError);
-      if (await error.isVisible({ timeout: 2000 })) {
+      if (await error.isVisible({ timeout: E2E_TIMEOUTS.elementQuick })) {
         return await error.textContent();
       }
     } catch (error) {
@@ -474,8 +462,8 @@ export class AdminPage extends BasePage {
     // Wait for navigation or error
     try {
       await Promise.race([
-        this.page.waitForURL('**/ab-tests/**', { timeout: 10000 }),
-        this.page.locator(this.abTestCreateError).waitFor({ state: 'visible', timeout: 10000 }),
+        this.page.waitForURL('**/ab-tests/**', { timeout: E2E_TIMEOUTS.navigation }),
+        this.page.locator(this.abTestCreateError).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.navigation }),
       ]);
     } catch (error) {
       // May still be processing
@@ -492,7 +480,7 @@ export class AdminPage extends BasePage {
   async getAbTestCreateError(): Promise<string | null> {
     try {
       const error = this.page.locator(this.abTestCreateError);
-      if (await error.isVisible({ timeout: 2000 })) {
+      if (await error.isVisible({ timeout: E2E_TIMEOUTS.elementQuick })) {
         return await error.textContent();
       }
     } catch (error) {
@@ -552,7 +540,7 @@ export class AdminPage extends BasePage {
   async waitForPromptList(): Promise<void> {
     // Wait for loading to disappear
     try {
-      await this.page.locator(this.promptListLoading).waitFor({ state: 'hidden', timeout: 10000 });
+      await this.page.locator(this.promptListLoading).waitFor({ state: 'hidden', timeout: E2E_TIMEOUTS.loadingState });
     } catch (error) {
       // May not have loading state
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -562,8 +550,8 @@ export class AdminPage extends BasePage {
     // Wait for either table or empty state
     try {
       await Promise.race([
-        this.page.locator(this.promptListTable).waitFor({ state: 'visible', timeout: 10000 }),
-        this.page.locator(this.promptListEmpty).waitFor({ state: 'visible', timeout: 10000 }),
+        this.page.locator(this.promptListTable).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.loadingState }),
+        this.page.locator(this.promptListEmpty).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.loadingState }),
       ]);
     } catch (error) {
       // May still be loading
@@ -579,7 +567,7 @@ export class AdminPage extends BasePage {
   async waitForAbTestList(): Promise<void> {
     // Wait for loading to disappear
     try {
-      await this.page.locator(this.abTestListLoading).waitFor({ state: 'hidden', timeout: 10000 });
+      await this.page.locator(this.abTestListLoading).waitFor({ state: 'hidden', timeout: E2E_TIMEOUTS.loadingState });
     } catch (error) {
       // May not have loading state
       if (error instanceof Error && !error.message.includes('Timeout')) {
@@ -589,8 +577,8 @@ export class AdminPage extends BasePage {
     // Wait for either table or empty state
     try {
       await Promise.race([
-        this.page.locator(this.abTestListTable).waitFor({ state: 'visible', timeout: 10000 }),
-        this.page.locator(this.abTestListEmpty).waitFor({ state: 'visible', timeout: 10000 }),
+        this.page.locator(this.abTestListTable).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.loadingState }),
+        this.page.locator(this.abTestListEmpty).waitFor({ state: 'visible', timeout: E2E_TIMEOUTS.loadingState }),
       ]);
     } catch (error) {
       // May still be loading

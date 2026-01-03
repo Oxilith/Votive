@@ -27,9 +27,9 @@ export default defineConfig({
   testDir: './__tests__',
   testMatch: '**/*.spec.ts',
 
-  // Sequential execution for database isolation
-  fullyParallel: false,
-  workers: 1,
+  // Parallel execution - each test generates unique users, so isolation is maintained
+  fullyParallel: true,
+  workers: process.env.CI ? 2 : 4,
 
   // Fail fast in CI, allow .only locally
   forbidOnly: !!process.env.CI,

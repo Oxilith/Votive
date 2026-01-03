@@ -139,7 +139,7 @@ test.describe('Responsive Layout', () => {
 
       // Switch to mobile
       await layoutPage.setViewport('mobile');
-      await layoutPage.page.waitForTimeout(300); // Allow CSS transitions
+      await layoutPage.waitForViewportTransition();
 
       // Verify mobile adaptation
       const isMobileMenuVisible = await layoutPage.isMobileMenuVisible();
@@ -156,7 +156,7 @@ test.describe('Responsive Layout', () => {
 
       // Switch to desktop
       await layoutPage.setViewport('desktop');
-      await layoutPage.page.waitForTimeout(300); // Allow CSS transitions
+      await layoutPage.waitForViewportTransition();
 
       // Verify desktop layout
       expect(await layoutPage.areNavLinksVisible()).toBe(true);

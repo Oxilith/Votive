@@ -11,6 +11,7 @@
  */
 
 import { test, expect } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 import { BasePage } from '../../pages';
 
 test.describe('User Logout', () => {
@@ -32,7 +33,7 @@ test.describe('User Logout', () => {
     // Wait for avatar to disappear (React state update)
     await authenticatedPage
       .locator('[data-testid="user-avatar-dropdown"]')
-      .waitFor({ state: 'hidden', timeout: 5000 });
+      .waitFor({ state: 'hidden', timeout: E2E_TIMEOUTS.elementVisible });
 
     // Should be logged out now
     expect(await basePage.isLoggedIn()).toBe(false);
@@ -72,8 +73,17 @@ test.describe('User Logout', () => {
     await authenticatedPage.waitForURL('**/');
     await authenticatedPage.waitForLoadState('networkidle');
 
-    // Wait a moment for cookies to be cleared by the server response
-    await authenticatedPage.waitForTimeout(500);
+    // Wait for CSRF cookie to be cleared using Playwright context
+    // (cookie is httpOnly so document.cookie can't see it)
+    await expect
+      .poll(
+        async () => {
+          const cookies = await authenticatedPage.context().cookies();
+          return cookies.find((c) => c.name === 'csrf-token');
+        },
+        { timeout: E2E_TIMEOUTS.elementMedium }
+      )
+      .toBeUndefined();
 
     // CSRF token should be cleared after logout
     const csrfAfter = await basePage.getCsrfToken();

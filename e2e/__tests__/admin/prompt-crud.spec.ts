@@ -14,6 +14,7 @@
  */
 
 import { test, expect, ADMIN_API_KEY } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('Prompt CRUD Operations', () => {
   test.beforeEach(async ({ adminPage }) => {
@@ -60,7 +61,7 @@ test.describe('Prompt CRUD Operations', () => {
       await adminPage.navigateToCreatePrompt();
 
       // Wait for form to fully render before checking fields
-      await adminPage.page.waitForSelector(adminPage.promptKeyInput, { state: 'visible', timeout: 5000 });
+      await adminPage.page.waitForSelector(adminPage.promptKeyInput, { state: 'visible', timeout: E2E_TIMEOUTS.elementVisible });
 
       // Check all form fields are visible
       expect(await adminPage.page.locator(adminPage.promptKeyInput).isVisible()).toBe(true);

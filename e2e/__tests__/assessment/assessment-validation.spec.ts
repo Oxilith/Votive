@@ -26,7 +26,7 @@ test.describe('Assessment Validation', () => {
     expect(await assessmentPage.isValidationErrorVisible()).toBe(false);
 
     // Try to click Continue without selecting anything
-    await assessmentPage.tryClickNextWithoutWait();
+    await assessmentPage.clickNextExpectingPossibleValidationError();
 
     // Validation error should appear
     expect(await assessmentPage.isValidationErrorVisible()).toBe(true);
@@ -37,7 +37,7 @@ test.describe('Assessment Validation', () => {
     await assessmentPage.startAssessment();
 
     // Trigger validation error
-    await assessmentPage.tryClickNextWithoutWait();
+    await assessmentPage.clickNextExpectingPossibleValidationError();
     expect(await assessmentPage.isValidationErrorVisible()).toBe(true);
 
     // Select an option
@@ -102,7 +102,7 @@ test.describe('Assessment Validation', () => {
     const stepType = await assessmentPage.getCurrentStepType();
     if (stepType === 'textarea') {
       // Try to click Continue without filling textarea
-      await assessmentPage.tryClickNextWithoutWait();
+      await assessmentPage.clickNextExpectingPossibleValidationError();
 
       // Validation error should appear
       expect(await assessmentPage.isValidationErrorVisible()).toBe(true);
@@ -121,11 +121,11 @@ test.describe('Assessment Validation', () => {
     await assessmentPage.startAssessment();
 
     // Trigger validation error
-    await assessmentPage.tryClickNextWithoutWait();
+    await assessmentPage.clickNextExpectingPossibleValidationError();
     expect(await assessmentPage.isValidationErrorVisible()).toBe(true);
 
     // Try clicking Continue again without input
-    await assessmentPage.tryClickNextWithoutWait();
+    await assessmentPage.clickNextExpectingPossibleValidationError();
     expect(await assessmentPage.isValidationErrorVisible()).toBe(true);
 
     // Now provide valid input and proceed

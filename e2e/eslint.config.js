@@ -39,6 +39,8 @@ export default tseslint.config(
         'error',
         { allowNumber: true, allowBoolean: true },
       ],
+      // Allow empty object pattern for Playwright fixtures that don't need dependencies
+      'no-empty-pattern': 'off',
     },
   },
 

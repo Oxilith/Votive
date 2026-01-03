@@ -12,13 +12,14 @@
  */
 
 import { test, expect } from '../../fixtures';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('Assessment Flow', () => {
   test('should display assessment page', async ({ assessmentPage }) => {
     await assessmentPage.navigate();
 
     // Should see the assessment page with begin button
-    const hasBeginButton = await assessmentPage.page.locator(assessmentPage.beginButton).isVisible({ timeout: 5000 });
+    const hasBeginButton = await assessmentPage.page.locator(assessmentPage.beginButton).isVisible({ timeout: E2E_TIMEOUTS.elementVisible });
     expect(hasBeginButton).toBe(true);
   });
 
@@ -125,7 +126,7 @@ test.describe('Assessment Flow', () => {
     await assessmentPage.clickComplete();
 
     // Should redirect to auth page (not insights)
-    await assessmentPage.page.waitForURL('**/sign-*', { timeout: 10000 });
+    await assessmentPage.page.waitForURL('**/sign-*', { timeout: E2E_TIMEOUTS.navigation });
     expect(assessmentPage.page.url()).toMatch(/sign-(in|up)/);
   });
 
@@ -176,7 +177,7 @@ test.describe('Assessment Flow - Authenticated', () => {
     await assessmentPage.completeFullAssessment();
 
     // After completing, should be on insights page
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
     expect(authenticatedPage.url()).toContain('/insights');
   });
 });

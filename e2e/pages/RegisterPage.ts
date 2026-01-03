@@ -12,6 +12,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Registration data interface matching the form fields
@@ -111,11 +112,11 @@ export class RegisterPage extends BasePage {
     await this.fillForm(data);
     await this.submit();
 
-    // First check for immediate client-side validation errors (appear within 500ms)
+    // First check for immediate client-side validation errors (appear instantly)
     // These don't trigger API calls, so we shouldn't wait for network response
     const immediateError = await this.page
       .locator(this.errorAlert)
-      .isVisible({ timeout: 500 })
+      .isVisible({ timeout: E2E_TIMEOUTS.clientValidation })
       .catch(() => false);
 
     if (immediateError) {
@@ -126,8 +127,8 @@ export class RegisterPage extends BasePage {
     // No immediate error - wait for API response and subsequent result
     try {
       await Promise.race([
-        this.page.waitForURL((url) => !url.pathname.includes('/sign-up'), { timeout: 10000 }),
-        this.page.waitForSelector(this.errorAlert, { timeout: 10000 }),
+        this.page.waitForURL((url) => !url.pathname.includes('/sign-up'), { timeout: E2E_TIMEOUTS.navigation }),
+        this.page.waitForSelector(this.errorAlert, { timeout: E2E_TIMEOUTS.navigation }),
       ]);
     } catch (error) {
       // Log non-timeout errors for debugging
@@ -147,7 +148,7 @@ export class RegisterPage extends BasePage {
     try {
       // First check main error alert (API errors)
       const alert = this.page.locator(this.errorAlert);
-      if (await alert.isVisible({ timeout: 1000 })) {
+      if (await alert.isVisible({ timeout: E2E_TIMEOUTS.elementQuick })) {
         return await alert.textContent();
       }
     } catch {
@@ -160,7 +161,7 @@ export class RegisterPage extends BasePage {
       const count = await validationErrors.count();
       if (count > 0) {
         const firstError = validationErrors.first();
-        if (await firstError.isVisible({ timeout: 1000 })) {
+        if (await firstError.isVisible({ timeout: E2E_TIMEOUTS.elementQuick })) {
           return await firstError.textContent();
         }
       }

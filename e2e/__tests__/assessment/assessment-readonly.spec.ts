@@ -13,6 +13,7 @@
 
 import { test, expect } from '../../fixtures';
 import { AssessmentPage, ProfilePage } from '../../pages';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('Assessment Readonly Mode', () => {
   test.beforeEach(async ({ authenticatedPage }) => {
@@ -22,7 +23,7 @@ test.describe('Assessment Readonly Mode', () => {
     await assessmentPage.completeFullAssessment();
 
     // Wait for redirect to insights page
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
   });
 
   test('should open saved assessment from profile in readonly mode', async ({ authenticatedPage }) => {
@@ -37,7 +38,7 @@ test.describe('Assessment Readonly Mode', () => {
     // Wait for synthesis step to be visible (readonly mode loads synthesis directly)
     await authenticatedPage.waitForSelector('[data-testid="synthesis-step"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
 
     // Should be in readonly mode (synthesis visible, progress hidden)
@@ -56,7 +57,7 @@ test.describe('Assessment Readonly Mode', () => {
     // Wait for synthesis step to be visible
     await authenticatedPage.waitForSelector('[data-testid="synthesis-step"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
 
     // Should show synthesis step
@@ -78,7 +79,7 @@ test.describe('Assessment Readonly Mode', () => {
     // Wait for synthesis step to be visible
     await authenticatedPage.waitForSelector('[data-testid="synthesis-step"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
 
     // Progress header should be hidden
@@ -98,24 +99,24 @@ test.describe('Assessment Readonly Mode', () => {
     // Wait for page to load
     await authenticatedPage.waitForSelector('[data-testid="synthesis-step"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
 
     // Navigation buttons should not be visible
     const nextVisible = await authenticatedPage
       .locator(assessmentPage.nextButton)
       .first()
-      .isVisible({ timeout: 1000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
       .catch(() => false);
     const backVisible = await authenticatedPage
       .locator(assessmentPage.backButton)
       .first()
-      .isVisible({ timeout: 1000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
       .catch(() => false);
     const completeVisible = await authenticatedPage
       .locator(assessmentPage.completeButton)
       .first()
-      .isVisible({ timeout: 1000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
       .catch(() => false);
 
     expect(nextVisible).toBe(false);
@@ -135,7 +136,7 @@ test.describe('Assessment Readonly Mode', () => {
     // Wait for synthesis step to be visible
     await authenticatedPage.waitForSelector('[data-testid="synthesis-step"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
 
     // Page header should be visible

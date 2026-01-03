@@ -12,6 +12,7 @@
 
 import { test, expect } from '../../fixtures';
 import { AssessmentPage, ProfilePage } from '../../pages';
+import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
 
 test.describe('Assessment Editing', () => {
   test('should modify responses in edit mode', async ({ assessmentPage }) => {
@@ -95,7 +96,7 @@ test.describe('Assessment Editing', () => {
     // Complete first assessment
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Check count increased - wait for expected count
     await profilePage.navigate();
@@ -109,13 +110,13 @@ test.describe('Assessment Editing', () => {
     // The assessment page should show the completed assessment with Retake button
     await authenticatedPage.waitForSelector('[data-testid="assessment-btn-retake"]', {
       state: 'visible',
-      timeout: 10000,
+      timeout: E2E_TIMEOUTS.navigation,
     });
     await assessmentPage.clickRetake();
 
     // Complete another assessment
     await assessmentPage.completeFullAssessment();
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Check count increased again - wait for expected count
     await profilePage.navigate();
@@ -161,7 +162,7 @@ test.describe('Assessment Editing - Authenticated User', () => {
     // Complete an assessment
     await assessmentPage.navigate();
     await assessmentPage.completeFullAssessment();
-    await authenticatedPage.waitForURL('**/insights', { timeout: 10000 });
+    await authenticatedPage.waitForURL('**/insights', { timeout: E2E_TIMEOUTS.navigation });
 
     // Verify assessment was saved - wait for at least 1 item
     await profilePage.navigate();
@@ -175,7 +176,7 @@ test.describe('Assessment Editing - Authenticated User', () => {
     // Wait for retake button (indicates readonly completed assessment)
     const retakeVisible = await authenticatedPage
       .locator('[data-testid="assessment-btn-retake"]')
-      .isVisible({ timeout: 5000 })
+      .isVisible({ timeout: E2E_TIMEOUTS.elementVisible })
       .catch(() => false);
 
     // Retake button should be visible since assessment is completed

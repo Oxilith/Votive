@@ -205,7 +205,6 @@ test.describe('Sticky Navigation', () => {
 
     // Scroll down using helper method (avoids TypeScript window/document issues)
     await layoutPage.scrollToBottom();
-    await layoutPage.page.waitForTimeout(300);
 
     const scrolledPosition = await layoutPage.getScrollPosition();
     expect(scrolledPosition).toBeGreaterThan(0);
@@ -215,7 +214,7 @@ test.describe('Sticky Navigation', () => {
     const logoOrHomeLink = layoutPage.page.locator('a[href="/"], [data-testid="logo-link"]').first();
     if (await logoOrHomeLink.isVisible()) {
       await logoOrHomeLink.click();
-      await layoutPage.page.waitForTimeout(500);
+      await layoutPage.waitForScrollComplete();
 
       // Should be at or near top
       const topPosition = await layoutPage.getScrollPosition();

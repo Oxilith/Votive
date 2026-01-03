@@ -12,6 +12,7 @@
  */
 
 import { BasePage } from './BasePage';
+import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Page object for the login form.
@@ -85,7 +86,7 @@ export class LoginPage extends BasePage {
       await Promise.all([
         this.page.waitForResponse(
           (resp) => resp.url().includes('/api/user-auth/login') && resp.status() !== 0,
-          { timeout: 15000 }
+          { timeout: E2E_TIMEOUTS.apiResponse }
         ),
         this.submit(),
       ]);
@@ -99,8 +100,8 @@ export class LoginPage extends BasePage {
     // Wait for either redirect (success) or error message (failure)
     try {
       await Promise.race([
-        this.page.waitForURL((url) => !url.pathname.includes('/sign-in'), { timeout: 10000 }),
-        this.page.waitForSelector(this.errorAlert, { timeout: 10000 }),
+        this.page.waitForURL((url) => !url.pathname.includes('/sign-in'), { timeout: E2E_TIMEOUTS.navigation }),
+        this.page.waitForSelector(this.errorAlert, { timeout: E2E_TIMEOUTS.navigation }),
       ]);
     } catch (error) {
       // Timeout expected when neither redirect nor error appeared within timeout
@@ -123,7 +124,7 @@ export class LoginPage extends BasePage {
     try {
       // First check main error alert (API errors)
       const alert = this.page.locator(this.errorAlert);
-      if (await alert.isVisible({ timeout: 1000 })) {
+      if (await alert.isVisible({ timeout: E2E_TIMEOUTS.elementQuick })) {
         return await alert.textContent();
       }
     } catch {
@@ -136,7 +137,7 @@ export class LoginPage extends BasePage {
       const count = await validationErrors.count();
       if (count > 0) {
         const firstError = validationErrors.first();
-        if (await firstError.isVisible({ timeout: 1000 })) {
+        if (await firstError.isVisible({ timeout: E2E_TIMEOUTS.elementQuick })) {
           return await firstError.textContent();
         }
       }
