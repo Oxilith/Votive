@@ -273,19 +273,20 @@ export const handlers = [...anthropicHandlers];
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: '__tests__',
+  testDir: './__tests__',
   testMatch: '**/*.spec.ts',
-  fullyParallel: false,        // Sequential for DB isolation
+  fullyParallel: true,         // Parallel execution - unique users per test
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,                   // One worker for database state
+  workers: process.env.CI ? 2 : 4,  // Parallel workers enabled
   reporter: [
-    ['html', { outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results.json' }]
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['json', { outputFile: 'test-results/results.json' }],
+    process.env.CI ? ['github'] : ['list'],
   ],
 
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'https://localhost',
+    baseURL: process.env.E2E_BASE_URL ?? 'https://localhost',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',

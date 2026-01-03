@@ -140,8 +140,12 @@ test.describe('Assessment Flow', () => {
     await assessmentPage.startAssessment();
 
     // Complete steps until we reach synthesis
+    // Max iterations guard prevents infinite loop if synthesis is never reached
     let stepType = await assessmentPage.getCurrentStepType();
-    while (stepType !== 'synthesis') {
+    let iterations = 0;
+    const MAX_ITERATIONS = 30;
+    while (stepType !== 'synthesis' && iterations < MAX_ITERATIONS) {
+      iterations++;
       if (stepType === 'multiSelect') {
         await assessmentPage.selectMultipleOptions([0, 1]);
       } else if (stepType === 'singleSelect') {
@@ -155,6 +159,10 @@ test.describe('Assessment Flow', () => {
       }
       await assessmentPage.clickNext();
       stepType = await assessmentPage.getCurrentStepType();
+    }
+
+    if (stepType !== 'synthesis') {
+      throw new Error(`Failed to reach synthesis after ${MAX_ITERATIONS} steps. Current step: ${stepType}`);
     }
 
     // Verify we reached synthesis

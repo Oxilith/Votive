@@ -17,13 +17,14 @@ import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Admin panel base URL - served by prompt-service
+ * Uses HTTPS for consistency with main app and to catch SSL issues early
  */
-const ADMIN_BASE_URL = process.env.PROMPT_SERVICE_URL ?? 'http://localhost:3002';
+const ADMIN_BASE_URL = process.env.PROMPT_SERVICE_URL ?? 'https://localhost:3002';
 
 /**
  * Page object for the admin panel.
  *
- * The admin panel is accessed at http://localhost:3002/admin (prompt-service)
+ * The admin panel is accessed at https://localhost:3002/admin (prompt-service)
  * and requires API key authentication.
  * After login, admin can:
  * - View and manage prompts
