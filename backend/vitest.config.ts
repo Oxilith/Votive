@@ -56,6 +56,8 @@ export default defineConfig({
           include: ['__tests__/unit/**/*.test.ts'],
           exclude: ['node_modules', 'dist'],
           testTimeout: 10000,
+          maxConcurrency: 4,
+          fileParallelism: true,
         },
       },
       {
@@ -70,12 +72,9 @@ export default defineConfig({
           ],
           exclude: ['node_modules', 'dist'],
           testTimeout: 30000,
-          hookTimeout: 30000, 
-          
-          // Run integration tests sequentially to avoid SQLite database locking
-          // Use single-threaded mode for database access
-          maxConcurrency: 1,
-          fileParallelism: false,
+          hookTimeout: 30000,
+          maxConcurrency: 4,
+          fileParallelism: true,
         },
       },
     ],

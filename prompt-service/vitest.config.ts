@@ -59,7 +59,9 @@ export default defineConfig({
           setupFiles: ['./vitest.setup.ts'],
           include: ['__tests__/unit/**/*.test.ts'],
           exclude: ['node_modules', 'dist'],
-          testTimeout: 10000,
+          testTimeout: 10000,          
+          maxConcurrency: 4,
+          fileParallelism: true,
         },
       },
       {
