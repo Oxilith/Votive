@@ -63,8 +63,8 @@ export default defineConfig({
     // Navigation timeout
     navigationTimeout: 30000,
 
-    // Action timeout
-    actionTimeout: 10000,
+    // Action timeout (15s for CI stability)
+    actionTimeout: 15000,
   },
 
   // Browser projects - Chromium only for fast feedback

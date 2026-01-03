@@ -105,8 +105,7 @@ export const test = base.extend<TestFixtures>({
 
   // Generate unique test user for each test
   // This ensures test isolation - no user conflicts between parallel tests
-  // eslint-disable-next-line no-empty-pattern -- Playwright fixture syntax requires object destructuring
-  testUser: async ({}, use) => {
+  testUser: async (_, use) => {
     const user: TestUser = {
       name: faker.person.fullName(),
       email: `e2e-${faker.string.uuid().slice(0, 8)}@test.votive.local`,

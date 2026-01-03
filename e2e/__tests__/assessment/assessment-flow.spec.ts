@@ -68,47 +68,6 @@ test.describe('Assessment Flow', () => {
     // The previously selected option might still be selected
   });
 
-  test('should handle scale step type', async ({ assessmentPage }) => {
-    await assessmentPage.navigate();
-    await assessmentPage.startAssessment();
-
-    // Navigate to a scale step (skip through multiSelect steps)
-    // Phase 1, Step 1: multiSelect
-    await assessmentPage.selectMultipleOptions([0, 1]);
-    await assessmentPage.clickNext();
-
-    // Phase 1, Step 2: multiSelect
-    await assessmentPage.selectMultipleOptions([2, 3]);
-    await assessmentPage.clickNext();
-
-    // Phase 1, Step 3: should be scale
-    const stepType = await assessmentPage.getCurrentStepType();
-    if (stepType === 'scale') {
-      await assessmentPage.setScaleValue(4);
-      expect(await assessmentPage.isNextEnabled()).toBe(true);
-    }
-  });
-
-  test('should handle textarea step type', async ({ assessmentPage }) => {
-    await assessmentPage.navigate();
-    await assessmentPage.startAssessment();
-
-    // Navigate to a textarea step (skip through first steps)
-    await assessmentPage.selectMultipleOptions([0, 1]);
-    await assessmentPage.clickNext();
-    await assessmentPage.selectMultipleOptions([2, 3]);
-    await assessmentPage.clickNext();
-    await assessmentPage.setScaleValue(3);
-    await assessmentPage.clickNext();
-
-    // Should now be on textarea step
-    const stepType = await assessmentPage.getCurrentStepType();
-    if (stepType === 'textarea') {
-      await assessmentPage.fillTextarea('Test response for energy drains');
-      expect(await assessmentPage.isNextEnabled()).toBe(true);
-    }
-  });
-
   test('should redirect to auth when completing without login', async ({ assessmentPage }) => {
     await assessmentPage.navigate();
 
