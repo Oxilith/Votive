@@ -31,7 +31,11 @@
     "test:e2e:headed": "npx dotenvx run -f .env.test -- npm run e2e:headed -w e2e",
     "test:e2e:ui": "npx dotenvx run -f .env.test -- npm run e2e:ui -w e2e",
     "test:e2e:failed": "npx dotenvx run -f .env.test -- npm run e2e:failed -w e2e",
-    "test:e2e:grep": "npx dotenvx run -f .env.test -- npm run e2e:grep -w e2e"
+    "test:e2e:grep": "npx dotenvx run -f .env.test -- npm run e2e:grep -w e2e",
+    "test:e2e:report": "npx dotenvx run -f .env.test -- npm run e2e:report -w e2e",
+    "test:e2e:codegen": "npx dotenvx run -f .env.test -- npm run e2e:codegen -w e2e",
+    "test:e2e:trace": "npx dotenvx run -f .env.test -- npm run e2e:trace -w e2e",
+    "test:e2e:serial": "npx dotenvx run -f .env.test -- npm run e2e:serial -w e2e"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -10,7 +10,10 @@
     "e2e:ui": "playwright test --ui",
     "e2e:failed": "playwright test --last-failed",
     "e2e:grep": "playwright test --grep",
-    "report": "playwright show-report",
+    "e2e:report": "playwright show-report",
+    "e2e:codegen": "playwright codegen",
+    "e2e:trace": "playwright test --trace on",
+    "e2e:serial": "playwright test --workers=1",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit"
