@@ -33,9 +33,12 @@ import { E2E_TIMEOUTS } from '../fixtures/mock-data';
  */
 export class AssessmentPage extends BasePage {
   // Navigation button selectors (using data-testid for reliability)
+  // Note: The intro step's Continue button and regular Continue button share the same data-testid
+  // The Complete button appears only on synthesis step with different data-testid
   readonly nextButton = '[data-testid="assessment-continue-button"]';
   readonly backButton = '[data-testid="assessment-back-button"]';
-  readonly beginButton = '[data-testid="assessment-btn-begin"], button:has-text("Begin"), button:has-text("Start")';
+  // Begin button is just the intro step's continue button
+  readonly beginButton = '[data-testid="assessment-continue-button"]';
   readonly completeButton = '[data-testid="assessment-complete-button"]';
 
   // Progress indicators

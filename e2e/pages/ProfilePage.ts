@@ -55,8 +55,8 @@ export class ProfilePage extends BasePage {
 
   // Loading and empty state selectors
   readonly loadingIndicator = '[data-testid="ink-loader"]';
-  readonly emptyAssessmentsMessage = 'text=/no.*assessment|empty/i';
-  readonly emptyAnalysesMessage = 'text=/no.*analysis|empty/i';
+  readonly emptyAssessmentsMessage = '[data-testid="assessments-empty-state"]';
+  readonly emptyAnalysesMessage = '[data-testid="analyses-empty-state"]';
 
   // Danger zone selectors (using data-testid for reliability)
   readonly deleteAccountButton = '[data-testid="profile-btn-delete-account"]';

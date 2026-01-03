@@ -564,7 +564,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                       </button>
                     </div>
                   ) : !assessmentsList || assessmentsList.length === 0 ? (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12" data-testid="assessments-empty-state">
                       <p className="font-body text-[var(--text-secondary)]">
                         {t('assessmentsTab.empty')}
                       </p>
@@ -613,7 +613,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                       </button>
                     </div>
                   ) : !analysesList || analysesList.length === 0 ? (
-                    <div className="text-center py-12">
+                    <div className="text-center py-12" data-testid="analyses-empty-state">
                       <p className="font-body text-[var(--text-secondary)]">
                         {t('analysesTab.empty')}
                       </p>

@@ -22,6 +22,7 @@ import {
   ProfilePage,
   AdminPage,
   LayoutPage,
+  CSRF_COOKIE_NAME,
 } from '../pages';
 import { DEFAULT_TEST_PASSWORD, E2E_TIMEOUTS } from './mock-data';
 
@@ -139,10 +140,20 @@ export const test = base.extend<TestFixtures>({
           gender: testUser.gender,
         });
 
-        // Check if we're redirected away from auth pages
-        const currentUrl = page.url();
-        if (!currentUrl.includes('/sign-in') && !currentUrl.includes('/sign-up')) {
-          // Success - we're logged in
+        // Verify login success with BOTH cookie AND UI (robust detection)
+        // Check for CSRF cookie (httpOnly - must use Playwright's context.cookies())
+        const cookies = await page.context().cookies();
+        const hasCsrfCookie = cookies.some((c) => c.name === CSRF_COOKIE_NAME);
+
+        // Check for user avatar in UI
+        const isAvatarVisible = await page
+          .locator('[data-testid="user-avatar-dropdown"]')
+          .isVisible({ timeout: E2E_TIMEOUTS.elementVisible })
+          .catch(() => false);
+
+        // Require BOTH conditions for robust login verification
+        if (hasCsrfCookie && isAvatarVisible) {
+          // Success - fully logged in (cookie set + UI updated)
           if (attempt > 1) {
             console.log(`[authenticatedPage] Registration succeeded on attempt ${attempt}`);
           }
@@ -152,20 +163,24 @@ export const test = base.extend<TestFixtures>({
           return;
         }
 
-        // Check for error message
-        const errorVisible = await page
-          .locator('[role="alert"]')
+        // Check for error message using data-testid (i18n-compatible)
+        const errorAlert = page.locator('[data-testid="register-error"]');
+        const errorVisible = await errorAlert
           .isVisible({ timeout: E2E_TIMEOUTS.elementQuick })
           .catch(() => false);
         if (errorVisible) {
-          const errorText = await page.locator('[role="alert"]').textContent();
+          const errorText = await errorAlert.textContent();
           // Check for duplicate user error - don't retry if user already exists
+          // Note: This text check is kept for error classification, but the error is detected via data-testid
           if (errorText?.toLowerCase().includes('already exists') || errorText?.toLowerCase().includes('already registered')) {
             throw new Error(`Registration failed: ${errorText} (not retrying - duplicate user)`);
           }
           lastError = new Error(`Registration failed: ${errorText}`);
         } else {
-          lastError = new Error('Registration failed - still on auth page');
+          // Provide more context on why login check failed
+          lastError = new Error(
+            `Registration failed - login verification incomplete. Cookie: ${hasCsrfCookie}, Avatar: ${isAvatarVisible}`
+          );
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));

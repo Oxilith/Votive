@@ -12,7 +12,7 @@
 
 import { test, expect } from '../../fixtures';
 import { E2E_TIMEOUTS } from '../../fixtures/mock-data';
-import { BasePage } from '../../pages';
+import { BasePage, CSRF_COOKIE_NAME } from '../../pages';
 
 test.describe('User Logout', () => {
   test('should logout successfully', async ({ authenticatedPage }) => {
@@ -79,7 +79,7 @@ test.describe('User Logout', () => {
       .poll(
         async () => {
           const cookies = await authenticatedPage.context().cookies();
-          return cookies.find((c) => c.name === 'csrf-token');
+          return cookies.find((c) => c.name === CSRF_COOKIE_NAME);
         },
         { timeout: E2E_TIMEOUTS.elementMedium }
       )
