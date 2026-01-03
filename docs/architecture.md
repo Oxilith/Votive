@@ -355,7 +355,7 @@ flowchart TB
 
 ### Container Health Checks
 
-All containers use Node.js fetch for health checks (wget not available in Alpine):
+All containers use Node.js fetch for health checks (consistent approach using Node.js built-in):
 
 ```yaml
 healthcheck:

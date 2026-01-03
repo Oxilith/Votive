@@ -1,7 +1,9 @@
 # Prompt Service Dockerfile
-FROM node:24-alpine AS builder
+# Using Debian slim for consistency and libsql native module compatibility
+FROM node:24-slim AS builder
 
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @dotenvx/dotenvx
 
@@ -33,9 +35,10 @@ RUN npm run db:generate -w prompt-service
 RUN npm run build -w prompt-service
 
 # Production
-FROM node:24-alpine
+FROM node:24-slim
 
-RUN apk add --no-cache openssl && \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/* && \
     npm install -g @dotenvx/dotenvx
 
 WORKDIR /app
@@ -53,8 +56,8 @@ COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
 COPY .env prompt-service/.env
 
 # Create non-root user matching worker (UID 1001) for shared volume access
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 appuser && \
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs appuser && \
     mkdir -p /app/data && \
     chown -R appuser:nodejs /app
 

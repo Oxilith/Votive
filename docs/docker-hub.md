@@ -212,7 +212,7 @@ Check container health status:
 docker ps --format "table {{.Names}}\t{{.Status}}"
 ```
 
-All containers use Node.js fetch for health checks (Alpine images don't have wget/curl):
+All containers use Node.js fetch for health checks (consistent across Debian slim images):
 
 ```bash
 # Manual health check

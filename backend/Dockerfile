@@ -1,5 +1,6 @@
 # Backend Dockerfile
-FROM node:24-alpine AS builder
+# Using Debian slim for consistency across all services
+FROM node:24-slim AS builder
 
 RUN npm install -g @dotenvx/dotenvx
 
@@ -27,9 +28,10 @@ COPY backend/tsup.config.ts backend/
 RUN npm run build -w backend
 
 # Production
-FROM node:24-alpine
+FROM node:24-slim
 
-RUN apk add --no-cache wget && \
+RUN apt-get update && apt-get install -y --no-install-recommends wget && \
+    rm -rf /var/lib/apt/lists/* && \
     npm install -g @dotenvx/dotenvx
 
 WORKDIR /app
@@ -45,8 +47,8 @@ COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/backend/dist backend/dist
 COPY .env backend/.env
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 appuser && \
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs appuser && \
     chown -R appuser:nodejs /app
 
 USER appuser

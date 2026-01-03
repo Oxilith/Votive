@@ -1,5 +1,6 @@
 # Frontend Dockerfile
-FROM node:24-alpine AS builder
+# Using Debian slim for consistency across all services
+FROM node:24-slim AS builder
 
 RUN npm install -g @dotenvx/dotenvx
 
@@ -33,10 +34,11 @@ COPY app/postcss.config.* app/
 
 RUN npm run build -w app
 
-# Production
-FROM nginx:1.28.1-alpine
+# Production - using Debian-based nginx for consistency
+FROM nginx:1.28.1
 
-RUN apk add --no-cache openssl nodejs npm && \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl curl && \
+    rm -rf /var/lib/apt/lists/* && \
     mkdir -p /etc/nginx/ssl
 
 COPY app/nginx.conf /etc/nginx/conf.d/default.conf

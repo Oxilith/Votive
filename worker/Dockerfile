@@ -1,7 +1,9 @@
 # Worker Dockerfile
-FROM node:24-alpine AS builder
+# Using Debian slim for consistency and libsql native module compatibility
+FROM node:24-slim AS builder
 
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @dotenvx/dotenvx
 
@@ -34,9 +36,10 @@ COPY worker/tsup.config.ts worker/
 RUN npm run build -w worker
 
 # Production
-FROM node:24-alpine
+FROM node:24-slim
 
-RUN apk add --no-cache openssl && \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
+    rm -rf /var/lib/apt/lists/* && \
     npm install -g @dotenvx/dotenvx
 
 WORKDIR /app
@@ -53,8 +56,8 @@ COPY --from=builder /app/worker/dist worker/dist
 COPY --from=builder /app/worker/prisma worker/prisma
 COPY .env worker/.env
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 appuser && \
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs appuser && \
     chown -R appuser:nodejs /app
 
 USER appuser
