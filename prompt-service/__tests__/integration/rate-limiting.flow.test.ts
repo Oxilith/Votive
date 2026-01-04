@@ -19,7 +19,7 @@
 
 import type { Express } from 'express';
 import request from 'supertest';
-import { integrationTestHooks, AUTH_ENDPOINTS, MOCK_PASSWORD } from '@/testing';
+import { AUTH_ENDPOINTS, MOCK_PASSWORD } from '@/testing';
 
 describe('Rate Limiting Integration Tests', () => {
   let app: Express;
@@ -37,17 +37,9 @@ describe('Rate Limiting Integration Tests', () => {
     // Dynamically import to get fresh instances with real limits
     const { createIntegrationTestApp } = await import('@/testing');
     app = createIntegrationTestApp();
-
-    await integrationTestHooks.setup();
-  });
-
-  beforeEach(async () => {
-    await integrationTestHooks.cleanup();
   });
 
   afterAll(async () => {
-    await integrationTestHooks.teardown();
-
     // Restore high limits for other tests
     process.env['RATE_LIMIT_WINDOW_MS'] = '60000';
     process.env['RATE_LIMIT_LOGIN'] = '10000';

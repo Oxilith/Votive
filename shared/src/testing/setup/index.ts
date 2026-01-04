@@ -7,9 +7,11 @@
  * - Exports Prisma client management (setTestPrisma, getTestPrisma, hasTestPrisma)
  * - Exports cleanup utilities (cleanupTestDb, cleanupTables, disconnectTestDb)
  * - Exports test wrappers (setupTestDb, withCleanup)
+ * - Exports testcontainers setup for PostgreSQL integration tests
  * @dependencies
  * - ./test-db for database setup functions
  * - ./db for database lifecycle utilities
+ * - ./testcontainers for PostgreSQL container management
  */
 
 export { setupIntegrationDb, checkDatabaseAvailable } from './test-db';
@@ -28,6 +30,16 @@ export {
     type TableName,
     type CleanupOptions,
 } from './db';
+
+// Testcontainers - PostgreSQL container for integration tests
+export {
+    setupTestContainer,
+    teardownTestContainer,
+    getTestDatabaseUrl,
+    isContainerRunning,
+    getTestPrismaClient,
+    TEST_DB_CONFIG,
+} from './testcontainers';
 
 // Re-export PrismaClient type for consumers
 export type { PrismaClient } from '../../generated/prisma/client';

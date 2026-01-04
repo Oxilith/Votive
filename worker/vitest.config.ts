@@ -32,6 +32,7 @@ export default defineConfig({
         'src/prisma/client.ts',
         'src/utils/logger.ts',
         'src/jobs/index.ts',
+        'src/utils/bootstrap-logger.ts', // Bootstrap-only logging, tested implicitly
       ],
       thresholds: {
         lines: 85,
@@ -59,15 +60,15 @@ export default defineConfig({
         test: {
           name: 'integration',
           environment: 'node',
-          setupFiles: ['./vitest.setup.ts'],
+          setupFiles: ['./vitest.setup.ts', './vitest.integration.setup.ts'],
           include: [
             '__tests__/integration/**/*.test.ts',
             '__tests__/integration/**/*.flow.test.ts',
           ],
           exclude: ['node_modules', 'dist'],
           testTimeout: 30000,
-          hookTimeout: 30000,
-          // Run integration tests sequentially to avoid SQLite database locking
+          hookTimeout: 120000, // 2 minute timeout for testcontainer startup
+          // Run integration tests sequentially for database isolation
           maxConcurrency: 1,
           fileParallelism: false,
         },

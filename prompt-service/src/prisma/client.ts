@@ -1,37 +1,37 @@
 /**
  * @file prompt-service/src/prisma/client.ts
- * @purpose Singleton Prisma client instance with SQLCipher encryption support
+ * @purpose Singleton Prisma client instance with PostgreSQL adapter and test injection
  * @functionality
  * - Provides a single shared Prisma client instance
- * - Supports SQLCipher encryption via libsql adapter when DATABASE_KEY is set
- * - Falls back to standard SQLite when no encryption key is provided
+ * - Supports test injection via setTestPrismaClient() for integration tests
+ * - Uses @prisma/adapter-pg for PostgreSQL connections (Prisma 7+)
  * - Prevents multiple client instances in development with hot reload
  * @note Graceful shutdown is handled in index.ts via SIGTERM/SIGINT handlers
  * @dependencies
  * - shared/prisma for PrismaClient (generated types)
- * - @prisma/adapter-libsql for driver adapter
- * - @libsql/client for SQLCipher encrypted connections
+ * - @prisma/adapter-pg for PostgreSQL driver adapter
  */
 
 import { PrismaClient } from '@votive/shared/prisma';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 /**
  * Global cache for Prisma instance.
  */
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  testPrisma: PrismaClient | undefined;
 };
 
 function createPrismaClient(): PrismaClient {
-  const databaseUrl = process.env.DATABASE_URL ?? 'file:./dev.db';
-  const encryptionKey = process.env.DATABASE_KEY;
+  const connectionString = process.env.DATABASE_URL;
 
-  // Create adapter with libsql config (Prisma 7+ API)
-  const adapter = new PrismaLibSql({
-    url: databaseUrl,
-    encryptionKey,
-  });
+  if (!connectionString) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+
+  // Create PostgreSQL adapter (Prisma 7+ API)
+  const adapter = new PrismaPg({ connectionString });
 
   // Determine log level based on environment
   // - Development: verbose logging for debugging
@@ -51,13 +51,38 @@ function createPrismaClient(): PrismaClient {
 }
 
 /**
- * Singleton Prisma instance
- * Uses global caching in all environments to ensure a single connection pool:
- * - Development: Prevents connection leaks during hot module reloading
- * - Production: Ensures consistent single instance across module imports
- * The caching is safe because PrismaClient manages its own connection pool.
+ * Sets a test Prisma client for integration tests.
+ * Called by testcontainer setup before tests run.
  */
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export function setTestPrismaClient(client: PrismaClient): void {
+  globalForPrisma.testPrisma = client;
+}
 
-// Cache instance globally to prevent connection leaks
-globalForPrisma.prisma = prisma;
+/**
+ * Clears the test Prisma client after tests complete.
+ */
+export function clearTestPrismaClient(): void {
+  globalForPrisma.testPrisma = undefined;
+}
+
+/**
+ * Gets the active Prisma client (test client if set, otherwise production singleton).
+ */
+function getActivePrisma(): PrismaClient {
+  if (globalForPrisma.testPrisma) {
+    return globalForPrisma.testPrisma;
+  }
+  globalForPrisma.prisma ??= createPrismaClient();
+  return globalForPrisma.prisma;
+}
+
+/**
+ * Singleton Prisma instance with test injection support.
+ * Uses Proxy to dynamically resolve the active client (test or production).
+ * This allows integration tests to inject a testcontainer-connected client.
+ */
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    return getActivePrisma()[prop as keyof PrismaClient];
+  },
+});

@@ -30,8 +30,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@libsql/client": "^0.15.15",
-    "@prisma/adapter-libsql": "^7.2.0",
+    "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@prisma/config": "^7.2.0",
     "bcryptjs": "^3.0.3",

@@ -584,6 +584,7 @@ export type ABVariantCreateOrConnectWithoutAbTestInput = {
 
 export type ABVariantCreateManyAbTestInputEnvelope = {
   data: Prisma.ABVariantCreateManyAbTestInput | Prisma.ABVariantCreateManyAbTestInput[]
+  skipDuplicates?: boolean
 }
 
 export type ABVariantUpsertWithWhereUniqueWithoutAbTestInput = {
@@ -1518,6 +1519,7 @@ export type ABVariantCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many ABVariants.
    */
   data: Prisma.ABVariantCreateManyInput | Prisma.ABVariantCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1536,6 +1538,7 @@ export type ABVariantCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many ABVariants.
    */
   data: Prisma.ABVariantCreateManyInput | Prisma.ABVariantCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

@@ -69,16 +69,16 @@ export default defineConfig({
         test: {
           name: 'integration',
           environment: 'node',
-          setupFiles: ['./vitest.setup.ts'],
+          setupFiles: ['./vitest.setup.ts', './vitest.integration.setup.ts'],
           include: [
             '__tests__/integration/**/*.test.ts',
             '__tests__/integration/**/*.flow.test.ts',
           ],
           exclude: ['node_modules', 'dist'],
           testTimeout: 30000,
-          hookTimeout: 30000,
-          // Run integration tests sequentially to avoid SQLite database locking
-          // Use single-threaded mode for database access
+          hookTimeout: 120000, // 2 minute timeout for testcontainer startup
+          // Run integration tests sequentially for database isolation
+          // Use single-threaded mode for shared testcontainer
           maxConcurrency: 1,
           fileParallelism: false,
         },

@@ -3,7 +3,7 @@
  * @purpose Centralized environment configuration with validation for worker service
  * @functionality
  * - Loads environment variables from .env file
- * - Validates required configuration values
+ * - Validates required DATABASE_URL for PostgreSQL connection
  * - Provides typed configuration object for application use
  * - Configures job-specific settings (enabled/schedule)
  * - Configures health server port (default: 3003)
@@ -14,7 +14,6 @@
 
 import { config as dotenvConfig } from 'dotenv';
 import { z } from 'zod';
-import { bootstrapLogger } from '@/utils/bootstrap-logger';
 
 dotenvConfig();
 
@@ -22,12 +21,8 @@ const configSchema = z.object({
   // Environment
   nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
 
-  // Database (shared with prompt-service)
-  databaseUrl: z.string().optional(),
-  databaseKey: z
-    .string()
-    .min(32, 'DATABASE_KEY must be at least 32 characters for libsql encryption')
-    .optional(),
+  // Database (shared with prompt-service) - PostgreSQL connection string
+  databaseUrl: z.string().min(1, 'DATABASE_URL is required'),
 
   // Logging
   logLevel: z.enum(['silent', 'fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
@@ -47,34 +42,12 @@ const configSchema = z.object({
   }),
 });
 
-type Config = z.infer<typeof configSchema> & {
-  databaseUrl: string;
-};
+type Config = z.infer<typeof configSchema>;
 
 function loadConfig(): Config {
-  const nodeEnv = process.env.NODE_ENV ?? 'development';
-  const isProduction = nodeEnv === 'production';
-
-  // Validate required production environment variables
-  if (isProduction) {
-    if (!process.env.DATABASE_URL) {
-      throw new Error(
-        'DATABASE_URL is required in production. Cannot use default dev.db in production environment.'
-      );
-    }
-  }
-
-  // Warn in development if DATABASE_KEY is not set (database will be unencrypted)
-  if (!isProduction && !process.env.DATABASE_KEY) {
-    bootstrapLogger.warn(
-      'DATABASE_KEY not set - database will not be encrypted. Set DATABASE_KEY for encryption.'
-    );
-  }
-
   const result = configSchema.safeParse({
     nodeEnv: process.env.NODE_ENV,
     databaseUrl: process.env.DATABASE_URL,
-    databaseKey: process.env.DATABASE_KEY,
     logLevel: process.env.LOG_LEVEL,
     healthPort: process.env.WORKER_HEALTH_PORT,
     jobs: {
@@ -92,14 +65,7 @@ function loadConfig(): Config {
     throw new Error(`Configuration validation failed:\n${errors}`);
   }
 
-  // Apply default database URL for non-production environments
-  // Worker shares database with prompt-service - use the same file in development
-  const databaseUrl = result.data.databaseUrl ?? 'file:../prompt-service/prisma/dev.db';
-
-  return {
-    ...result.data,
-    databaseUrl,
-  };
+  return result.data;
 }
 
 export const config = loadConfig();

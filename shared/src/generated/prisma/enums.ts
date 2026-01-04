@@ -9,7 +9,17 @@
 * 🟢 You can import this file directly.
 */
 
+export const VariantType = {
+  withThinking: 'withThinking',
+  withoutThinking: 'withoutThinking'
+} as const
+
+export type VariantType = (typeof VariantType)[keyof typeof VariantType]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const ThinkingType = {
+  enabled: 'enabled',
+  disabled: 'disabled'
+} as const
+
+export type ThinkingType = (typeof ThinkingType)[keyof typeof ThinkingType]

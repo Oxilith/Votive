@@ -1,5 +1,5 @@
 # Prompt Service Dockerfile
-# Using Debian slim for consistency and libsql native module compatibility
+# Using Debian slim for consistency with other services
 FROM node:24-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
@@ -27,7 +27,7 @@ RUN npm run build -w shared
 # Build prompt-service
 COPY prompt-service/src prompt-service/src
 COPY prompt-service/prisma prompt-service/prisma
-COPY prompt-service/scripts prompt-service/scripts
+COPY prompt-service/prisma.config.ts prompt-service/
 COPY prompt-service/tsconfig.json prompt-service/
 COPY prompt-service/tsup.config.ts prompt-service/
 COPY prompt-service/vite.config.ts prompt-service/
@@ -53,6 +53,7 @@ RUN npm ci --workspaces --include-workspace-root --omit=dev
 COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/prompt-service/dist prompt-service/dist
 COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
+COPY --from=builder /app/prompt-service/prisma.config.ts prompt-service/
 COPY .env prompt-service/.env
 
 # Create non-root user matching worker (UID 1001) for shared volume access
@@ -67,6 +68,6 @@ WORKDIR /app/prompt-service
 EXPOSE 3002
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:3002/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
+  CMD node -e "process.env.NODE_TLS_REJECT_UNAUTHORIZED='0'; fetch('https://localhost:3002/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
 
-CMD ["dotenvx", "run", "--", "sh", "-c", "if [ -n \"$DATABASE_KEY\" ]; then node dist/scripts/migrate.js; else npx prisma migrate deploy; fi && node dist/prisma/seed.js && node dist/src/index.js"]
+CMD ["dotenvx", "run", "--", "sh", "-c", "npx prisma migrate deploy --config ./prisma.config.ts && node dist/prisma/seed.js && node dist/src/index.js"]

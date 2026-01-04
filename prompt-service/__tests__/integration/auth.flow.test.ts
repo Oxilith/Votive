@@ -17,26 +17,13 @@ import request from 'supertest';
 import {
   createIntegrationTestApp,
   extractCsrfToken,
-  integrationTestHooks,
   MOCK_PASSWORD,
-  prisma,
   registerTestUser,
 } from '@/testing';
+import { getTestPrisma } from '@votive/shared/testing';
 
 describe('Auth Flow Integration Tests', () => {
   const app = createIntegrationTestApp();
-
-  beforeAll(async () => {
-    await integrationTestHooks.setup();
-  });
-
-  beforeEach(async () => {
-    await integrationTestHooks.cleanup();
-  });
-
-  afterAll(async () => {
-    await integrationTestHooks.teardown();
-  });
 
   describe('POST /api/user-auth/register', () => {
     it('should register a new user successfully', async () => {
@@ -429,6 +416,7 @@ describe('Auth Flow Integration Tests', () => {
       });
 
       // Manually verify the user in database
+      const prisma = getTestPrisma();
       await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: true },

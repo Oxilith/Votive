@@ -1485,6 +1485,7 @@ export type PromptCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Prompts.
    */
   data: Prisma.PromptCreateManyInput | Prisma.PromptCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1503,6 +1504,7 @@ export type PromptCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many Prompts.
    */
   data: Prisma.PromptCreateManyInput | Prisma.PromptCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**

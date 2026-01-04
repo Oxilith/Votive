@@ -18,6 +18,7 @@ import { prisma } from '@/prisma';
 import { NotFoundError } from '@/errors';
 import { validatePromptContent, validatePromptKey } from '@/utils';
 import type { Prisma, Prompt, PromptVariant, PromptVersion } from '@votive/shared/prisma';
+import { VariantType, ThinkingType } from '@votive/shared/prisma';
 
 export interface PromptWithVariants extends Prompt {
   variants: PromptVariant[];
@@ -113,18 +114,18 @@ export class PromptService {
         variants: {
           create: [
             {
-              variantType: 'withThinking',
+              variantType: VariantType.withThinking,
               temperature: input.variants.withThinking.temperature,
               maxTokens: input.variants.withThinking.maxTokens,
-              thinkingType: 'enabled',
+              thinkingType: ThinkingType.enabled,
               budgetTokens: input.variants.withThinking.budgetTokens,
               isDefault: true,
             },
             {
-              variantType: 'withoutThinking',
+              variantType: VariantType.withoutThinking,
               temperature: input.variants.withoutThinking.temperature,
               maxTokens: input.variants.withoutThinking.maxTokens,
-              thinkingType: 'disabled',
+              thinkingType: ThinkingType.disabled,
               budgetTokens: null,
               isDefault: false,
             },
@@ -214,7 +215,7 @@ export class PromptService {
           }
           if (Object.keys(thinkingData).length > 0) {
             await tx.promptVariant.updateMany({
-              where: { promptId: id, variantType: 'withThinking' },
+              where: { promptId: id, variantType: VariantType.withThinking },
               data: thinkingData,
             });
           }
@@ -229,7 +230,7 @@ export class PromptService {
           }
           if (Object.keys(nonThinkingData).length > 0) {
             await tx.promptVariant.updateMany({
-              where: { promptId: id, variantType: 'withoutThinking' },
+              where: { promptId: id, variantType: VariantType.withoutThinking },
               data: nonThinkingData,
             });
           }

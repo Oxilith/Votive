@@ -19,6 +19,7 @@ RUN npm ci --workspaces --include-workspace-root
 
 # Generate Prisma client (uses prompt-service schema, outputs to shared/src/generated)
 COPY prompt-service/prisma prompt-service/prisma
+COPY prompt-service/prisma.config.ts prompt-service/
 RUN npx prisma generate --schema=prompt-service/prisma/schema.prisma
 
 # Build shared

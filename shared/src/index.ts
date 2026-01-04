@@ -109,5 +109,6 @@ export {
 } from './validators';
 
 // NOTE: Prisma exports are in 'shared/prisma' (server-side only)
+// NOTE: Path utilities (findProjectRoot) are in 'shared/testing' (server-side only)
 // Do NOT add Prisma exports here - they contain Node.js runtime code
 // that breaks app builds. Import from '@votive/shared/prisma' in backend packages.

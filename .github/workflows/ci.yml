@@ -47,8 +47,10 @@ jobs:
     name: Test
     needs: lint
     runs-on: ubuntu-latest
+    # Integration tests use testcontainers to start PostgreSQL automatically
+    # Unit tests mock Prisma so DATABASE_URL is only needed for config validation
     env:
-      DATABASE_URL: file:./prisma/dev.db
+      DATABASE_URL: postgresql://test:test@localhost:5432/votive_test
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -67,9 +69,6 @@ jobs:
 
       - name: Generate Prisma Client
         run: npm run db:generate -w prompt-service
-
-      - name: Run database migrations
-        run: npm run db:migrate:deploy -w prompt-service
 
       - name: Run tests with coverage
         run: npm run test:coverage

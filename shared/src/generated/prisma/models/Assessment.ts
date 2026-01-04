@@ -410,6 +410,7 @@ export type AssessmentCreateOrConnectWithoutUserInput = {
 
 export type AssessmentCreateManyUserInputEnvelope = {
   data: Prisma.AssessmentCreateManyUserInput | Prisma.AssessmentCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type AssessmentUpsertWithWhereUniqueWithoutUserInput = {
@@ -1269,6 +1270,7 @@ export type AssessmentCreateManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * The data used to create many Assessments.
    */
   data: Prisma.AssessmentCreateManyInput | Prisma.AssessmentCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1287,6 +1289,7 @@ export type AssessmentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    * The data used to create many Assessments.
    */
   data: Prisma.AssessmentCreateManyInput | Prisma.AssessmentCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

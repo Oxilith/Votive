@@ -13,6 +13,7 @@
 
 import {prisma} from '@/prisma';
 import type { Prisma, ABTest, ABVariant, ABVariantConfig } from '@votive/shared/prisma';
+import { VariantType, ThinkingType } from '@votive/shared/prisma';
 import {NotFoundError, ValidationError} from '@/errors';
 
 export interface ABTestWithVariants extends ABTest {
@@ -233,10 +234,10 @@ export class ABTestService {
                 ...(input.configs.withThinking
                   ? [
                       {
-                        variantType: 'withThinking',
+                        variantType: VariantType.withThinking,
                         temperature: input.configs.withThinking.temperature,
                         maxTokens: input.configs.withThinking.maxTokens,
-                        thinkingType: 'enabled',
+                        thinkingType: ThinkingType.enabled,
                         budgetTokens: input.configs.withThinking.budgetTokens,
                       },
                     ]
@@ -244,10 +245,10 @@ export class ABTestService {
                 ...(input.configs.withoutThinking
                   ? [
                       {
-                        variantType: 'withoutThinking',
+                        variantType: VariantType.withoutThinking,
                         temperature: input.configs.withoutThinking.temperature,
                         maxTokens: input.configs.withoutThinking.maxTokens,
-                        thinkingType: 'disabled',
+                        thinkingType: ThinkingType.disabled,
                         budgetTokens: null,
                       },
                     ]

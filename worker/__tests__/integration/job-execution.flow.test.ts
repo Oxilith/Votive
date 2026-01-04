@@ -8,60 +8,15 @@
  * @dependencies
  * - vitest for testing framework
  * - @/jobs for job implementations
- * - @/prisma for database access
- * @note These tests require a running database with migrations applied.
- *       They will be skipped if the database is not available.
+ * - @votive/shared/testing for testcontainer setup
  */
 
-
 import { tokenCleanupJob } from '@/jobs';
-import { createFreshPrismaClient } from '@/prisma';
-import {
-  setTestPrisma,
-  cleanupTestDb,
-} from '@votive/shared/testing';
+import { getTestPrisma } from '@votive/shared/testing';
 
 describe('Job Execution Integration Tests', () => {
-  const prisma = createFreshPrismaClient();
-  let databaseAvailable = false;
-
-  beforeAll(async () => {
-    // Check if database is available and has migrations applied
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      // Check if User table exists (migrations applied)
-      await prisma.user.findFirst();
-      databaseAvailable = true;
-      setTestPrisma(prisma);
-    } catch {
-      console.warn(
-        'Database not available or migrations not applied. ' +
-        'Skipping worker integration tests. ' +
-        'Run `npm run db:migrate` in prompt-service to enable these tests.'
-      );
-      databaseAvailable = false;
-    }
-  });
-
-  beforeEach(async () => {
-    if (databaseAvailable) {
-      await cleanupTestDb();
-    }
-  });
-
-  afterAll(async () => {
-    if (databaseAvailable) {
-      await cleanupTestDb();
-    }
-    await prisma.$disconnect();
-  });
-
   describe('Token Cleanup Job', () => {
     it('should run successfully with no tokens to clean', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
       const result = await tokenCleanupJob.run();
 
       expect(result.success).toBe(true);
@@ -70,10 +25,8 @@ describe('Job Execution Integration Tests', () => {
     });
 
     it('should delete expired refresh tokens', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
+      const prisma = getTestPrisma();
+
       // Create a test user first
       const user = await prisma.user.create({
         data: {
@@ -126,10 +79,8 @@ describe('Job Execution Integration Tests', () => {
     });
 
     it('should delete expired password reset tokens', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
+      const prisma = getTestPrisma();
+
       // Create a test user
       const user = await prisma.user.create({
         data: {
@@ -165,10 +116,8 @@ describe('Job Execution Integration Tests', () => {
     });
 
     it('should delete used password reset tokens', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
+      const prisma = getTestPrisma();
+
       // Create a test user
       const user = await prisma.user.create({
         data: {
@@ -199,10 +148,8 @@ describe('Job Execution Integration Tests', () => {
     });
 
     it('should delete expired email verification tokens', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
+      const prisma = getTestPrisma();
+
       // Create a test user
       const user = await prisma.user.create({
         data: {
@@ -232,10 +179,8 @@ describe('Job Execution Integration Tests', () => {
     });
 
     it('should clean up old revoked refresh tokens', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
+      const prisma = getTestPrisma();
+
       // Create a test user
       const user = await prisma.user.create({
         data: {
@@ -293,10 +238,8 @@ describe('Job Execution Integration Tests', () => {
     });
 
     it('should report accurate metrics for mixed cleanup', async () => {
-      if (!databaseAvailable) {
-        console.log('Skipping test: database not available');
-        return;
-      }
+      const prisma = getTestPrisma();
+
       // Create a test user
       const user = await prisma.user.create({
         data: {

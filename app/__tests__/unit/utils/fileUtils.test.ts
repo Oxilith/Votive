@@ -70,7 +70,7 @@ describe('fileUtils', () => {
       exportToJson(sampleResponses);
 
       expect(mockCreateObjectURL).toHaveBeenCalled();
-      const blobArg = mockCreateObjectURL.mock.calls[0][0];
+      const blobArg = mockCreateObjectURL.mock.calls[0]?.[0];
       expect(blobArg).toBeInstanceOf(Blob);
     });
 

@@ -68,13 +68,18 @@ services:
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM=${SMTP_FROM}
+      # SSL certificate paths for HTTPS
+      - SSL_KEY_PATH=/app/certs/localhost+2-key.pem
+      - SSL_CERT_PATH=/app/certs/localhost+2.pem
     ports:
       - "3002:3002"
+    volumes:
+      - ${PWD}/certs:/app/certs:ro
     depends_on:
       postgresql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      test: ["CMD", "node", "-e", "process.env.NODE_TLS_REJECT_UNAUTHORIZED='0'; fetch('https://localhost:3002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 5

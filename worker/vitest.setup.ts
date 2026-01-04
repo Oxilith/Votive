@@ -19,9 +19,9 @@ vi.mock('dotenv', () => ({
 process.env.NODE_ENV = 'test';
 // Use 'silent' to suppress all log output during tests
 process.env.LOG_LEVEL = 'silent';
-// Point to the shared database with prompt-service
-// Note: DATABASE_KEY is intentionally not set - test DB is unencrypted
-process.env.DATABASE_URL = 'file:../prompt-service/prisma/dev.db';
+// Use PostgreSQL for tests - integration tests will check actual availability
+// Unit tests mock Prisma so this just needs to be a valid connection string
+process.env.DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/votive_test';
 
 // Reset mocks after each test
 afterEach(() => {

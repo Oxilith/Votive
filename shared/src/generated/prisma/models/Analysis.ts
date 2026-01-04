@@ -424,6 +424,7 @@ export type AnalysisCreateOrConnectWithoutUserInput = {
 
 export type AnalysisCreateManyUserInputEnvelope = {
   data: Prisma.AnalysisCreateManyUserInput | Prisma.AnalysisCreateManyUserInput[]
+  skipDuplicates?: boolean
 }
 
 export type AnalysisUpsertWithWhereUniqueWithoutUserInput = {
@@ -474,6 +475,7 @@ export type AnalysisCreateOrConnectWithoutAssessmentInput = {
 
 export type AnalysisCreateManyAssessmentInputEnvelope = {
   data: Prisma.AnalysisCreateManyAssessmentInput | Prisma.AnalysisCreateManyAssessmentInput[]
+  skipDuplicates?: boolean
 }
 
 export type AnalysisUpsertWithWhereUniqueWithoutAssessmentInput = {
@@ -1273,6 +1275,7 @@ export type AnalysisCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many Analyses.
    */
   data: Prisma.AnalysisCreateManyInput | Prisma.AnalysisCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1291,6 +1294,7 @@ export type AnalysisCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many Analyses.
    */
   data: Prisma.AnalysisCreateManyInput | Prisma.AnalysisCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

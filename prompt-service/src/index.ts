@@ -4,12 +4,15 @@
  * @functionality
  * - Initializes Express application with middleware
  * - Configures CORS, CSP security headers, and logging
+ * - Supports HTTPS when SSL certificates are available
  * - Mounts API routes and admin UI static files
  * - Protects admin UI with HttpOnly cookie authentication in production
  * - Provides health check endpoint with database verification
  * - Handles graceful shutdown
  * @dependencies
  * - express for HTTP server
+ * - https for HTTPS server (when SSL certs available)
+ * - fs for reading SSL certificates
  * - helmet for security headers with CSP
  * - cors for cross-origin requests
  * - cookie-parser for signed HttpOnly session cookies
@@ -21,6 +24,8 @@
  */
 
 import express from 'express';
+import https from 'https';
+import fs from 'fs';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -186,15 +191,37 @@ app.use((_req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Start server
-const server = app.listen(config.port, () => {
-  logger.info(`Prompt service listening on port ${config.port}`);
-  logger.info(`Environment: ${config.nodeEnv}`);
-  if (config.nodeEnv !== 'production') {
-    logger.info(`Admin UI available at http://localhost:${config.port}/admin`);
-    logger.info(`API available at http://localhost:${config.port}/api`);
-  }
-});
+// SSL configuration for HTTPS
+const sslKeyPath = process.env.SSL_KEY_PATH ?? '/app/certs/localhost+2-key.pem';
+const sslCertPath = process.env.SSL_CERT_PATH ?? '/app/certs/localhost+2.pem';
+const useHttps = fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath);
+
+// Start server (HTTPS if certificates available, otherwise HTTP)
+const server = useHttps
+  ? https
+      .createServer(
+        {
+          key: fs.readFileSync(sslKeyPath),
+          cert: fs.readFileSync(sslCertPath),
+        },
+        app
+      )
+      .listen(config.port, () => {
+        logger.info(`Prompt service listening on HTTPS port ${config.port}`);
+        logger.info(`Environment: ${config.nodeEnv}`);
+        if (config.nodeEnv !== 'production') {
+          logger.info(`Admin UI available at https://localhost:${config.port}/admin`);
+          logger.info(`API available at https://localhost:${config.port}/api`);
+        }
+      })
+  : app.listen(config.port, () => {
+      logger.info(`Prompt service listening on HTTP port ${config.port}`);
+      logger.info(`Environment: ${config.nodeEnv}`);
+      if (config.nodeEnv !== 'production') {
+        logger.info(`Admin UI available at http://localhost:${config.port}/admin`);
+        logger.info(`API available at http://localhost:${config.port}/api`);
+      }
+    });
 
 // Graceful shutdown
 const shutdown = async () => {

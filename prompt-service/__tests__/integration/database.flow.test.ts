@@ -16,7 +16,6 @@ import request from 'supertest';
 import {
   createAuthenticatedRequest,
   createIntegrationTestApp,
-  integrationTestHooks,
   MOCK_PASSWORD,
   registerTestUser,
   validAssessmentResponses,
@@ -24,18 +23,6 @@ import {
 
 describe('Database Flow Integration Tests', () => {
   const app = createIntegrationTestApp();
-
-  beforeAll(async () => {
-    await integrationTestHooks.setup();
-  });
-
-  beforeEach(async () => {
-    await integrationTestHooks.cleanup();
-  });
-
-  afterAll(async () => {
-    await integrationTestHooks.teardown();
-  });
 
   describe('Assessment CRUD', () => {
     it('should create assessment successfully', async () => {

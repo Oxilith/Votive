@@ -41,10 +41,10 @@ export type PromptVariantSumAggregateOutputType = {
 export type PromptVariantMinAggregateOutputType = {
   id: string | null
   promptId: string | null
-  variantType: string | null
+  variantType: $Enums.VariantType | null
   temperature: number | null
   maxTokens: number | null
-  thinkingType: string | null
+  thinkingType: $Enums.ThinkingType | null
   budgetTokens: number | null
   isDefault: boolean | null
   createdAt: Date | null
@@ -54,10 +54,10 @@ export type PromptVariantMinAggregateOutputType = {
 export type PromptVariantMaxAggregateOutputType = {
   id: string | null
   promptId: string | null
-  variantType: string | null
+  variantType: $Enums.VariantType | null
   temperature: number | null
   maxTokens: number | null
-  thinkingType: string | null
+  thinkingType: $Enums.ThinkingType | null
   budgetTokens: number | null
   isDefault: boolean | null
   createdAt: Date | null
@@ -220,10 +220,10 @@ export type PromptVariantGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 export type PromptVariantGroupByOutputType = {
   id: string
   promptId: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens: number | null
   isDefault: boolean
   createdAt: Date
@@ -256,10 +256,10 @@ export type PromptVariantWhereInput = {
   NOT?: Prisma.PromptVariantWhereInput | Prisma.PromptVariantWhereInput[]
   id?: Prisma.StringFilter<"PromptVariant"> | string
   promptId?: Prisma.StringFilter<"PromptVariant"> | string
-  variantType?: Prisma.StringFilter<"PromptVariant"> | string
+  variantType?: Prisma.EnumVariantTypeFilter<"PromptVariant"> | $Enums.VariantType
   temperature?: Prisma.FloatFilter<"PromptVariant"> | number
   maxTokens?: Prisma.IntFilter<"PromptVariant"> | number
-  thinkingType?: Prisma.StringFilter<"PromptVariant"> | string
+  thinkingType?: Prisma.EnumThinkingTypeFilter<"PromptVariant"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableFilter<"PromptVariant"> | number | null
   isDefault?: Prisma.BoolFilter<"PromptVariant"> | boolean
   createdAt?: Prisma.DateTimeFilter<"PromptVariant"> | Date | string
@@ -288,10 +288,10 @@ export type PromptVariantWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PromptVariantWhereInput[]
   NOT?: Prisma.PromptVariantWhereInput | Prisma.PromptVariantWhereInput[]
   promptId?: Prisma.StringFilter<"PromptVariant"> | string
-  variantType?: Prisma.StringFilter<"PromptVariant"> | string
+  variantType?: Prisma.EnumVariantTypeFilter<"PromptVariant"> | $Enums.VariantType
   temperature?: Prisma.FloatFilter<"PromptVariant"> | number
   maxTokens?: Prisma.IntFilter<"PromptVariant"> | number
-  thinkingType?: Prisma.StringFilter<"PromptVariant"> | string
+  thinkingType?: Prisma.EnumThinkingTypeFilter<"PromptVariant"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableFilter<"PromptVariant"> | number | null
   isDefault?: Prisma.BoolFilter<"PromptVariant"> | boolean
   createdAt?: Prisma.DateTimeFilter<"PromptVariant"> | Date | string
@@ -323,10 +323,10 @@ export type PromptVariantScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PromptVariantScalarWhereWithAggregatesInput | Prisma.PromptVariantScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"PromptVariant"> | string
   promptId?: Prisma.StringWithAggregatesFilter<"PromptVariant"> | string
-  variantType?: Prisma.StringWithAggregatesFilter<"PromptVariant"> | string
+  variantType?: Prisma.EnumVariantTypeWithAggregatesFilter<"PromptVariant"> | $Enums.VariantType
   temperature?: Prisma.FloatWithAggregatesFilter<"PromptVariant"> | number
   maxTokens?: Prisma.IntWithAggregatesFilter<"PromptVariant"> | number
-  thinkingType?: Prisma.StringWithAggregatesFilter<"PromptVariant"> | string
+  thinkingType?: Prisma.EnumThinkingTypeWithAggregatesFilter<"PromptVariant"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableWithAggregatesFilter<"PromptVariant"> | number | null
   isDefault?: Prisma.BoolWithAggregatesFilter<"PromptVariant"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PromptVariant"> | Date | string
@@ -335,10 +335,10 @@ export type PromptVariantScalarWhereWithAggregatesInput = {
 
 export type PromptVariantCreateInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   isDefault?: boolean
   createdAt?: Date | string
@@ -349,10 +349,10 @@ export type PromptVariantCreateInput = {
 export type PromptVariantUncheckedCreateInput = {
   id?: string
   promptId: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   isDefault?: boolean
   createdAt?: Date | string
@@ -361,10 +361,10 @@ export type PromptVariantUncheckedCreateInput = {
 
 export type PromptVariantUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -375,10 +375,10 @@ export type PromptVariantUpdateInput = {
 export type PromptVariantUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   promptId?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -388,10 +388,10 @@ export type PromptVariantUncheckedUpdateInput = {
 export type PromptVariantCreateManyInput = {
   id?: string
   promptId: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   isDefault?: boolean
   createdAt?: Date | string
@@ -400,10 +400,10 @@ export type PromptVariantCreateManyInput = {
 
 export type PromptVariantUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -413,10 +413,10 @@ export type PromptVariantUpdateManyMutationInput = {
 export type PromptVariantUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   promptId?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -435,7 +435,7 @@ export type PromptVariantOrderByRelationAggregateInput = {
 
 export type PromptVariantPromptIdVariantTypeCompoundUniqueInput = {
   promptId: string
-  variantType: string
+  variantType: $Enums.VariantType
 }
 
 export type PromptVariantCountOrderByAggregateInput = {
@@ -531,6 +531,10 @@ export type PromptVariantUncheckedUpdateManyWithoutPromptNestedInput = {
   deleteMany?: Prisma.PromptVariantScalarWhereInput | Prisma.PromptVariantScalarWhereInput[]
 }
 
+export type EnumVariantTypeFieldUpdateOperationsInput = {
+  set?: $Enums.VariantType
+}
+
 export type FloatFieldUpdateOperationsInput = {
   set?: number
   increment?: number
@@ -547,6 +551,10 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type EnumThinkingTypeFieldUpdateOperationsInput = {
+  set?: $Enums.ThinkingType
+}
+
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -557,10 +565,10 @@ export type NullableIntFieldUpdateOperationsInput = {
 
 export type PromptVariantCreateWithoutPromptInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   isDefault?: boolean
   createdAt?: Date | string
@@ -569,10 +577,10 @@ export type PromptVariantCreateWithoutPromptInput = {
 
 export type PromptVariantUncheckedCreateWithoutPromptInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   isDefault?: boolean
   createdAt?: Date | string
@@ -586,6 +594,7 @@ export type PromptVariantCreateOrConnectWithoutPromptInput = {
 
 export type PromptVariantCreateManyPromptInputEnvelope = {
   data: Prisma.PromptVariantCreateManyPromptInput | Prisma.PromptVariantCreateManyPromptInput[]
+  skipDuplicates?: boolean
 }
 
 export type PromptVariantUpsertWithWhereUniqueWithoutPromptInput = {
@@ -610,10 +619,10 @@ export type PromptVariantScalarWhereInput = {
   NOT?: Prisma.PromptVariantScalarWhereInput | Prisma.PromptVariantScalarWhereInput[]
   id?: Prisma.StringFilter<"PromptVariant"> | string
   promptId?: Prisma.StringFilter<"PromptVariant"> | string
-  variantType?: Prisma.StringFilter<"PromptVariant"> | string
+  variantType?: Prisma.EnumVariantTypeFilter<"PromptVariant"> | $Enums.VariantType
   temperature?: Prisma.FloatFilter<"PromptVariant"> | number
   maxTokens?: Prisma.IntFilter<"PromptVariant"> | number
-  thinkingType?: Prisma.StringFilter<"PromptVariant"> | string
+  thinkingType?: Prisma.EnumThinkingTypeFilter<"PromptVariant"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableFilter<"PromptVariant"> | number | null
   isDefault?: Prisma.BoolFilter<"PromptVariant"> | boolean
   createdAt?: Prisma.DateTimeFilter<"PromptVariant"> | Date | string
@@ -622,10 +631,10 @@ export type PromptVariantScalarWhereInput = {
 
 export type PromptVariantCreateManyPromptInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   isDefault?: boolean
   createdAt?: Date | string
@@ -634,10 +643,10 @@ export type PromptVariantCreateManyPromptInput = {
 
 export type PromptVariantUpdateWithoutPromptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -646,10 +655,10 @@ export type PromptVariantUpdateWithoutPromptInput = {
 
 export type PromptVariantUncheckedUpdateWithoutPromptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -658,10 +667,10 @@ export type PromptVariantUncheckedUpdateWithoutPromptInput = {
 
 export type PromptVariantUncheckedUpdateManyWithoutPromptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -744,10 +753,10 @@ export type $PromptVariantPayload<ExtArgs extends runtime.Types.Extensions.Inter
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     promptId: string
-    variantType: string
+    variantType: $Enums.VariantType
     temperature: number
     maxTokens: number
-    thinkingType: string
+    thinkingType: $Enums.ThinkingType
     budgetTokens: number | null
     isDefault: boolean
     createdAt: Date
@@ -1178,10 +1187,10 @@ export interface Prisma__PromptVariantClient<T, Null = never, ExtArgs extends ru
 export interface PromptVariantFieldRefs {
   readonly id: Prisma.FieldRef<"PromptVariant", 'String'>
   readonly promptId: Prisma.FieldRef<"PromptVariant", 'String'>
-  readonly variantType: Prisma.FieldRef<"PromptVariant", 'String'>
+  readonly variantType: Prisma.FieldRef<"PromptVariant", 'VariantType'>
   readonly temperature: Prisma.FieldRef<"PromptVariant", 'Float'>
   readonly maxTokens: Prisma.FieldRef<"PromptVariant", 'Int'>
-  readonly thinkingType: Prisma.FieldRef<"PromptVariant", 'String'>
+  readonly thinkingType: Prisma.FieldRef<"PromptVariant", 'ThinkingType'>
   readonly budgetTokens: Prisma.FieldRef<"PromptVariant", 'Int'>
   readonly isDefault: Prisma.FieldRef<"PromptVariant", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"PromptVariant", 'DateTime'>
@@ -1415,6 +1424,7 @@ export type PromptVariantCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many PromptVariants.
    */
   data: Prisma.PromptVariantCreateManyInput | Prisma.PromptVariantCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1433,6 +1443,7 @@ export type PromptVariantCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * The data used to create many PromptVariants.
    */
   data: Prisma.PromptVariantCreateManyInput | Prisma.PromptVariantCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

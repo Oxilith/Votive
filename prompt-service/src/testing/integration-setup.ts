@@ -1,15 +1,12 @@
 /**
  * @file prompt-service/src/testing/integration-setup.ts
- * @purpose Integration test infrastructure for prompt-service with database lifecycle management
+ * @purpose Integration test infrastructure for prompt-service
  * @functionality
  * - Creates Express app for integration testing (without rate limiting)
- * - Provides database setup and cleanup hooks with availability checking
- * - Provides requireDatabase() hook that fails tests with migration instructions
  * - Creates authenticated request builders with JWT tokens
- * - Manages test user creation and cleanup
+ * - Manages test user creation
  * - Extracts CSRF tokens from response cookies
  * - Provides shared test fixtures (validAssessmentResponses)
- * - Gracefully skips tests when database unavailable (via setup())
  * - Exports AUTH_ENDPOINTS, AUTH_HEADERS, and bearerToken() for test constants
  * - Provides 404 handler for unknown routes
  * - Uses type-safe error handling with isAppError type guard
@@ -19,7 +16,6 @@
  * - @/routes for API routes
  * - @/middleware for tracing
  * - @/errors for isAppError type guard
- * - shared/testing for database utilities
  */
  
 import express, { type Express, type ErrorRequestHandler, type RequestHandler } from 'express';
@@ -30,11 +26,6 @@ import type { AssessmentResponses } from '@votive/shared';
 import { apiRouter } from '@/routes';
 import { tracingMiddleware } from '@/middleware';
 import { isAppError } from '@/errors';
-import {
-  cleanupTestDb,
-  setTestPrisma,
-  checkDatabaseAvailable,
-} from '@votive/shared/testing';
 import { prisma } from '@/prisma';
 
 /** Response type for register endpoint */
@@ -213,81 +204,6 @@ export function createAuthenticatedRequest(
   };
 }
 
-// Module-level state for database availability
-let _databaseAvailable = false;
-
-/**
- * Integration test lifecycle hooks.
- * Use these in your test file's beforeAll/beforeEach/afterAll.
- */
-export const integrationTestHooks = {
-  /**
-   * Call in beforeAll to check database and register Prisma instance.
-   * Returns whether the database is available.
-   */
-  async setup(): Promise<boolean> {
-    _databaseAvailable = await checkDatabaseAvailable(prisma);
-    if (_databaseAvailable) {
-      setTestPrisma(prisma);
-    }
-    return _databaseAvailable;
-  },
-
-  /**
-   * Call in beforeAll to require database availability.
-   * Throws an error with migration instructions if database is not available.
-   * Use this when tests MUST have database access and should not silently skip.
-   *
-   * @throws Error with migration instructions if database unavailable
-   *
-   * @example
-   * ```typescript
-   * beforeAll(async () => {
-   *   await integrationTestHooks.requireDatabase();
-   * });
-   * ```
-   */
-  async requireDatabase(): Promise<void> {
-    const available = await this.setup();
-    if (!available) {
-      throw new Error(
-        'Integration tests require a database with migrations applied.\n' +
-        'Run: npm run db:migrate -w prompt-service\n' +
-        'Then re-run the tests.'
-      );
-    }
-  },
-
-  /**
-   * Call in beforeEach to clean up database for test isolation.
-   */
-  async cleanup(): Promise<void> {
-    if (_databaseAvailable) {
-      await cleanupTestDb();
-    }
-  },
-
-  /**
-   * Call in afterAll to disconnect from database.
-   * Uses try-finally to ensure disconnect runs even if cleanup fails.
-   */
-  async teardown(): Promise<void> {
-    try {
-      if (_databaseAvailable) {
-        await cleanupTestDb();
-      }
-    } finally {
-      await prisma.$disconnect();
-    }
-  },
-
-  /**
-   * Returns whether the database is available for testing.
-   */
-  isDatabaseAvailable(): boolean {
-    return _databaseAvailable;
-  },
-};
 
 /**
  * Registers a user and returns access token and CSRF token.

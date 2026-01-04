@@ -15,25 +15,12 @@
 import request from 'supertest';
 import {
   createIntegrationTestApp,
-  integrationTestHooks,
   MOCK_PASSWORD,
   registerTestUser,
 } from '@/testing';
 
 describe('CSRF Protection Integration Tests', () => {
   const app = createIntegrationTestApp();
-
-  beforeAll(async () => {
-    await integrationTestHooks.setup();
-  });
-
-  beforeEach(async () => {
-    await integrationTestHooks.cleanup();
-  });
-
-  afterAll(async () => {
-    await integrationTestHooks.teardown();
-  });
 
   describe('Profile update (PUT /api/user-auth/profile)', () => {
     it('should accept request with valid CSRF token', async () => {

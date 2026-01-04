@@ -27,7 +27,7 @@ RUN npm run build -w shared
 # Build prompt-service
 COPY prompt-service/src prompt-service/src
 COPY prompt-service/prisma prompt-service/prisma
-COPY prompt-service/scripts prompt-service/scripts
+COPY prompt-service/prisma.config.ts prompt-service/
 COPY prompt-service/tsconfig.json prompt-service/
 COPY prompt-service/tsup.config.ts prompt-service/
 COPY prompt-service/vite.config.ts prompt-service/
@@ -52,6 +52,7 @@ RUN npm ci --workspaces --include-workspace-root --omit=dev
 COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/prompt-service/dist prompt-service/dist
 COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
+COPY --from=builder /app/prompt-service/prisma.config.ts prompt-service/
 
 # Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \

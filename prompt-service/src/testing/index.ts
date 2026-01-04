@@ -2,7 +2,6 @@
  * @file prompt-service/src/testing/index.ts
  * @purpose Barrel export for prompt-service testing utilities
  * @functionality
- * - Exports integration test setup and helpers
  * - Exports test app factory and authenticated request builders
  * - Exports CSRF token extraction helper
  * - Exports shared test fixtures (validAssessmentResponses)
@@ -21,7 +20,6 @@ export {
   createIntegrationTestApp,
   createTestAgent,
   createAuthenticatedRequest,
-  integrationTestHooks,
   registerTestUser,
   loginTestUser,
   extractCsrfToken,

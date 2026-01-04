@@ -17,7 +17,6 @@ import jwt from 'jsonwebtoken';
 import {
   createAuthenticatedRequest,
   createIntegrationTestApp,
-  integrationTestHooks,
   MOCK_PASSWORD,
   registerTestUser,
   TEST_CONFIG,
@@ -25,18 +24,6 @@ import {
 
 describe('JWT Protection Integration Tests', () => {
   const app = createIntegrationTestApp();
-
-  beforeAll(async () => {
-    await integrationTestHooks.setup();
-  });
-
-  beforeEach(async () => {
-    await integrationTestHooks.cleanup();
-  });
-
-  afterAll(async () => {
-    await integrationTestHooks.teardown();
-  });
 
   describe('GET /api/user-auth/me', () => {
     it('should return user profile with valid JWT', async () => {

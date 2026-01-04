@@ -27,8 +27,9 @@ process.env['JWT_REFRESH_SECRET'] = 'test-jwt-refresh-secret-32-chars-min';
 // Note: DATABASE_KEY is intentionally NOT set - test DB is unencrypted
 // Suppress Prisma debug/error output during tests
 process.env['DEBUG'] = '';
-// Point to the actual database created by prisma migrate
-process.env['DATABASE_URL'] = 'file:./prisma/dev.db';
+// Use PostgreSQL for tests - integration tests will check actual availability
+// Unit tests mock Prisma so this just needs to be a valid connection string
+process.env['DATABASE_URL'] = process.env['DATABASE_URL'] ?? 'postgresql://postgres:postgres@localhost:5432/votive_test';
 // Disable rate limiting for integration tests (set very high limits)
 process.env['RATE_LIMIT_LOGIN'] = '10000';
 process.env['RATE_LIMIT_REGISTER'] = '10000';

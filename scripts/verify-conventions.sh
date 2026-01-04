@@ -73,6 +73,7 @@ PARENT_IMPORTS=$(grep -rn "from ['\"]\.\./" --include="*.ts" --include="*.tsx" \
     | grep -v "// @allow-relative" \
     | grep -v "shared/src/generated/prisma/" \
     | grep -v "shared/src/testing/setup/.*generated/prisma" \
+    | grep -v "shared/src/testing/setup/testcontainers.ts.*paths" \
     || true)
 
 if [ -n "$PARENT_IMPORTS" ]; then

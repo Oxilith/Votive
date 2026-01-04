@@ -17,9 +17,10 @@ import { E2E_TIMEOUTS } from '../fixtures/mock-data';
 
 /**
  * Admin panel base URL - served by prompt-service
- * Uses HTTPS for consistency with main app and to catch SSL issues early
+ * Uses HTTPS for consistency with main app (SSL via Node.js https module)
+ * Accessed directly on port 3002 from the host machine during E2E tests
  */
-const ADMIN_BASE_URL = process.env.PROMPT_SERVICE_URL ?? 'https://localhost:3002';
+const ADMIN_BASE_URL = 'https://localhost:3002';
 
 /**
  * Page object for the admin panel.

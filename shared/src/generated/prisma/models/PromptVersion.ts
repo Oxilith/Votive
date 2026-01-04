@@ -502,6 +502,7 @@ export type PromptVersionCreateOrConnectWithoutPromptInput = {
 
 export type PromptVersionCreateManyPromptInputEnvelope = {
   data: Prisma.PromptVersionCreateManyPromptInput | Prisma.PromptVersionCreateManyPromptInput[]
+  skipDuplicates?: boolean
 }
 
 export type PromptVersionUpsertWithWhereUniqueWithoutPromptInput = {
@@ -1309,6 +1310,7 @@ export type PromptVersionCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many PromptVersions.
    */
   data: Prisma.PromptVersionCreateManyInput | Prisma.PromptVersionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1327,6 +1329,7 @@ export type PromptVersionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * The data used to create many PromptVersions.
    */
   data: Prisma.PromptVersionCreateManyInput | Prisma.PromptVersionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

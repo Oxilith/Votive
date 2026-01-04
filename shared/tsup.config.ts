@@ -7,5 +7,20 @@ export default defineConfig({
     clean: true,
     sourcemap: true,
     splitting: false,
-    external: ['vitest', 'msw', 'msw/node', '@faker-js/faker', 'vitest-mock-extended', 'zod', '@prisma/client/runtime/client'],
+    external: [
+        'vitest',
+        'msw',
+        'msw/node',
+        '@faker-js/faker',
+        'vitest-mock-extended',
+        'zod',
+        '@prisma/client/runtime/client',
+        // Testcontainers and heavy Node.js dependencies
+        '@testcontainers/postgresql',
+        'testcontainers',
+        'dockerode',
+        'supertest',
+        'express',
+        'cookie-parser',
+    ],
 });

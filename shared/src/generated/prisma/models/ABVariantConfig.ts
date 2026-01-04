@@ -41,20 +41,20 @@ export type ABVariantConfigSumAggregateOutputType = {
 export type ABVariantConfigMinAggregateOutputType = {
   id: string | null
   abVariantId: string | null
-  variantType: string | null
+  variantType: $Enums.VariantType | null
   temperature: number | null
   maxTokens: number | null
-  thinkingType: string | null
+  thinkingType: $Enums.ThinkingType | null
   budgetTokens: number | null
 }
 
 export type ABVariantConfigMaxAggregateOutputType = {
   id: string | null
   abVariantId: string | null
-  variantType: string | null
+  variantType: $Enums.VariantType | null
   temperature: number | null
   maxTokens: number | null
-  thinkingType: string | null
+  thinkingType: $Enums.ThinkingType | null
   budgetTokens: number | null
 }
 
@@ -202,10 +202,10 @@ export type ABVariantConfigGroupByArgs<ExtArgs extends runtime.Types.Extensions.
 export type ABVariantConfigGroupByOutputType = {
   id: string
   abVariantId: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens: number | null
   _count: ABVariantConfigCountAggregateOutputType | null
   _avg: ABVariantConfigAvgAggregateOutputType | null
@@ -235,10 +235,10 @@ export type ABVariantConfigWhereInput = {
   NOT?: Prisma.ABVariantConfigWhereInput | Prisma.ABVariantConfigWhereInput[]
   id?: Prisma.StringFilter<"ABVariantConfig"> | string
   abVariantId?: Prisma.StringFilter<"ABVariantConfig"> | string
-  variantType?: Prisma.StringFilter<"ABVariantConfig"> | string
+  variantType?: Prisma.EnumVariantTypeFilter<"ABVariantConfig"> | $Enums.VariantType
   temperature?: Prisma.FloatFilter<"ABVariantConfig"> | number
   maxTokens?: Prisma.IntFilter<"ABVariantConfig"> | number
-  thinkingType?: Prisma.StringFilter<"ABVariantConfig"> | string
+  thinkingType?: Prisma.EnumThinkingTypeFilter<"ABVariantConfig"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableFilter<"ABVariantConfig"> | number | null
   abVariant?: Prisma.XOR<Prisma.ABVariantScalarRelationFilter, Prisma.ABVariantWhereInput>
 }
@@ -261,10 +261,10 @@ export type ABVariantConfigWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ABVariantConfigWhereInput[]
   NOT?: Prisma.ABVariantConfigWhereInput | Prisma.ABVariantConfigWhereInput[]
   abVariantId?: Prisma.StringFilter<"ABVariantConfig"> | string
-  variantType?: Prisma.StringFilter<"ABVariantConfig"> | string
+  variantType?: Prisma.EnumVariantTypeFilter<"ABVariantConfig"> | $Enums.VariantType
   temperature?: Prisma.FloatFilter<"ABVariantConfig"> | number
   maxTokens?: Prisma.IntFilter<"ABVariantConfig"> | number
-  thinkingType?: Prisma.StringFilter<"ABVariantConfig"> | string
+  thinkingType?: Prisma.EnumThinkingTypeFilter<"ABVariantConfig"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableFilter<"ABVariantConfig"> | number | null
   abVariant?: Prisma.XOR<Prisma.ABVariantScalarRelationFilter, Prisma.ABVariantWhereInput>
 }, "id" | "abVariantId_variantType">
@@ -290,19 +290,19 @@ export type ABVariantConfigScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ABVariantConfigScalarWhereWithAggregatesInput | Prisma.ABVariantConfigScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ABVariantConfig"> | string
   abVariantId?: Prisma.StringWithAggregatesFilter<"ABVariantConfig"> | string
-  variantType?: Prisma.StringWithAggregatesFilter<"ABVariantConfig"> | string
+  variantType?: Prisma.EnumVariantTypeWithAggregatesFilter<"ABVariantConfig"> | $Enums.VariantType
   temperature?: Prisma.FloatWithAggregatesFilter<"ABVariantConfig"> | number
   maxTokens?: Prisma.IntWithAggregatesFilter<"ABVariantConfig"> | number
-  thinkingType?: Prisma.StringWithAggregatesFilter<"ABVariantConfig"> | string
+  thinkingType?: Prisma.EnumThinkingTypeWithAggregatesFilter<"ABVariantConfig"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableWithAggregatesFilter<"ABVariantConfig"> | number | null
 }
 
 export type ABVariantConfigCreateInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
   abVariant: Prisma.ABVariantCreateNestedOneWithoutConfigsInput
 }
@@ -310,19 +310,19 @@ export type ABVariantConfigCreateInput = {
 export type ABVariantConfigUncheckedCreateInput = {
   id?: string
   abVariantId: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
 }
 
 export type ABVariantConfigUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   abVariant?: Prisma.ABVariantUpdateOneRequiredWithoutConfigsNestedInput
 }
@@ -330,39 +330,39 @@ export type ABVariantConfigUpdateInput = {
 export type ABVariantConfigUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   abVariantId?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type ABVariantConfigCreateManyInput = {
   id?: string
   abVariantId: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
 }
 
 export type ABVariantConfigUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type ABVariantConfigUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   abVariantId?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -378,7 +378,7 @@ export type ABVariantConfigOrderByRelationAggregateInput = {
 
 export type ABVariantConfigAbVariantIdVariantTypeCompoundUniqueInput = {
   abVariantId: string
-  variantType: string
+  variantType: $Enums.VariantType
 }
 
 export type ABVariantConfigCountOrderByAggregateInput = {
@@ -467,19 +467,19 @@ export type ABVariantConfigUncheckedUpdateManyWithoutAbVariantNestedInput = {
 
 export type ABVariantConfigCreateWithoutAbVariantInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
 }
 
 export type ABVariantConfigUncheckedCreateWithoutAbVariantInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
 }
 
@@ -490,6 +490,7 @@ export type ABVariantConfigCreateOrConnectWithoutAbVariantInput = {
 
 export type ABVariantConfigCreateManyAbVariantInputEnvelope = {
   data: Prisma.ABVariantConfigCreateManyAbVariantInput | Prisma.ABVariantConfigCreateManyAbVariantInput[]
+  skipDuplicates?: boolean
 }
 
 export type ABVariantConfigUpsertWithWhereUniqueWithoutAbVariantInput = {
@@ -514,46 +515,46 @@ export type ABVariantConfigScalarWhereInput = {
   NOT?: Prisma.ABVariantConfigScalarWhereInput | Prisma.ABVariantConfigScalarWhereInput[]
   id?: Prisma.StringFilter<"ABVariantConfig"> | string
   abVariantId?: Prisma.StringFilter<"ABVariantConfig"> | string
-  variantType?: Prisma.StringFilter<"ABVariantConfig"> | string
+  variantType?: Prisma.EnumVariantTypeFilter<"ABVariantConfig"> | $Enums.VariantType
   temperature?: Prisma.FloatFilter<"ABVariantConfig"> | number
   maxTokens?: Prisma.IntFilter<"ABVariantConfig"> | number
-  thinkingType?: Prisma.StringFilter<"ABVariantConfig"> | string
+  thinkingType?: Prisma.EnumThinkingTypeFilter<"ABVariantConfig"> | $Enums.ThinkingType
   budgetTokens?: Prisma.IntNullableFilter<"ABVariantConfig"> | number | null
 }
 
 export type ABVariantConfigCreateManyAbVariantInput = {
   id?: string
-  variantType: string
+  variantType: $Enums.VariantType
   temperature: number
   maxTokens: number
-  thinkingType: string
+  thinkingType: $Enums.ThinkingType
   budgetTokens?: number | null
 }
 
 export type ABVariantConfigUpdateWithoutAbVariantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type ABVariantConfigUncheckedUpdateWithoutAbVariantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type ABVariantConfigUncheckedUpdateManyWithoutAbVariantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  variantType?: Prisma.StringFieldUpdateOperationsInput | string
+  variantType?: Prisma.EnumVariantTypeFieldUpdateOperationsInput | $Enums.VariantType
   temperature?: Prisma.FloatFieldUpdateOperationsInput | number
   maxTokens?: Prisma.IntFieldUpdateOperationsInput | number
-  thinkingType?: Prisma.StringFieldUpdateOperationsInput | string
+  thinkingType?: Prisma.EnumThinkingTypeFieldUpdateOperationsInput | $Enums.ThinkingType
   budgetTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -621,10 +622,10 @@ export type $ABVariantConfigPayload<ExtArgs extends runtime.Types.Extensions.Int
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     abVariantId: string
-    variantType: string
+    variantType: $Enums.VariantType
     temperature: number
     maxTokens: number
-    thinkingType: string
+    thinkingType: $Enums.ThinkingType
     budgetTokens: number | null
   }, ExtArgs["result"]["aBVariantConfig"]>
   composites: {}
@@ -1052,10 +1053,10 @@ export interface Prisma__ABVariantConfigClient<T, Null = never, ExtArgs extends 
 export interface ABVariantConfigFieldRefs {
   readonly id: Prisma.FieldRef<"ABVariantConfig", 'String'>
   readonly abVariantId: Prisma.FieldRef<"ABVariantConfig", 'String'>
-  readonly variantType: Prisma.FieldRef<"ABVariantConfig", 'String'>
+  readonly variantType: Prisma.FieldRef<"ABVariantConfig", 'VariantType'>
   readonly temperature: Prisma.FieldRef<"ABVariantConfig", 'Float'>
   readonly maxTokens: Prisma.FieldRef<"ABVariantConfig", 'Int'>
-  readonly thinkingType: Prisma.FieldRef<"ABVariantConfig", 'String'>
+  readonly thinkingType: Prisma.FieldRef<"ABVariantConfig", 'ThinkingType'>
   readonly budgetTokens: Prisma.FieldRef<"ABVariantConfig", 'Int'>
 }
     
@@ -1286,6 +1287,7 @@ export type ABVariantConfigCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many ABVariantConfigs.
    */
   data: Prisma.ABVariantConfigCreateManyInput | Prisma.ABVariantConfigCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1304,6 +1306,7 @@ export type ABVariantConfigCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    * The data used to create many ABVariantConfigs.
    */
   data: Prisma.ABVariantConfigCreateManyInput | Prisma.ABVariantConfigCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
