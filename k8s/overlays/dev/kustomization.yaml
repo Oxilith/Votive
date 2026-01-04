@@ -11,8 +11,10 @@ kind: Kustomization
 namespace: votive-dev
 
 # Common labels for dev environment
-commonLabels:
-  environment: dev
+labels:
+  - pairs:
+      environment: dev
+    includeSelectors: false
 
 # Include base manifests
 resources:

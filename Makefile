@@ -2,8 +2,8 @@
 # Usage: make help
 
 .PHONY: help cluster-create cluster-delete install-ingress install-cert install-postgres-dev \
-        deploy-dev deploy-staging deploy-prod status-dev logs-dev logs-backend-dev \
-        port-forward clean-dev clean-all
+        deploy-dev deploy-staging deploy-prod deploy-test status-dev status-test \
+        logs-dev logs-backend-dev logs-test port-forward clean-dev clean-test clean-all
 
 # Colors for output
 CYAN := \033[36m
@@ -29,15 +29,19 @@ help:
 	@echo "  make deploy-dev          Deploy to votive-dev namespace"
 	@echo "  make deploy-staging      Deploy to votive-staging namespace"
 	@echo "  make deploy-prod         Deploy to votive-prod namespace"
+	@echo "  make deploy-test         Deploy to votive-test (mocked Claude API)"
 	@echo ""
 	@echo "$(GREEN)Operations:$(RESET)"
 	@echo "  make status-dev          Show dev namespace status"
+	@echo "  make status-test         Show test namespace status"
 	@echo "  make logs-dev            Tail prompt-service logs"
 	@echo "  make logs-backend-dev    Tail backend logs"
+	@echo "  make logs-test           Tail test namespace logs"
 	@echo "  make port-forward        Show access instructions"
 	@echo ""
 	@echo "$(GREEN)Cleanup:$(RESET)"
 	@echo "  make clean-dev           Remove dev deployment"
+	@echo "  make clean-test          Remove test deployment"
 	@echo "  make clean-all           Remove everything including cluster"
 	@echo ""
 
@@ -136,6 +140,22 @@ deploy-prod:
 	kubectl rollout status deployment/app -n votive-prod --timeout=180s
 	@echo "$(GREEN)Production deployment complete!$(RESET)"
 
+deploy-test:
+	@echo "$(CYAN)Deploying to votive-test (mocked Claude API)...$(RESET)"
+	@echo "$(CYAN)Applying secrets...$(RESET)"
+	sops -d k8s/overlays/dev/secrets.enc.yaml | kubectl apply -n votive-test -f -
+	sops -d k8s/overlays/dev/postgresql-secret.enc.yaml | kubectl apply -n votive-test -f -
+	@echo "$(CYAN)Applying test overlay...$(RESET)"
+	kubectl apply -k k8s/overlays/test
+	@echo "$(CYAN)Waiting for deployments...$(RESET)"
+	kubectl rollout status deployment/prompt-service -n votive-test --timeout=120s
+	kubectl rollout status deployment/backend -n votive-test --timeout=120s
+	kubectl rollout status deployment/app -n votive-test --timeout=120s
+	@echo "$(GREEN)Test deployment complete!$(RESET)"
+	@echo ""
+	@echo "Access at: $(CYAN)https://votive.127.0.0.1.nip.io$(RESET)"
+	@echo "Run E2E tests: $(CYAN)npm run test:e2e$(RESET)"
+
 # ============ Operations ============
 
 status-dev:
@@ -154,6 +174,16 @@ status-dev:
 	@echo "$(CYAN)=== Recent Jobs ===$(RESET)"
 	kubectl get jobs -n votive-dev --sort-by=.metadata.creationTimestamp | tail -5
 
+status-test:
+	@echo "$(CYAN)=== Pods (votive-test) ===$(RESET)"
+	kubectl get pods -n votive-test -o wide
+	@echo ""
+	@echo "$(CYAN)=== Services ===$(RESET)"
+	kubectl get svc -n votive-test
+	@echo ""
+	@echo "$(CYAN)=== Ingress ===$(RESET)"
+	kubectl get ingress -n votive-test
+
 logs-dev:
 	kubectl logs -n votive-dev -l app=prompt-service --tail=50 -f
 
@@ -162,6 +192,9 @@ logs-backend-dev:
 
 logs-worker-dev:
 	kubectl logs -n votive-dev -l app=worker --tail=50 -f
+
+logs-test:
+	kubectl logs -n votive-test --all-containers --tail=100 -f
 
 port-forward:
 	@echo ""
@@ -191,8 +224,15 @@ clean-dev:
 	helm uninstall postgresql -n votive-dev --ignore-not-found || true
 	@echo "$(GREEN)Cleanup complete!$(RESET)"
 
+clean-test:
+	@echo "$(YELLOW)Cleaning up votive-test...$(RESET)"
+	kubectl delete -k k8s/overlays/test --ignore-not-found
+	kubectl delete namespace votive-test --ignore-not-found || true
+	@echo "$(GREEN)Test cleanup complete!$(RESET)"
+
 clean-all:
 	@echo "$(YELLOW)Cleaning up everything...$(RESET)"
+	$(MAKE) clean-test
 	$(MAKE) clean-dev
 	kind delete cluster --name votive
 	@echo "$(GREEN)Full cleanup complete!$(RESET)"

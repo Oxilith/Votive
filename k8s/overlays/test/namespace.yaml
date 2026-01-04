@@ -1,0 +1,8 @@
+# Test namespace for E2E testing
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: votive-test
+  labels:
+    environment: test
+    app.kubernetes.io/part-of: votive

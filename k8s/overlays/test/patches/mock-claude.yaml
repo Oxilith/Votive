@@ -1,0 +1,12 @@
+# Enable mocked Claude API for deterministic E2E tests
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  # Override base config to use mocked Claude API
+  MOCK_CLAUDE_API: "true"
+
+  # Test-specific CORS (same nip.io domain)
+  CORS_ORIGIN: "https://votive.127.0.0.1.nip.io"
+  CORS_ORIGINS: "https://votive.127.0.0.1.nip.io"

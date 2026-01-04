@@ -1,0 +1,35 @@
+# Test environment overlay
+# Uses mocked Claude API for deterministic E2E tests
+#
+# Usage:
+#   make deploy-test
+#   npm run test:e2e
+#   make clean-test
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: votive-test
+
+labels:
+  - pairs:
+      environment: test
+    includeSelectors: false
+
+resources:
+  - ../../base
+  - namespace.yaml
+
+patches:
+  - path: patches/replicas.yaml
+  - path: patches/mock-claude.yaml
+
+images:
+  - name: ghcr.io/oxilith/votive-prompt-service
+    newTag: latest
+  - name: ghcr.io/oxilith/votive-backend
+    newTag: latest
+  - name: ghcr.io/oxilith/votive-app
+    newTag: latest
+  - name: ghcr.io/oxilith/votive-worker
+    newTag: latest
