@@ -1,0 +1,86 @@
+# PostgreSQL backup CronJob
+# Creates daily pg_dump backups to a PersistentVolumeClaim
+#
+# Manual backup:
+#   kubectl create job --from=cronjob/postgresql-backup manual-backup-$(date +%s) -n votive-dev
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-backups
+  labels:
+    app: postgresql-backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgresql-backup
+  labels:
+    app: postgresql-backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: postgresql-backup
+        spec:
+          containers:
+            - name: backup
+              image: bitnami/postgresql:16
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -e
+                  BACKUP_FILE="/backups/votive-$(date +%Y%m%d-%H%M%S).sql.gz"
+                  echo "Creating backup: $BACKUP_FILE"
+
+                  PGPASSWORD=$POSTGRES_PASSWORD pg_dump \
+                    -h postgresql \
+                    -U votive \
+                    -d votive \
+                    --no-owner \
+                    --no-privileges \
+                    | gzip > "$BACKUP_FILE"
+
+                  echo "Backup complete: $(ls -lh $BACKUP_FILE)"
+
+                  # Cleanup old backups (keep last 7 days)
+                  echo "Cleaning up old backups..."
+                  find /backups -name "votive-*.sql.gz" -mtime +7 -delete
+
+                  echo "Current backups:"
+                  ls -lht /backups/
+              env:
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgresql-secret
+                      key: password
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+              resources:
+                requests:
+                  memory: 128Mi
+                  cpu: 100m
+                limits:
+                  memory: 256Mi
+                  cpu: 200m
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgresql-backups
+          restartPolicy: OnFailure

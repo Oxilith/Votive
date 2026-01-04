@@ -1,0 +1,68 @@
+# PostgreSQL Helm values for development environment
+# Bitnami PostgreSQL chart: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
+#
+# Usage:
+#   helm upgrade --install postgresql bitnami/postgresql \
+#     --namespace votive-dev \
+#     -f k8s/helm-values/postgresql-dev.yaml
+
+# Authentication
+auth:
+  database: votive
+  username: votive
+  # Password from existing secret (must be created before helm install)
+  existingSecret: postgresql-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+
+# Primary database configuration
+primary:
+  # Persistence
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: standard
+
+  # Resource limits
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # PostgreSQL configuration
+  configuration: |
+    max_connections = 100
+    shared_buffers = 128MB
+    effective_cache_size = 256MB
+    maintenance_work_mem = 64MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 4MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+
+  # Health checks
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+# Metrics (optional, enable for Prometheus scraping)
+metrics:
+  enabled: false
+
+# Backup (handled by separate CronJob)
+backup:
+  enabled: false

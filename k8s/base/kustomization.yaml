@@ -1,0 +1,46 @@
+# Base Kustomization for Votive
+# Contains all shared resources across environments
+#
+# Usage:
+#   kubectl kustomize k8s/base
+#   kubectl apply -k k8s/overlays/dev
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Common labels applied to all resources
+commonLabels:
+  app.kubernetes.io/part-of: votive
+  app.kubernetes.io/managed-by: kustomize
+
+resources:
+  # cert-manager
+  - cert-manager/mkcert-issuer.yaml
+
+  # PostgreSQL backup
+  - postgresql/backup-cronjob.yaml
+
+  # Network policies
+  - network-policies/default-deny.yaml
+  - network-policies/app-policy.yaml
+  - network-policies/backend-policy.yaml
+  - network-policies/prompt-service-policy.yaml
+  - network-policies/worker-policy.yaml
+
+  # Application services
+  - app/deployment.yaml
+  - app/service.yaml
+  - app/configmap.yaml
+
+  - backend/deployment.yaml
+  - backend/service.yaml
+  - backend/configmap.yaml
+
+  - prompt-service/deployment.yaml
+  - prompt-service/service.yaml
+  - prompt-service/configmap.yaml
+
+  - worker/cronjob.yaml
+
+  # Ingress
+  - ingress/ingress.yaml

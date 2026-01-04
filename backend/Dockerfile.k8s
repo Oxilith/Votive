@@ -1,0 +1,60 @@
+# Backend Dockerfile for Kubernetes
+# Simplified version without dotenvx - K8s injects env vars directly
+
+FROM node:24-slim AS builder
+
+WORKDIR /app
+
+# Copy workspace config
+COPY package.json package-lock.json ./
+COPY tsconfig.base.json ./
+COPY shared/package.json shared/
+COPY backend/package.json backend/
+
+# Install all dependencies
+RUN npm ci --workspaces --include-workspace-root
+
+# Build shared
+COPY shared/src shared/src
+COPY shared/tsconfig.json shared/
+COPY shared/tsup.config.ts shared/
+RUN npm run build -w shared
+
+# Build backend
+COPY backend/src backend/src
+COPY backend/tsconfig.json backend/
+COPY backend/tsup.config.ts backend/
+RUN npm run build -w backend
+
+# Production stage
+FROM node:24-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+COPY shared/package.json shared/
+COPY backend/package.json backend/
+
+RUN npm ci --workspaces --include-workspace-root --omit=dev
+
+COPY --from=builder /app/shared/dist shared/dist
+COPY --from=builder /app/backend/dist backend/dist
+
+# Create non-root user
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs appuser && \
+    chown -R appuser:nodejs /app
+
+USER appuser
+WORKDIR /app/backend
+
+EXPOSE 3001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -sf http://localhost:3001/health || exit 1
+
+CMD ["node", "dist/index.js"]

@@ -1,0 +1,21 @@
+# Dev environment replica counts (1 each for local development)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prompt-service
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  replicas: 1

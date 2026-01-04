@@ -1,0 +1,39 @@
+# Dev environment overlay
+# Applies dev-specific configurations on top of base manifests
+#
+# Usage:
+#   kubectl apply -k k8s/overlays/dev
+#   kubectl kustomize k8s/overlays/dev  # Preview without applying
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: votive-dev
+
+# Common labels for dev environment
+commonLabels:
+  environment: dev
+
+# Include base manifests
+resources:
+  - ../../base
+  - namespace.yaml
+
+# Apply patches
+patches:
+  - path: patches/replicas.yaml
+
+# Image tags (override for dev if needed)
+images:
+  - name: ghcr.io/oxilith/votive-prompt-service
+    newTag: latest
+  - name: ghcr.io/oxilith/votive-backend
+    newTag: latest
+  - name: ghcr.io/oxilith/votive-app
+    newTag: latest
+  - name: ghcr.io/oxilith/votive-worker
+    newTag: latest
+
+# Note: Secrets are applied separately via SOPS:
+#   sops -d k8s/overlays/dev/secrets.enc.yaml | kubectl apply -f -
+#   sops -d k8s/overlays/dev/postgresql-secret.enc.yaml | kubectl apply -f -

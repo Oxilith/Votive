@@ -1,0 +1,22 @@
+# ClusterIssuer using mkcert CA for local development
+# This allows cert-manager to issue certificates signed by your local mkcert CA
+#
+# Prerequisites:
+#   1. mkcert installed and CA created: mkcert -install
+#   2. CA secret created in cert-manager namespace:
+#      kubectl create secret tls mkcert-ca \
+#        --cert="$(mkcert -CAROOT)/rootCA.pem" \
+#        --key="$(mkcert -CAROOT)/rootCA-key.pem" \
+#        -n cert-manager
+#
+# Usage in Ingress:
+#   annotations:
+#     cert-manager.io/cluster-issuer: mkcert-issuer
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: mkcert-issuer
+spec:
+  ca:
+    secretName: mkcert-ca

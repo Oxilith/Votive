@@ -1,0 +1,39 @@
+# backend ConfigMap
+# Non-secret configuration for backend API
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  labels:
+    app: backend
+    app.kubernetes.io/name: backend
+data:
+  NODE_ENV: "production"
+  PORT: "3001"
+  LOG_LEVEL: "info"
+
+  # CORS configuration
+  CORS_ORIGIN: "https://votive.127.0.0.1.nip.io"
+  CORS_ORIGINS: "https://votive.127.0.0.1.nip.io"
+
+  # Internal service URL (K8s DNS)
+  PROMPT_SERVICE_URL: "http://prompt-service:3002"
+
+  # Claude API settings
+  THINKING_ENABLED: "true"
+  MOCK_CLAUDE_API: "false"
+
+  # Circuit breaker settings
+  CIRCUIT_BREAKER_TIMEOUT: "10000"
+  CIRCUIT_BREAKER_RESET_TIMEOUT: "30000"
+  CIRCUIT_BREAKER_ERROR_THRESHOLD: "50"
+
+  # Rate limiting
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX_REQUESTS: "60"
+  CLAUDE_RATE_LIMIT_WINDOW_MS: "60000"
+  CLAUDE_RATE_LIMIT_MAX_REQUESTS: "5"
+
+  # Request timeout
+  REQUEST_TIMEOUT: "5000"

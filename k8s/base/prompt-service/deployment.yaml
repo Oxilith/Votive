@@ -1,0 +1,88 @@
+# prompt-service Deployment
+# Manages prompt configurations and user authentication
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prompt-service
+  labels:
+    app: prompt-service
+    app.kubernetes.io/name: prompt-service
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prompt-service
+  template:
+    metadata:
+      labels:
+        app: prompt-service
+        app.kubernetes.io/name: prompt-service
+    spec:
+      # Run Prisma migrations before starting the app
+      initContainers:
+        - name: migrate
+          image: ghcr.io/oxilith/votive-prompt-service:latest
+          command:
+            - npx
+            - prisma
+            - migrate
+            - deploy
+          envFrom:
+            - secretRef:
+                name: votive-secrets
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m
+
+      containers:
+        - name: prompt-service
+          image: ghcr.io/oxilith/votive-prompt-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3002
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: prompt-service-config
+            - secretRef:
+                name: votive-secrets
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+
+      securityContext:
+        fsGroup: 1001
+
+      restartPolicy: Always

@@ -1,17 +1,23 @@
 generator client {
   provider = "prisma-client"
-  output   = "../../shared/src/generated/prisma"  
+  output   = "../../shared/src/generated/prisma"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// Note: SQLite doesn't support native enums. The following types are used as strings:
-// - VariantType: "withThinking" | "withoutThinking"
-// - ThinkingType: "enabled" | "disabled"
-// TypeScript validation is enforced at the application layer via Zod schemas.
-// If migrating to PostgreSQL, consider converting these to native Prisma enums.
+// Native PostgreSQL enums for type safety
+enum VariantType {
+  withThinking
+  withoutThinking
+}
+
+enum ThinkingType {
+  enabled
+  disabled
+}
 
 /// Main prompt definition - stores the base prompt configuration
 model Prompt {
@@ -35,16 +41,16 @@ model Prompt {
 
 /// Thinking mode variants for prompts (withThinking/withoutThinking configurations)
 model PromptVariant {
-  id           String   @id @default(uuid())
+  id           String      @id @default(uuid())
   promptId     String
-  variantType  String   // "withThinking" | "withoutThinking"
+  variantType  VariantType // Native PostgreSQL enum
   temperature  Float
   maxTokens    Int
-  thinkingType String   // "enabled" | "disabled"
+  thinkingType ThinkingType // Native PostgreSQL enum
   budgetTokens Int?
-  isDefault    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isDefault    Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   prompt Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
 
@@ -110,12 +116,12 @@ model ABVariant {
 
 /// A/B Variant thinking configurations
 model ABVariantConfig {
-  id           String @id @default(uuid())
+  id           String       @id @default(uuid())
   abVariantId  String
-  variantType  String // "withThinking" | "withoutThinking"
+  variantType  VariantType  // Native PostgreSQL enum
   temperature  Float
   maxTokens    Int
-  thinkingType String // "enabled" | "disabled"
+  thinkingType ThinkingType // Native PostgreSQL enum
   budgetTokens Int?
 
   abVariant ABVariant @relation(fields: [abVariantId], references: [id], onDelete: Cascade)

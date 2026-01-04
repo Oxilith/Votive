@@ -1,0 +1,19 @@
+# prompt-service Service
+# Internal ClusterIP service for prompt-service API
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: prompt-service
+  labels:
+    app: prompt-service
+    app.kubernetes.io/name: prompt-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3002
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: prompt-service

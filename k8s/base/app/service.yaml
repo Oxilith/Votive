@@ -1,0 +1,19 @@
+# app Service
+# ClusterIP service for nginx frontend (Ingress handles external traffic)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+  labels:
+    app: app
+    app.kubernetes.io/name: app
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: app

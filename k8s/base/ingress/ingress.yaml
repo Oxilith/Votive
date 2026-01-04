@@ -1,0 +1,42 @@
+# Ingress for Votive application
+# Uses nip.io for local DNS resolution and mkcert CA for TLS
+#
+# Access: https://votive.127.0.0.1.nip.io
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: votive-ingress
+  labels:
+    app.kubernetes.io/name: votive-ingress
+  annotations:
+    # Use mkcert CA for certificate issuance
+    cert-manager.io/cluster-issuer: mkcert-issuer
+
+    # NGINX Ingress settings
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+
+    # SSL redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - votive.127.0.0.1.nip.io
+      secretName: votive-tls
+  rules:
+    - host: votive.127.0.0.1.nip.io
+      http:
+        paths:
+          # All traffic goes to nginx app which handles routing
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 80

@@ -1,0 +1,27 @@
+# SOPS configuration for encrypting Kubernetes secrets
+# Uses age encryption for simplicity and security
+#
+# Setup:
+#   1. Generate age key: age-keygen -o ~/.config/sops/age/keys.txt
+#   2. Export public key: export SOPS_AGE_RECIPIENTS=$(cat ~/.config/sops/age/keys.txt | grep "public key" | cut -d: -f2 | tr -d ' ')
+#   3. Create encrypted secret: sops -e secrets.yaml > secrets.enc.yaml
+#   4. Edit encrypted secret: sops secrets.enc.yaml
+#
+# In CI/CD:
+#   Set SOPS_AGE_KEY environment variable with the private key
+
+creation_rules:
+  # Encrypt all files matching *secret*.yaml in k8s overlays
+  - path_regex: k8s/overlays/.*/.*secret.*\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  # Encrypt all .enc.yaml files
+  - path_regex: .*\.enc\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Note: Replace the age public key above with your actual key from:
+#   cat ~/.config/sops/age/keys.txt | grep "public key" | cut -d: -f2

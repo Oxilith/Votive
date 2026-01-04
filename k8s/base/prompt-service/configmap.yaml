@@ -1,0 +1,40 @@
+# prompt-service ConfigMap
+# Non-secret configuration for prompt-service
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prompt-service-config
+  labels:
+    app: prompt-service
+    app.kubernetes.io/name: prompt-service
+data:
+  NODE_ENV: "production"
+  PORT: "3002"
+  LOG_LEVEL: "info"
+
+  # Password hashing
+  BCRYPT_SALT_ROUNDS: "10"
+
+  # Rate limiting (requests per minute unless noted)
+  RATE_LIMIT_LOGIN: "5"
+  RATE_LIMIT_REGISTER: "5"
+  RATE_LIMIT_PASSWORD_RESET: "3"
+  RATE_LIMIT_FORGOT_PASSWORD: "3"
+  RATE_LIMIT_TOKEN_REFRESH: "20"
+  RATE_LIMIT_USER_DATA: "30"
+  RATE_LIMIT_PROFILE: "15"
+  RATE_LIMIT_ADMIN_API: "100"
+  RATE_LIMIT_ADMIN_WINDOW_MS: "900000"
+
+  # JWT token expiry
+  JWT_ACCESS_EXPIRY: "15m"
+  JWT_REFRESH_EXPIRY: "7d"
+
+  # Account lockout
+  ACCOUNT_LOCKOUT_MAX_ATTEMPTS: "15"
+  ACCOUNT_LOCKOUT_INITIAL_DURATION: "15"
+  ACCOUNT_LOCKOUT_MAX_DURATION: "1440"
+
+  # SMTP disabled by default
+  SMTP_ENABLED: "false"

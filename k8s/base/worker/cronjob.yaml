@@ -1,0 +1,61 @@
+# worker CronJob
+# Background job for token cleanup (refresh tokens, password reset tokens, email verification tokens)
+#
+# Manual trigger:
+#   kubectl create job --from=cronjob/worker-token-cleanup manual-cleanup-$(date +%s) -n votive-dev
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: worker-token-cleanup
+  labels:
+    app: worker
+    app.kubernetes.io/name: worker
+    app.kubernetes.io/component: background-job
+spec:
+  schedule: "0 * * * *"  # Hourly
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      template:
+        metadata:
+          labels:
+            app: worker
+            app.kubernetes.io/name: worker
+        spec:
+          containers:
+            - name: worker
+              image: ghcr.io/oxilith/votive-worker:latest
+              imagePullPolicy: Always
+              envFrom:
+                - secretRef:
+                    name: votive-secrets
+              env:
+                - name: NODE_ENV
+                  value: "production"
+                - name: LOG_LEVEL
+                  value: "info"
+                - name: JOB_TOKEN_CLEANUP_ENABLED
+                  value: "true"
+              resources:
+                requests:
+                  memory: 128Mi
+                  cpu: 100m
+                limits:
+                  memory: 512Mi
+                  cpu: 500m
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                runAsNonRoot: true
+                runAsUser: 1001
+
+          securityContext:
+            fsGroup: 1001
+
+          restartPolicy: OnFailure
