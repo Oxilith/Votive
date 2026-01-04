@@ -3,7 +3,8 @@
 
 .PHONY: help cluster-create cluster-delete install-ingress install-cert install-postgres-dev \
         deploy-dev deploy-staging deploy-prod deploy-test status-dev status-test \
-        logs-dev logs-backend-dev logs-test port-forward clean-dev clean-test clean-all
+        logs-dev logs-backend-dev logs-test port-forward clean-dev clean-test clean-all \
+        test-up test-down test-e2e test-e2e-full
 
 # Colors for output
 CYAN := \033[36m
@@ -43,6 +44,12 @@ help:
 	@echo "  make clean-dev           Remove dev deployment"
 	@echo "  make clean-test          Remove test deployment"
 	@echo "  make clean-all           Remove everything including cluster"
+	@echo ""
+	@echo "$(GREEN)E2E Testing (Docker Compose):$(RESET)"
+	@echo "  make test-up             Start Docker Compose test environment"
+	@echo "  make test-down           Stop Docker Compose test environment"
+	@echo "  make test-e2e            Run E2E tests (services must be running)"
+	@echo "  make test-e2e-full       Start services, run tests, stop services"
 	@echo ""
 
 # ============ Cluster ============
@@ -244,3 +251,36 @@ validate-dev:
 	@echo "$(CYAN)Validating dev manifests...$(RESET)"
 	kubectl kustomize k8s/overlays/dev | kubectl apply --dry-run=client -f -
 	@echo "$(GREEN)Validation passed!$(RESET)"
+
+# ============ E2E Testing (Docker Compose) ============
+# Uses k8s/overlays/test/secrets.yaml as single source of truth
+# Requires: yq (brew install yq)
+
+# Helper to export env vars from K8s secrets.yaml
+define load_test_env
+	$$(yq -r '.stringData | to_entries | .[] | "export \(.key)=\"\(.value)\""' k8s/overlays/test/secrets.yaml)
+endef
+
+test-up:
+	@echo "$(CYAN)Starting Docker Compose test environment...$(RESET)"
+	@eval $(load_test_env) && \
+		docker compose -f docker-compose.test.yml up -d --build --wait
+	@echo "$(GREEN)Test environment ready!$(RESET)"
+	@echo "Access at: $(CYAN)https://localhost$(RESET)"
+
+test-down:
+	@echo "$(YELLOW)Stopping Docker Compose test environment...$(RESET)"
+	docker compose -f docker-compose.test.yml down -v
+	@echo "$(GREEN)Test environment stopped!$(RESET)"
+
+test-e2e:
+	@echo "$(CYAN)Running E2E tests...$(RESET)"
+	@eval $(load_test_env) && npm run e2e -w e2e
+	@echo "$(GREEN)E2E tests complete!$(RESET)"
+
+test-e2e-full:
+	@echo "$(CYAN)Running full E2E test cycle...$(RESET)"
+	$(MAKE) test-up
+	@eval $(load_test_env) && npm run e2e -w e2e || ($(MAKE) test-down && exit 1)
+	$(MAKE) test-down
+	@echo "$(GREEN)Full E2E cycle complete!$(RESET)"

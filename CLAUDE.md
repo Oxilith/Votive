@@ -57,7 +57,9 @@ npx vitest run --reporter=verbose path/to/file   # Verbose output for debugging
 
 ## Docker
 
-Development uses Docker exclusively with [dotenvx](https://dotenvx.com) for encrypted environment variables:
+### Development
+
+Development uses Docker with [dotenvx](https://dotenvx.com) for encrypted environment variables:
 
 ```bash
 # Local development (build from source)
@@ -65,13 +67,27 @@ DOTENV_PRIVATE_KEY=<your-private-key> docker compose up --build
 
 # Production (OCI deployment with pre-built images)
 DOTENV_PRIVATE_KEY=<your-private-key> docker compose -f oci://oxilith/votive-oci:latest up
-
-# Set/update environment variables
-dotenvx set THINKING_ENABLED true
-dotenvx set ANTHROPIC_API_KEY "sk-ant-..."
 ```
 
 The `.env` file is encrypted and committed - only `.env.keys` (the private key) must stay secret.
+
+### E2E Testing
+
+E2E tests use a separate Docker Compose setup with mock Claude API. Configuration is centralized in `k8s/overlays/test/secrets.yaml`.
+
+```bash
+# Requires: yq (brew install yq)
+
+# All-in-one: start services, run tests, stop services
+make test-e2e-full
+
+# Or step-by-step:
+make test-up           # Start test environment
+make test-e2e          # Run E2E tests
+make test-down         # Stop and cleanup
+```
+
+The Makefile loads environment variables from the K8s secrets file using yq, enabling a single source of truth for both Docker Compose and future Kubernetes deployments.
 
 See [docs/docker-hub.md](docs/docker-hub.md) for complete workflow documentation.
 
@@ -85,11 +101,12 @@ mkdir -p certs && cd certs && mkcert localhost 127.0.0.1 ::1
 
 **Full coding conventions**: See [docs/AI-Agent-Codebase-Instructions.md](docs/AI-Agent-Codebase-Instructions.md) for comprehensive module system, import, and build documentation.
 
-### Environment Files
-- **NEVER read or edit `.env` files** - these contain secrets and should not be accessed
-- **Exception**: `.env.example` files may be read and edited to document required configuration
-- When setting up a new environment, populate `.env.example` with all required variable names and placeholder/example values
-- **docker-compose.yml**: Use `${VARIABLE}` syntax for sensitive values so they're injected at runtime, not hardcoded
+### Environment Configuration
+- **K8s secrets files**: All environment configuration is in `k8s/overlays/{env}/secrets.yaml`
+- **Test secrets**: `k8s/overlays/test/secrets.yaml` contains mock values and can be edited/committed
+- **Dev/staging/prod secrets**: Use SOPS-encrypted `.enc.yaml` files (never commit unencrypted)
+- **Example template**: `k8s/overlays/dev/secrets.example.yaml` documents required variables
+- **docker-compose.yml**: Use `${VARIABLE}` syntax - variables are injected at runtime via yq extraction
 
 ### TypeScript & Module System
 - **No `any` types** - use specific types or `unknown`
@@ -173,7 +190,7 @@ Microservice for prompt management with database storage and admin UI:
 - `src/routes/auth.routes.ts` - Authentication endpoints (login, logout, verify) with HttpOnly cookies
 - `src/routes/` - REST API endpoints for prompts, A/B tests, and resolve
 - `src/admin/` - React admin UI for prompt and A/B test management
-- `prisma/schema.prisma` - SQLite database schema (encrypted with libsql)
+- `prisma/schema.prisma` - PostgreSQL database schema
 
 The backend calls the prompt-service `/api/resolve` endpoint to get prompt configurations.
 
@@ -206,7 +223,7 @@ Background job scheduler for maintenance tasks:
 - `src/scheduler/index.ts` - Generic job scheduler using node-cron with W3C trace context
 - `src/jobs/token-cleanup.job.ts` - Cleans expired refresh, password reset, and email verification tokens
 - `src/config/index.ts` - Environment-configurable job schedules
-- Shares database with prompt-service via libsql
+- Shares database with prompt-service via PostgreSQL
 
 **Worker Configuration**:
 - `JOB_TOKEN_CLEANUP_ENABLED` - Enable/disable token cleanup (default: true)
@@ -284,7 +301,7 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
                     ↓               ↓          ↓
               localStorage     Prompt-Service  Pino logs
                                     ↓
-                              SQLite (encrypted)
+                               PostgreSQL
                                     ↑
                               Worker (cron jobs)
 ```
@@ -293,12 +310,15 @@ Frontend (Zustand) → ApiClient → Backend (Express) → Claude API
 
 See [docs/production-deployment.md](docs/production-deployment.md#environment-variables) for complete reference.
 
+**Configuration source**: `k8s/overlays/{env}/secrets.yaml` (or `.enc.yaml` for encrypted)
+
 Key variables:
-- `VITE_API_URL` - Frontend build-time (leave empty for Docker)
+- `DATABASE_URL` - PostgreSQL connection string
 - `ANTHROPIC_API_KEY` - Claude API key
-- `DATABASE_KEY` / `ADMIN_API_KEY` / `SESSION_SECRET` - 32+ char secrets for prompt-service
+- `ADMIN_API_KEY` / `SESSION_SECRET` - 32+ char secrets for prompt-service
 - `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` - 32+ char secrets for user authentication tokens
 - `THINKING_ENABLED` - Backend flag for Claude extended thinking mode (default: true)
+- `MOCK_CLAUDE_API` - Set to "true" for E2E testing (bypasses real API)
 - `SMTP_*` - Optional SMTP configuration for email verification/password reset
 
 ## Testing

@@ -1,12 +1,9 @@
 # Prompt Service Dockerfile for E2E Testing
-# Using Debian slim instead of Alpine due to libsql native module compatibility
-# (Alpine's musl libc lacks fcntl64 symbol required by @libsql/linux-x64-musl)
+# Uses PostgreSQL (env vars injected via docker-compose)
 FROM node:24-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
     rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g @dotenvx/dotenvx
 
 WORKDIR /app
 
@@ -39,8 +36,7 @@ RUN npm run build -w prompt-service
 FROM node:24-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g @dotenvx/dotenvx
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ENV NODE_ENV=test
@@ -54,7 +50,6 @@ RUN npm ci --workspaces --include-workspace-root --omit=dev
 COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/prompt-service/dist prompt-service/dist
 COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
-COPY .env.test prompt-service/.env.test
 
 # Create non-root user matching worker (UID 1001) for shared volume access
 RUN groupadd --system --gid 1001 nodejs && \
@@ -70,4 +65,6 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:3002/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
 
-CMD ["dotenvx", "run", "-f", ".env.test", "--", "sh", "-c", "if [ -n \"$DATABASE_KEY\" ]; then node dist/scripts/migrate.js; else npx prisma migrate deploy; fi && node dist/prisma/seed.test.js && node dist/src/index.js"]
+# Run Prisma migrations and seed, then start server
+# Env vars injected via docker-compose from k8s/overlays/test/secrets.yaml
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/prisma/seed.test.js && node dist/src/index.js"]

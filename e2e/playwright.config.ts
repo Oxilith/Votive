@@ -10,8 +10,9 @@
  * @dependencies
  * - @playwright/test for configuration types
  *
- * @note Run tests with: dotenvx run -f .env.test -- npm run test:e2e
- *       This loads environment variables from .env.test before running tests
+ * @note Run tests with: make test-e2e-full (starts services, runs tests, stops)
+ *       Or: make test-up && make test-e2e && make test-down
+ *       Env vars loaded from k8s/overlays/test/secrets.yaml via yq
  */
 
 import { defineConfig, devices } from '@playwright/test';

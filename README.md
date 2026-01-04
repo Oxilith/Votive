@@ -32,7 +32,7 @@ A 5-phase identity-based approach to sustainable change:
 
 - **Frontend**: React 19 + TypeScript + Vite + Zustand
 - **Backend**: Node.js + Express + TypeScript
-- **Prompt Service**: Express + Prisma + SQLite (encrypted with libsql)
+- **Prompt Service**: Express + Prisma + PostgreSQL
 - **Worker**: Background job scheduler (node-cron)
 - **Build**: tsup (server packages) + Vite (frontend)
 - **Styling**: Tailwind CSS v4
@@ -46,6 +46,7 @@ A 5-phase identity-based approach to sustainable change:
 - Docker and Docker Compose
 - Anthropic API key
 - mkcert (for HTTPS certificates)
+- yq (for E2E testing): `brew install yq`
 
 ### HTTPS Certificates Setup
 
@@ -138,7 +139,7 @@ See [Production Deployment](docs/production-deployment.md#environment-variables)
 │       ├── services/       # Claude API, prompt client, circuit breaker, cache
 │       └── utils/          # Logger (Pino)
 ├── prompt-service/         # Prompt management microservice
-│   ├── prisma/             # SQLite schema & migrations
+│   ├── prisma/             # PostgreSQL schema & migrations
 │   └── src/
 │       ├── admin/          # React admin UI
 │       ├── routes/         # REST API endpoints
@@ -170,6 +171,12 @@ npm run db:migrate       # Run database migrations
 npm run db:generate      # Generate Prisma client
 npm run db:seed          # Seed initial data
 npm run db:studio        # Open Prisma Studio
+
+# E2E Testing (uses Docker Compose with mocked Claude API)
+make test-e2e-full       # Start services, run tests, stop services
+make test-up             # Start test environment
+make test-e2e            # Run E2E tests (services must be running)
+make test-down           # Stop test environment
 ```
 
 ## Documentation

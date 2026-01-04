@@ -45,7 +45,7 @@ This starts:
 | Variable | Description |
 |----------|-------------|
 | `ANTHROPIC_API_KEY` | Your Claude API key |
-| `DATABASE_KEY` | 32+ character encryption key for SQLite |
+| `DATABASE_URL` | PostgreSQL connection string |
 | `ADMIN_API_KEY` | 32+ character admin authentication key |
 | `SESSION_SECRET` | 32+ character cookie signing secret (must differ from ADMIN_API_KEY) |
 | `JWT_ACCESS_SECRET` | 32+ character secret for signing access tokens |
@@ -70,6 +70,28 @@ openssl rand -hex 32
 ```
 
 For the complete environment variable reference, see [Production Deployment > Environment Variables](production-deployment.md#environment-variables).
+
+## E2E Testing
+
+E2E tests run against a dedicated Docker Compose environment with a mocked Claude API. Configuration is centralized in `k8s/overlays/test/secrets.yaml`.
+
+### Prerequisites
+- yq (YAML processor): `brew install yq`
+- mkcert certificates in `./certs` directory
+
+### Running E2E Tests
+
+```bash
+# All-in-one: start services, run tests, stop services
+make test-e2e-full
+
+# Or step-by-step:
+make test-up           # Start Docker Compose test environment
+make test-e2e          # Run E2E tests
+make test-down         # Stop and cleanup
+```
+
+The test environment uses PostgreSQL and a mock Claude API. Environment variables are extracted from the K8s secrets file using yq, providing a single source of truth for both Docker Compose and Kubernetes deployments.
 
 ## Local Build & Run
 

@@ -8,14 +8,25 @@ Playwright-based E2E tests for the Votive application. Tests run against Docker 
 
 **See also**: Root [CLAUDE.md](../CLAUDE.md) for project-wide guidance and [docs/testing-strategy.md](../docs/testing-strategy.md) for full testing philosophy.
 
-## Commands
+## Running E2E Tests
 
-**IMPORTANT**: All E2E commands must run from the **project root** using dotenvx (not from e2e directory):
+**Recommended**: Use Makefile commands (requires `yq`: `brew install yq`):
 
 ```bash
-# Run all E2E tests
-npm run test:e2e
+# All-in-one: start services, run tests, stop services
+make test-e2e-full
 
+# Or step-by-step:
+make test-up           # Start Docker Compose test environment
+make test-e2e          # Run E2E tests
+make test-down         # Stop and cleanup
+```
+
+### Additional Test Commands
+
+All E2E commands run from the **project root**:
+
+```bash
 # Run with browser visible
 npm run test:e2e:headed
 
@@ -41,10 +52,10 @@ npm run test:e2e:trace
 npm run test:e2e:serial
 ```
 
-If a command is missing, add it to both `package.json` (root) and `e2e/package.json` following the dotenvx pattern:
+If a command is missing, add it to both `package.json` (root) and `e2e/package.json`:
 ```json
 // Root package.json
-"test:e2e:newcmd": "npx dotenvx run -f .env.test -- npm run e2e:newcmd -w e2e"
+"test:e2e:newcmd": "npm run e2e:newcmd -w e2e"
 
 // e2e/package.json
 "e2e:newcmd": "playwright test --some-flag"
@@ -52,11 +63,13 @@ If a command is missing, add it to both `package.json` (root) and `e2e/package.j
 
 ## Prerequisites
 
-Tests require Docker Compose services running with the decryption key:
-```bash
-# Start services (requires private key for environment decryption)
-DOTENV_PRIVATE_KEY=<your-private-key> docker compose up --build
-```
+- **yq** (YAML processor): `brew install yq`
+- **Docker** and Docker Compose
+- **mkcert certificates** in `./certs` directory (see root README)
+
+### Configuration
+
+Environment variables are loaded from `k8s/overlays/test/secrets.yaml` (single source of truth). The Makefile extracts these using yq before running services or tests.
 
 ## Architecture
 

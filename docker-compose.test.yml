@@ -1,25 +1,78 @@
 # Docker Compose configuration for E2E testing
-# Uses separate test database and mocked Claude API
+# Uses PostgreSQL and mocked Claude API
 #
-# Usage:
+# Usage (via Makefile - recommended):
+#   make test-up        # Start services
+#   make test-e2e       # Run tests
+#   make test-down      # Stop services
+#   make test-e2e-full  # All-in-one
+#
+# Manual usage:
+#   eval $(yq -r '.stringData | to_entries | .[] | "export \(.key)=\"\(.value)\""' k8s/overlays/test/secrets.yaml)
 #   docker compose -f docker-compose.test.yml up -d --wait
-#   npm run test:e2e
+#   npm run e2e -w e2e
 #   docker compose -f docker-compose.test.yml down -v
 
 name: votive-test
 
 services:
+  postgresql:
+    image: postgres:16-alpine
+    container_name: votive-postgresql-test
+    environment:
+      POSTGRES_USER: votive
+      POSTGRES_PASSWORD: test-password-for-e2e
+      POSTGRES_DB: votive
+    ports:
+      - "5432:5432"
+    volumes:
+      - test-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U votive -d votive"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - test-network
+
   prompt-service:
     build:
       context: .
       dockerfile: prompt-service/Dockerfile.test
     container_name: votive-prompt-service-test
     environment:
-      - DOTENV_PRIVATE_KEY_TEST=${DOTENV_PRIVATE_KEY_TEST}
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${PROMPT_SERVICE_PORT}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+      - BCRYPT_SALT_ROUNDS=${BCRYPT_SALT_ROUNDS}
+      - RATE_LIMIT_LOGIN=${RATE_LIMIT_LOGIN}
+      - RATE_LIMIT_REGISTER=${RATE_LIMIT_REGISTER}
+      - RATE_LIMIT_PASSWORD_RESET=${RATE_LIMIT_PASSWORD_RESET}
+      - RATE_LIMIT_FORGOT_PASSWORD=${RATE_LIMIT_FORGOT_PASSWORD}
+      - RATE_LIMIT_TOKEN_REFRESH=${RATE_LIMIT_TOKEN_REFRESH}
+      - RATE_LIMIT_USER_DATA=${RATE_LIMIT_USER_DATA}
+      - RATE_LIMIT_PROFILE=${RATE_LIMIT_PROFILE}
+      - RATE_LIMIT_ADMIN_API=${RATE_LIMIT_ADMIN_API}
+      - RATE_LIMIT_ADMIN_WINDOW_MS=${RATE_LIMIT_ADMIN_WINDOW_MS}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
     ports:
       - "3002:3002"
-    volumes:
-      - test-prompt-data:/app/data
+    depends_on:
+      postgresql:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s
@@ -35,7 +88,22 @@ services:
       dockerfile: backend/Dockerfile.test
     container_name: votive-backend-test
     environment:
-      - DOTENV_PRIVATE_KEY_TEST=${DOTENV_PRIVATE_KEY_TEST}
+      - NODE_ENV=${NODE_ENV}
+      - PORT=${BACKEND_PORT}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - PROMPT_SERVICE_URL=http://prompt-service:3002
+      - MOCK_CLAUDE_API=${MOCK_CLAUDE_API}
+      - THINKING_ENABLED=${THINKING_ENABLED}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS}
+      - CLAUDE_RATE_LIMIT_WINDOW_MS=${CLAUDE_RATE_LIMIT_WINDOW_MS}
+      - CLAUDE_RATE_LIMIT_MAX_REQUESTS=${CLAUDE_RATE_LIMIT_MAX_REQUESTS}
+      - CIRCUIT_BREAKER_TIMEOUT=${CIRCUIT_BREAKER_TIMEOUT}
+      - CIRCUIT_BREAKER_RESET_TIMEOUT=${CIRCUIT_BREAKER_RESET_TIMEOUT}
+      - CIRCUIT_BREAKER_ERROR_THRESHOLD=${CIRCUIT_BREAKER_ERROR_THRESHOLD}
     ports:
       - "3001:3001"
     depends_on:
@@ -73,7 +141,7 @@ services:
       - test-network
 
 volumes:
-  test-prompt-data:
+  test-postgres-data:
     # Ephemeral volume - cleaned between test runs with docker compose down -v
 
 networks:
