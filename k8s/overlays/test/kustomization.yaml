@@ -19,6 +19,8 @@ labels:
 resources:
   - ../../base
   - namespace.yaml
+  - secrets.yaml
+  - postgresql-secret.yaml
 
 patches:
   - path: patches/replicas.yaml

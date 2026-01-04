@@ -145,6 +145,15 @@ private/
 .private/
 secrets/
 
+# K8s unencrypted secrets (commit only .example.yaml and .enc.yaml)
+# Test overlay uses mock values and is safe to commit
+k8s/overlays/dev/secrets.yaml
+k8s/overlays/dev/postgresql-secret.yaml
+k8s/overlays/staging/secrets.yaml
+k8s/overlays/staging/postgresql-secret.yaml
+k8s/overlays/prod/secrets.yaml
+k8s/overlays/prod/postgresql-secret.yaml
+
 # Additional cache/temp
 *.cache
 out/

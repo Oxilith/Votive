@@ -142,10 +142,7 @@ deploy-prod:
 
 deploy-test:
 	@echo "$(CYAN)Deploying to votive-test (mocked Claude API)...$(RESET)"
-	@echo "$(CYAN)Applying secrets...$(RESET)"
-	sops -d k8s/overlays/dev/secrets.enc.yaml | kubectl apply -n votive-test -f -
-	sops -d k8s/overlays/dev/postgresql-secret.enc.yaml | kubectl apply -n votive-test -f -
-	@echo "$(CYAN)Applying test overlay...$(RESET)"
+	@echo "$(CYAN)Applying test overlay (includes mock secrets)...$(RESET)"
 	kubectl apply -k k8s/overlays/test
 	@echo "$(CYAN)Waiting for deployments...$(RESET)"
 	kubectl rollout status deployment/prompt-service -n votive-test --timeout=120s
