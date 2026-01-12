@@ -162,14 +162,14 @@ mkcert localhost 127.0.0.1 ::1
 
 ### Docker Images
 
-K8s deployments use dedicated `Dockerfile.k8s` variants (no dotenvx dependency):
+All images are published to GitHub Container Registry (GHCR):
 
 | Service | Dockerfile | Image Name |
 |---------|------------|------------|
-| prompt-service | `prompt-service/Dockerfile.k8s` | `ghcr.io/oxilith/votive-prompt-service` |
-| backend | `backend/Dockerfile.k8s` | `ghcr.io/oxilith/votive-backend` |
-| app | `app/Dockerfile.k8s` | `ghcr.io/oxilith/votive-app` |
-| worker | `worker/Dockerfile.k8s` | `ghcr.io/oxilith/votive-worker` |
+| prompt-service | `prompt-service/Dockerfile` | `ghcr.io/oxilith/votive-prompt-service` |
+| backend | `backend/Dockerfile` | `ghcr.io/oxilith/votive-backend` |
+| app | `app/Dockerfile` | `ghcr.io/oxilith/votive-app` |
+| worker | `worker/Dockerfile` | `ghcr.io/oxilith/votive-worker` |
 
 ## Local Development (kind)
 
@@ -651,10 +651,10 @@ export IMAGE_TAG=latest
 export IMAGE_PREFIX=ghcr.io/oxilith
 
 # Build all images (K8s variants)
-docker build -t $IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG -f prompt-service/Dockerfile.k8s .
-docker build -t $IMAGE_PREFIX/votive-backend:$IMAGE_TAG -f backend/Dockerfile.k8s .
-docker build -t $IMAGE_PREFIX/votive-app:$IMAGE_TAG -f app/Dockerfile.k8s .
-docker build -t $IMAGE_PREFIX/votive-worker:$IMAGE_TAG -f worker/Dockerfile.k8s .
+docker build -t $IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG -f prompt-service/Dockerfile .
+docker build -t $IMAGE_PREFIX/votive-backend:$IMAGE_TAG -f backend/Dockerfile .
+docker build -t $IMAGE_PREFIX/votive-app:$IMAGE_TAG -f app/Dockerfile .
+docker build -t $IMAGE_PREFIX/votive-worker:$IMAGE_TAG -f worker/Dockerfile .
 
 # Push all images
 docker push $IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG
@@ -670,10 +670,10 @@ $IMAGE_TAG = "latest"
 $IMAGE_PREFIX = "ghcr.io/oxilith"
 
 # Build all images (K8s variants)
-docker build -t "$IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG" -f prompt-service/Dockerfile.k8s .
-docker build -t "$IMAGE_PREFIX/votive-backend:$IMAGE_TAG" -f backend/Dockerfile.k8s .
-docker build -t "$IMAGE_PREFIX/votive-app:$IMAGE_TAG" -f app/Dockerfile.k8s .
-docker build -t "$IMAGE_PREFIX/votive-worker:$IMAGE_TAG" -f worker/Dockerfile.k8s .
+docker build -t "$IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG" -f prompt-service/Dockerfile .
+docker build -t "$IMAGE_PREFIX/votive-backend:$IMAGE_TAG" -f backend/Dockerfile .
+docker build -t "$IMAGE_PREFIX/votive-app:$IMAGE_TAG" -f app/Dockerfile .
+docker build -t "$IMAGE_PREFIX/votive-worker:$IMAGE_TAG" -f worker/Dockerfile .
 
 # Push all images
 docker push "$IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG"
@@ -758,10 +758,10 @@ $token | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 $IMAGE_PREFIX = "ghcr.io/oxilith"
 $IMAGE_TAG = "latest"
 
-docker build -t "$IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG" -f prompt-service/Dockerfile.k8s .
-docker build -t "$IMAGE_PREFIX/votive-backend:$IMAGE_TAG" -f backend/Dockerfile.k8s .
-docker build -t "$IMAGE_PREFIX/votive-app:$IMAGE_TAG" -f app/Dockerfile.k8s .
-docker build -t "$IMAGE_PREFIX/votive-worker:$IMAGE_TAG" -f worker/Dockerfile.k8s .
+docker build -t "$IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG" -f prompt-service/Dockerfile .
+docker build -t "$IMAGE_PREFIX/votive-backend:$IMAGE_TAG" -f backend/Dockerfile .
+docker build -t "$IMAGE_PREFIX/votive-app:$IMAGE_TAG" -f app/Dockerfile .
+docker build -t "$IMAGE_PREFIX/votive-worker:$IMAGE_TAG" -f worker/Dockerfile .
 
 # Push images
 docker push "$IMAGE_PREFIX/votive-prompt-service:$IMAGE_TAG"
@@ -848,7 +848,7 @@ curl "http://$IP/health"
 
 2. **Docker Context**: Always run Docker commands from the repository root.
 
-3. **Path Separators**: Use forward slashes in Dockerfile paths (`-f prompt-service/Dockerfile.k8s`).
+3. **Path Separators**: Use forward slashes in Dockerfile paths (`-f prompt-service/Dockerfile`).
 
 4. **Environment Variables**: Use `$env:VAR` syntax in PowerShell, not `$VAR`.
 

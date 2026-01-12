@@ -1,11 +1,10 @@
-# Worker Dockerfile
-# Using Debian slim for consistency and libsql native module compatibility
+# Worker Dockerfile for Kubernetes
+# Simplified version without dotenvx - K8s injects env vars directly
+
 FROM node:24-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
     rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g @dotenvx/dotenvx
 
 WORKDIR /app
 
@@ -20,6 +19,7 @@ RUN npm ci --workspaces --include-workspace-root
 
 # Generate Prisma client (uses prompt-service schema, outputs to shared/src/generated)
 COPY prompt-service/prisma prompt-service/prisma
+COPY prompt-service/prisma.config.ts prompt-service/
 RUN npx prisma generate --schema=prompt-service/prisma/schema.prisma
 
 # Build shared
@@ -35,12 +35,11 @@ COPY worker/tsconfig.json worker/
 COPY worker/tsup.config.ts worker/
 RUN npm run build -w worker
 
-# Production
+# Production stage
 FROM node:24-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g @dotenvx/dotenvx
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -54,8 +53,8 @@ RUN npm ci --workspaces --include-workspace-root --omit=dev
 COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/worker/dist worker/dist
 COPY --from=builder /app/worker/prisma worker/prisma
-COPY .env worker/.env
 
+# Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 --gid nodejs appuser && \
     chown -R appuser:nodejs /app
@@ -63,5 +62,4 @@ RUN groupadd --system --gid 1001 nodejs && \
 USER appuser
 WORKDIR /app/worker
 
-
-CMD ["npx", "dotenvx", "run", "--", "node", "dist/index.js"]
+CMD ["node", "dist/index.js"]

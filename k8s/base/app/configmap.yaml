@@ -44,7 +44,23 @@ data:
             add_header Content-Type text/plain;
         }
 
-        # API proxy to backend
+        # User auth API proxy to prompt-service
+        location /api/user-auth/ {
+            proxy_pass http://prompt-service;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Connection "";
+
+            # Timeouts
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 120s;
+            proxy_read_timeout 120s;
+        }
+
+        # Backend API proxy (Claude analysis)
         location /api/ {
             proxy_pass http://backend;
             proxy_http_version 1.1;

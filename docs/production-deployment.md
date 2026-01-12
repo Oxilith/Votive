@@ -82,26 +82,32 @@ The worker service handles background jobs like token cleanup. It shares the dat
 - `0 0 * * *` - Daily at midnight
 - `0 0 * * 0` - Weekly on Sunday at midnight
 
-## Docker Compose Configuration
+## Kubernetes Configuration
 
-Votive uses [dotenvx](https://dotenvx.com) for encrypted environment variable management. The `.env` file is encrypted and committed to the repository - you only need the decryption key to run.
+Votive uses Kubernetes for deployment with SOPS-encrypted secrets.
 
-### Running with Docker Compose
-
-```bash
-# Pass the decryption key - all other secrets are in the encrypted .env
-DOTENV_PRIVATE_KEY=<your-private-key> docker compose up --build
-```
-
-### How It Works
+### Secret Management
 
 | File | Description | Commit to Git? |
 |------|-------------|----------------|
-| `.env` | Encrypted secrets | Yes (safe) |
-| `.env.keys` | Private decryption key | **Never** |
-| `DOTENV_PRIVATE_KEY` | Runtime decryption | Pass via env/secrets manager |
+| `secrets.example.yaml` | Template with documentation | Yes |
+| `secrets.yaml` | Unencrypted secrets (temporary) | **Never** |
+| `secrets.enc.yaml` | SOPS-encrypted secrets | Yes (safe) |
+| `~/.config/sops/age/keys.txt` | Age private key | **Never** |
 
-At container startup, dotenvx decrypts the `.env` file using the private key and injects all variables into the process environment.
+### Running Locally
+
+```bash
+# Create kind cluster and deploy
+make cluster-create
+make build-and-load
+make install-postgres-dev
+make deploy-dev
+
+# Access at: https://votive.127.0.0.1.nip.io
+```
+
+See [kubernetes-guide.md](kubernetes-guide.md) for complete deployment instructions including Azure AKS production deployment.
 
 ## Rate Limiting
 

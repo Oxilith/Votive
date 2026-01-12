@@ -1,9 +1,11 @@
 # Votive Kubernetes Operations Makefile
 # Usage: make help
 
-.PHONY: help cluster-create cluster-delete install-ingress install-cert install-postgres-dev \
+.PHONY: help cluster-create cluster-delete install-ingress install-cert install-cert-prod \
+        install-postgres-dev install-postgres-prod \
         deploy-dev deploy-staging deploy-prod deploy-test status-dev status-test \
         logs-dev logs-backend-dev logs-test port-forward clean-dev clean-test clean-all \
+        build-images load-images build-and-load \
         test-up test-down test-e2e test-e2e-full
 
 # Colors for output
@@ -22,9 +24,11 @@ help:
 	@echo "  make cluster-delete      Delete kind cluster"
 	@echo ""
 	@echo "$(GREEN)Infrastructure:$(RESET)"
-	@echo "  make install-ingress     Install NGINX Ingress Controller"
-	@echo "  make install-cert        Install cert-manager + mkcert issuer"
-	@echo "  make install-postgres-dev Deploy PostgreSQL to votive-dev namespace"
+	@echo "  make install-ingress       Install NGINX Ingress Controller"
+	@echo "  make install-cert          Install cert-manager + mkcert (local dev)"
+	@echo "  make install-cert-prod     Install cert-manager + Let's Encrypt (prod)"
+	@echo "  make install-postgres-dev  Deploy PostgreSQL to votive-dev namespace"
+	@echo "  make install-postgres-prod Deploy PostgreSQL to votive-prod namespace"
 	@echo ""
 	@echo "$(GREEN)Deployment:$(RESET)"
 	@echo "  make deploy-dev          Deploy to votive-dev namespace"
@@ -39,6 +43,11 @@ help:
 	@echo "  make logs-backend-dev    Tail backend logs"
 	@echo "  make logs-test           Tail test namespace logs"
 	@echo "  make port-forward        Show access instructions"
+	@echo ""
+	@echo "$(GREEN)Build (for kind):$(RESET)"
+	@echo "  make build-images        Build all Docker images locally"
+	@echo "  make load-images         Load images into kind cluster"
+	@echo "  make build-and-load      Build and load in one step"
 	@echo ""
 	@echo "$(GREEN)Cleanup:$(RESET)"
 	@echo "  make clean-dev           Remove dev deployment"
@@ -72,10 +81,10 @@ cluster-delete:
 install-ingress:
 	@echo "$(CYAN)Installing NGINX Ingress Controller...$(RESET)"
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-	@echo "$(CYAN)Waiting for ingress controller to be ready...$(RESET)"
+	@echo "$(CYAN)Waiting for ingress deployment to be available...$(RESET)"
+	@sleep 5
 	kubectl wait --namespace ingress-nginx \
-		--for=condition=ready pod \
-		--selector=app.kubernetes.io/component=controller \
+		--for=condition=available deployment/ingress-nginx-controller \
 		--timeout=120s
 	@echo "$(GREEN)Ingress controller ready!$(RESET)"
 
@@ -95,6 +104,32 @@ install-cert:
 	@echo "$(CYAN)Applying mkcert ClusterIssuer...$(RESET)"
 	kubectl apply -f k8s/base/cert-manager/mkcert-issuer.yaml
 	@echo "$(GREEN)cert-manager ready!$(RESET)"
+
+install-cert-prod:
+	@echo "$(CYAN)Adding Jetstack Helm repo...$(RESET)"
+	helm repo add jetstack https://charts.jetstack.io --force-update
+	@echo "$(CYAN)Installing cert-manager...$(RESET)"
+	helm upgrade --install cert-manager jetstack/cert-manager \
+		--namespace cert-manager --create-namespace \
+		--set crds.enabled=true \
+		--wait
+	@echo "$(CYAN)Applying Let's Encrypt ClusterIssuers...$(RESET)"
+	kubectl apply -f k8s/base/cert-manager/letsencrypt-issuer.yaml
+	@echo "$(GREEN)cert-manager with Let's Encrypt ready!$(RESET)"
+
+install-postgres-prod:
+	@echo "$(CYAN)Creating votive-prod namespace...$(RESET)"
+	kubectl create namespace votive-prod --dry-run=client -o yaml | kubectl apply -f -
+	@echo "$(CYAN)Applying PostgreSQL secret...$(RESET)"
+	sops -d k8s/overlays/prod/postgresql-secret.enc.yaml | kubectl apply -f -
+	@echo "$(CYAN)Adding Bitnami Helm repo...$(RESET)"
+	helm repo add bitnami https://charts.bitnami.com/bitnami --force-update
+	@echo "$(CYAN)Installing PostgreSQL...$(RESET)"
+	helm upgrade --install postgresql bitnami/postgresql \
+		--namespace votive-prod \
+		-f k8s/helm-values/postgresql-prod.yaml \
+		--wait
+	@echo "$(GREEN)PostgreSQL ready!$(RESET)"
 
 install-postgres-dev:
 	@echo "$(CYAN)Creating votive-dev namespace...$(RESET)"
@@ -209,6 +244,58 @@ port-forward:
 	@echo "  kubectl port-forward svc/prompt-service 3002:3002 -n votive-dev"
 	@echo "  kubectl port-forward svc/backend 3001:3001 -n votive-dev"
 	@echo ""
+
+# ============ Build & Load Images (for kind) ============
+
+IMAGE_TAG ?= latest
+IMAGE_PREFIX ?= ghcr.io/oxilith
+
+build-images:
+	@echo "$(CYAN)Building all Docker images (K8s variant)...$(RESET)"
+	docker build -t $(IMAGE_PREFIX)/votive-prompt-service:$(IMAGE_TAG) -f prompt-service/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/votive-backend:$(IMAGE_TAG) -f backend/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/votive-app:$(IMAGE_TAG) -f app/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/votive-worker:$(IMAGE_TAG) -f worker/Dockerfile .
+	@echo "$(GREEN)All images built!$(RESET)"
+
+load-images:
+	@echo "$(CYAN)Loading images into kind cluster...$(RESET)"
+	kind load docker-image $(IMAGE_PREFIX)/votive-prompt-service:$(IMAGE_TAG) --name votive
+	kind load docker-image $(IMAGE_PREFIX)/votive-backend:$(IMAGE_TAG) --name votive
+	kind load docker-image $(IMAGE_PREFIX)/votive-app:$(IMAGE_TAG) --name votive
+	kind load docker-image $(IMAGE_PREFIX)/votive-worker:$(IMAGE_TAG) --name votive
+	@echo "$(GREEN)Images loaded into kind!$(RESET)"
+
+build-and-load: build-images load-images
+	@echo "$(GREEN)Build and load complete!$(RESET)"
+
+# Quick rebuild and redeploy a single service
+rebuild-prompt-service:
+	@echo "$(CYAN)Rebuilding prompt-service...$(RESET)"
+	docker build -t $(IMAGE_PREFIX)/votive-prompt-service:$(IMAGE_TAG) -f prompt-service/Dockerfile .
+	kind load docker-image $(IMAGE_PREFIX)/votive-prompt-service:$(IMAGE_TAG) --name votive
+	kubectl rollout restart deployment/prompt-service -n votive-dev
+	@echo "$(GREEN)prompt-service redeployed!$(RESET)"
+
+rebuild-backend:
+	@echo "$(CYAN)Rebuilding backend...$(RESET)"
+	docker build -t $(IMAGE_PREFIX)/votive-backend:$(IMAGE_TAG) -f backend/Dockerfile .
+	kind load docker-image $(IMAGE_PREFIX)/votive-backend:$(IMAGE_TAG) --name votive
+	kubectl rollout restart deployment/backend -n votive-dev
+	@echo "$(GREEN)backend redeployed!$(RESET)"
+
+rebuild-app:
+	@echo "$(CYAN)Rebuilding app...$(RESET)"
+	docker build -t $(IMAGE_PREFIX)/votive-app:$(IMAGE_TAG) -f app/Dockerfile .
+	kind load docker-image $(IMAGE_PREFIX)/votive-app:$(IMAGE_TAG) --name votive
+	kubectl rollout restart deployment/app -n votive-dev
+	@echo "$(GREEN)app redeployed!$(RESET)"
+
+# Redeploy all (after code changes)
+redeploy-all: build-and-load
+	@echo "$(CYAN)Restarting all deployments...$(RESET)"
+	kubectl rollout restart deployment/prompt-service deployment/backend deployment/app -n votive-dev
+	@echo "$(GREEN)All services redeployed!$(RESET)"
 
 # ============ Database ============
 

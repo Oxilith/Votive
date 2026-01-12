@@ -1,0 +1,8 @@
+# Prod namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: votive-prod
+  labels:
+    environment: prod
+    app.kubernetes.io/part-of: votive

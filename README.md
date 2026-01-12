@@ -44,9 +44,14 @@ A 5-phase identity-based approach to sustainable change:
 
 ### Prerequisites
 - Docker and Docker Compose
-- Anthropic API key
-- mkcert (for HTTPS certificates)
+- kind (Kubernetes in Docker): `brew install kind`
+- kubectl: `brew install kubernetes-cli`
+- helm: `brew install helm`
+- sops + age (for secrets): `brew install sops age`
+- mkcert (for HTTPS certificates): `brew install mkcert`
 - yq (for E2E testing): `brew install yq`
+
+See [Kubernetes Guide](docs/kubernetes-guide.md#prerequisites) for Windows installation instructions.
 
 ### HTTPS Certificates Setup
 
@@ -68,54 +73,44 @@ mkcert localhost 127.0.0.1 ::1
 cd ..
 ```
 
-### Quick Start
+### Quick Start (Local Development with kind)
 
-Votive uses [dotenvx](https://dotenvx.com) for encrypted environment variable management. The `.env` file is encrypted and committed to the repository - you only need the decryption key to run.
-
-Run the full stack using Docker:
+Votive uses Kubernetes for deployment. For local development, use kind (Kubernetes in Docker):
 
 ```bash
-# macOS/Linux
-DOTENV_PRIVATE_KEY=<your-private-key> docker compose up --build
+# 1. Create cluster with ingress and cert-manager
+make cluster-create
 
-# Windows (PowerShell)
-$env:DOTENV_PRIVATE_KEY="<your-private-key>"
-docker compose up --build
+# 2. Build and load images
+make build-and-load
+
+# 3. Install PostgreSQL
+make install-postgres-dev
+
+# 4. Deploy application
+make deploy-dev
+
+# 5. Access application
+open https://votive.127.0.0.1.nip.io
 ```
 
 Once running:
-- **Frontend**: https://localhost (via nginx)
-- **Backend API**: https://localhost/api/v1
-- **Admin UI**: http://localhost:3002/admin
+- **Frontend**: https://votive.127.0.0.1.nip.io
+- **Admin UI**: https://votive.127.0.0.1.nip.io/admin
 
-For pre-built images (faster startup):
+### E2E Testing
 
-```bash
-DOTENV_PRIVATE_KEY=<your-private-key> docker compose -f oci://oxilith/votive-oci:latest up
-```
-
-### Managing Environment Variables
-
-To add or update environment variables:
+Run E2E tests with Docker Compose (mocked Claude API):
 
 ```bash
-# Boolean/numeric values
-dotenvx set THINKING_ENABLED true
-
-# String values (use quotes)
-dotenvx set ANTHROPIC_API_KEY "sk-ant-..."
-
-# View current values (requires private key)
-DOTENV_PRIVATE_KEY=<key> dotenvx get
+make test-e2e-full    # All-in-one: start, test, stop
 ```
 
-Changes to `.env` are automatically encrypted. Commit the updated `.env` file (never commit `.env.keys`).
-
-See [Docker Hub Workflow](docs/docker-hub.md) for complete documentation including:
-- Local build instructions
-- HTTPS configuration
-- Multi-arch image publishing (maintainers)
-- Troubleshooting guide
+See [Kubernetes Guide](docs/kubernetes-guide.md) for complete documentation including:
+- Local development workflow
+- Secret management with SOPS/age
+- Production deployment to Azure AKS
+- Windows deployment instructions
 
 See [Production Deployment](docs/production-deployment.md#environment-variables) for the complete environment variable reference.
 
@@ -184,11 +179,11 @@ make test-down           # Stop test environment
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/architecture.md) | System design, diagrams, and technical decisions |
+| [Kubernetes Guide](docs/kubernetes-guide.md) | Local development, K8s deployment, and secrets management |
 | [AI Agent Codebase Instructions](docs/AI-Agent-Codebase-Instructions.md) | Module system, imports, build, and coding conventions |
 | [Ink & Stone Design System](docs/votive-ink-design-system.md) | Visual language, component patterns, and animation guidelines |
 | [Internationalization Guide](docs/InternationalizationGuide.md) | i18n setup, namespaces, and translation patterns |
 | [Production Deployment](docs/production-deployment.md) | Environment variables, security, and deployment best practices |
-| [Docker Hub Workflow](docs/docker-hub.md) | Container deployment, publishing, and troubleshooting |
 | [Known Limitations](docs/known-limitations.md) | Cache behavior, scaling considerations, and operational details |
 | [Motivation](docs/Motivation.md) | Theoretical framework and psychology principles |
 | [Testing Strategy](docs/testing-strategy.md) | Test pyramid, patterns, and conventions |

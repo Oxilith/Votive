@@ -1,0 +1,50 @@
+# Dev environment: use local images loaded into kind
+# imagePullPolicy: IfNotPresent allows using locally loaded images
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prompt-service
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: migrate
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: prompt-service
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  template:
+    spec:
+      containers:
+        - name: nginx
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: worker-token-cleanup
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: worker
+              imagePullPolicy: IfNotPresent

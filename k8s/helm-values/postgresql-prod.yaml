@@ -1,0 +1,84 @@
+# PostgreSQL Helm values for production environment (Azure)
+# Bitnami PostgreSQL chart: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
+#
+# Usage:
+#   helm upgrade --install postgresql bitnami/postgresql \
+#     --namespace votive-prod \
+#     -f k8s/helm-values/postgresql-prod.yaml
+
+# Pin image versions for production stability
+image:
+  registry: docker.io
+  repository: bitnami/postgresql
+  tag: "18.1.0"
+
+# Authentication
+auth:
+  database: votive
+  username: votive
+  # Password from existing secret (must be created before helm install)
+  existingSecret: postgresql-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+
+# Primary database configuration
+primary:
+  # Persistence - use Azure managed disk
+  persistence:
+    enabled: true
+    size: 20Gi
+    # For Azure AKS, use managed-premium for SSD or managed-csi for standard
+    storageClass: "managed-csi-premium"
+    # CRITICAL: Retain data even if PVC is deleted
+    annotations:
+      helm.sh/resource-policy: keep
+
+  # Resource limits - production sizing
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 1000m
+
+  # PostgreSQL configuration - production tuned
+  configuration: |
+    listen_addresses = '*'
+    max_connections = 200
+    shared_buffers = 256MB
+    effective_cache_size = 768MB
+    maintenance_work_mem = 128MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 8MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 4MB
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+
+  # Health checks
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+# Metrics for Prometheus monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false  # Enable if using Prometheus Operator
+
+# Backup (handled by separate CronJob or Azure Backup)
+backup:
+  enabled: false

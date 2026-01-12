@@ -1,8 +1,7 @@
-# Backend Dockerfile
-# Using Debian slim for consistency across all services
-FROM node:24-slim AS builder
+# Backend Dockerfile for Kubernetes
+# Simplified version without dotenvx - K8s injects env vars directly
 
-RUN npm install -g @dotenvx/dotenvx
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -27,12 +26,11 @@ COPY backend/tsconfig.json backend/
 COPY backend/tsup.config.ts backend/
 RUN npm run build -w backend
 
-# Production
+# Production stage
 FROM node:24-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends wget && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g @dotenvx/dotenvx
+RUN apt-get update && apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -45,8 +43,8 @@ RUN npm ci --workspaces --include-workspace-root --omit=dev
 
 COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/backend/dist backend/dist
-COPY .env backend/.env
 
+# Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 --gid nodejs appuser && \
     chown -R appuser:nodejs /app
@@ -57,6 +55,6 @@ WORKDIR /app/backend
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget -q --spider http://localhost:3001/health || exit 1
+  CMD curl -sf http://localhost:3001/health || exit 1
 
-CMD ["npx", "dotenvx", "run", "--", "node", "dist/index.js"]
+CMD ["node", "dist/index.js"]

@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/name: prompt-service
 data:
   NODE_ENV: "production"
-  PORT: "3002"
+  PROMPT_SERVICE_PORT: "3002"
   LOG_LEVEL: "info"
 
   # Password hashing

@@ -1,11 +1,11 @@
-# Prompt Service Dockerfile
-# Using Debian slim for consistency with other services
+# Prompt Service Dockerfile for Kubernetes
+# Simplified version without dotenvx - K8s injects env vars directly
+# Migrations run in init container, not at startup
+
 FROM node:24-slim AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
     rm -rf /var/lib/apt/lists/*
-
-RUN npm install -g @dotenvx/dotenvx
 
 WORKDIR /app
 
@@ -34,12 +34,11 @@ COPY prompt-service/vite.config.ts prompt-service/
 RUN npm run db:generate -w prompt-service
 RUN npm run build -w prompt-service
 
-# Production
+# Production stage
 FROM node:24-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && \
-    rm -rf /var/lib/apt/lists/* && \
-    npm install -g @dotenvx/dotenvx
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -54,12 +53,10 @@ COPY --from=builder /app/shared/dist shared/dist
 COPY --from=builder /app/prompt-service/dist prompt-service/dist
 COPY --from=builder /app/prompt-service/prisma prompt-service/prisma
 COPY --from=builder /app/prompt-service/prisma.config.ts prompt-service/
-COPY .env prompt-service/.env
 
-# Create non-root user matching worker (UID 1001) for shared volume access
+# Create non-root user
 RUN groupadd --system --gid 1001 nodejs && \
     useradd --system --uid 1001 --gid nodejs appuser && \
-    mkdir -p /app/data && \
     chown -R appuser:nodejs /app
 
 USER appuser
@@ -68,6 +65,8 @@ WORKDIR /app/prompt-service
 EXPOSE 3002
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD node -e "process.env.NODE_TLS_REJECT_UNAUTHORIZED='0'; fetch('https://localhost:3002/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://localhost:3002/health').then(r=>r.ok||process.exit(1)).catch(()=>process.exit(1))"
 
-CMD ["dotenvx", "run", "--", "sh", "-c", "npx prisma migrate deploy --config ./prisma.config.ts && node dist/prisma/seed.js && node dist/src/index.js"]
+# Simple startup - migrations handled by K8s init container
+# Seeding runs at startup for initial data
+CMD ["sh", "-c", "node dist/prisma/seed.js && node dist/src/index.js"]

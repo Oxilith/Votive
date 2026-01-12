@@ -35,6 +35,7 @@ primary:
 
   # PostgreSQL configuration
   configuration: |
+    listen_addresses = '*'
     max_connections = 100
     shared_buffers = 128MB
     effective_cache_size = 256MB

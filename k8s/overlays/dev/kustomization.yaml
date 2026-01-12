@@ -24,6 +24,7 @@ resources:
 # Apply patches
 patches:
   - path: patches/replicas.yaml
+  - path: patches/image-pull-policy.yaml
 
 # Image tags (override for dev if needed)
 images:

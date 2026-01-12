@@ -1,0 +1,26 @@
+# Prod ingress patch - Azure domain
+# Update the host to your actual domain
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: votive-ingress
+  annotations:
+    # Let's Encrypt production certificates
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        # TODO: Replace with your Azure domain
+        - votive.yourdomain.com
+      secretName: votive-tls
+  rules:
+    - host: votive.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 80

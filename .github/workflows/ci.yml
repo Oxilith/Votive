@@ -136,16 +136,16 @@ jobs:
       matrix:
         service:
           - name: app
-            dockerfile: app/Dockerfile.k8s
+            dockerfile: app/Dockerfile
             context: .
           - name: backend
-            dockerfile: backend/Dockerfile.k8s
+            dockerfile: backend/Dockerfile
             context: .
           - name: prompt-service
-            dockerfile: prompt-service/Dockerfile.k8s
+            dockerfile: prompt-service/Dockerfile
             context: .
           - name: worker
-            dockerfile: worker/Dockerfile.k8s
+            dockerfile: worker/Dockerfile
             context: .
     steps:
       - name: Checkout code

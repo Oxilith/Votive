@@ -55,25 +55,25 @@ npx vitest run --reporter=verbose path/to/file   # Verbose output for debugging
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 - Security issues: Email konrad.jagusiak@oxilogic.com (not public issues)
 
-## Docker
+## Kubernetes Development
 
-### Development
+### Local Development (kind)
 
-Development uses Docker with [dotenvx](https://dotenvx.com) for encrypted environment variables:
+Development uses Kubernetes with kind for local clusters:
 
 ```bash
-# Local development (build from source)
-DOTENV_PRIVATE_KEY=<your-private-key> docker compose up --build
+# Quick start
+make cluster-create      # Create kind cluster with ingress + cert-manager
+make build-and-load      # Build and load images
+make install-postgres-dev # Install PostgreSQL
+make deploy-dev          # Deploy application
 
-# Production (OCI deployment with pre-built images)
-DOTENV_PRIVATE_KEY=<your-private-key> docker compose -f oci://oxilith/votive-oci:latest up
+# Access at: https://votive.127.0.0.1.nip.io
 ```
-
-The `.env` file is encrypted and committed - only `.env.keys` (the private key) must stay secret.
 
 ### E2E Testing
 
-E2E tests use a separate Docker Compose setup with mock Claude API. Configuration is centralized in `k8s/overlays/test/secrets.yaml`.
+E2E tests use Docker Compose with mock Claude API. Configuration is in `k8s/overlays/test/secrets.yaml`.
 
 ```bash
 # Requires: yq (brew install yq)
@@ -87,11 +87,11 @@ make test-e2e          # Run E2E tests
 make test-down         # Stop and cleanup
 ```
 
-The Makefile loads environment variables from the K8s secrets file using yq, enabling a single source of truth for both Docker Compose and future Kubernetes deployments.
+The Makefile loads environment variables from the K8s secrets file using yq.
 
-See [docs/docker-hub.md](docs/docker-hub.md) for complete workflow documentation.
+See [docs/kubernetes-guide.md](docs/kubernetes-guide.md) for complete deployment documentation.
 
-### HTTPS Certificates (Required for Docker)
+### HTTPS Certificates (Required for E2E tests)
 ```bash
 brew install mkcert && mkcert -install
 mkdir -p certs && cd certs && mkcert localhost 127.0.0.1 ::1
@@ -106,7 +106,7 @@ mkdir -p certs && cd certs && mkcert localhost 127.0.0.1 ::1
 - **Test secrets**: `k8s/overlays/test/secrets.yaml` contains mock values and can be edited/committed
 - **Dev/staging/prod secrets**: Use SOPS-encrypted `.enc.yaml` files (never commit unencrypted)
 - **Example template**: `k8s/overlays/dev/secrets.example.yaml` documents required variables
-- **docker-compose.yml**: Use `${VARIABLE}` syntax - variables are injected at runtime via yq extraction
+- **docker-compose.test.yml**: Use `${VARIABLE}` syntax - variables are injected at runtime via yq extraction from K8s secrets
 
 ### TypeScript & Module System
 - **No `any` types** - use specific types or `unknown`
@@ -358,17 +358,18 @@ Sample test personas in `/personas/` for quick testing.
 
 **AI Analysis Output** (`AIAnalysisResult` type): `patterns`, `contradictions`, `blindSpots`, `leveragePoints`, `risks`, `identitySynthesis`
 
-## Docker Architecture
+## Deployment Architecture
 
 ```
-Browser → nginx (HTTPS :443) → backend (HTTP :3001)
-                ↑
-         SSL termination (API requests: /api/* → backend:3001)
+Browser → Ingress (NGINX) → App (nginx) → Backend → Prompt Service → PostgreSQL
+                                    ↓
+                              Claude API (external)
 ```
 
-- Multi-arch images: `linux/amd64` + `linux/arm64`
-- npm workspaces with shared package via symlinks
-- Backend uses non-root user for security
+- **Images**: Published to GHCR (`ghcr.io/oxilith/votive-*`)
+- **Secrets**: SOPS-encrypted with age keys
+- **Local dev**: kind cluster with nip.io wildcard DNS
+- **Production**: Azure AKS with Let's Encrypt certificates
 - `tsconfig.base.json` required in Docker context for builds
 
 ### Design System
