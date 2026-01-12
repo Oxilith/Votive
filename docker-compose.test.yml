@@ -10,6 +10,7 @@ name: votive-test
 
 services:
   prompt-service:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: prompt-service/Dockerfile.test
@@ -30,6 +31,7 @@ services:
       - test-network
 
   backend:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: backend/Dockerfile.test
@@ -51,6 +53,7 @@ services:
       - test-network
 
   app:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: app/Dockerfile.test
@@ -59,7 +62,7 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - ${PWD}/certs:/etc/nginx/ssl:ro
+      - ./certs:/etc/nginx/ssl:ro
     depends_on:
       backend:
         condition: service_healthy

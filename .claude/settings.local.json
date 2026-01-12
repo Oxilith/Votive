@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "graphiti"
+  ],
+  "enableAllProjectMcpServers": true
+}
