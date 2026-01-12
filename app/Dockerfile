@@ -37,13 +37,14 @@ RUN npm run build -w app
 # Production - using Debian-based nginx for consistency
 FROM nginx:1.28.1
 
-RUN apt-get update && apt-get install -y --no-install-recommends openssl curl && \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl curl dos2unix && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p /etc/nginx/ssl
 
 COPY app/nginx.conf /etc/nginx/conf.d/default.conf
 COPY app/docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+RUN dos2unix /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
 
 COPY --from=builder /app/app/dist /usr/share/nginx/html
 
