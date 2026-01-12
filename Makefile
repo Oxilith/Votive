@@ -6,7 +6,8 @@
         deploy-dev deploy-staging deploy-prod deploy-test status-dev status-test \
         logs-dev logs-backend-dev logs-test port-forward clean-dev clean-test clean-all \
         build-images load-images build-and-load \
-        test-up test-down test-e2e test-e2e-full
+        test-up test-down test-e2e test-e2e-full \
+        db-up db-down db-down-clean db-migrate db-seed db-seed-test db-generate db-studio
 
 # Colors for output
 CYAN := \033[36m
@@ -59,6 +60,16 @@ help:
 	@echo "  make test-down           Stop Docker Compose test environment"
 	@echo "  make test-e2e            Run E2E tests (services must be running)"
 	@echo "  make test-e2e-full       Start services, run tests, stop services"
+	@echo ""
+	@echo "$(GREEN)Local Database (Docker):$(RESET)"
+	@echo "  make db-up               Start PostgreSQL in Docker"
+	@echo "  make db-down             Stop PostgreSQL"
+	@echo "  make db-down-clean       Stop PostgreSQL and remove data"
+	@echo "  make db-migrate          Run database migrations"
+	@echo "  make db-generate         Generate Prisma client"
+	@echo "  make db-seed             Seed the database"
+	@echo "  make db-seed-test        Seed the database with test data"
+	@echo "  make db-studio           Open Prisma Studio"
 	@echo ""
 
 # ============ Cluster ============
@@ -306,6 +317,53 @@ db-shell-dev:
 db-backup-dev:
 	@echo "$(CYAN)Creating manual backup...$(RESET)"
 	kubectl create job --from=cronjob/postgresql-backup manual-backup-$$(date +%s) -n votive-dev
+
+# ============ Local Development (PostgreSQL via Docker) ============
+
+LOCAL_DATABASE_URL := postgresql://votive:dev-password@localhost:5432/votive
+
+db-up:
+	@echo "$(CYAN)Starting local PostgreSQL...$(RESET)"
+	docker compose -f docker-compose.dev.yml up -d --wait
+	@echo "$(GREEN)PostgreSQL ready at localhost:5432$(RESET)"
+
+db-down:
+	@echo "$(YELLOW)Stopping local PostgreSQL...$(RESET)"
+	docker compose -f docker-compose.dev.yml down
+	@echo "$(GREEN)PostgreSQL stopped$(RESET)"
+
+db-down-clean:
+	@echo "$(YELLOW)Stopping local PostgreSQL and removing data...$(RESET)"
+	docker compose -f docker-compose.dev.yml down -v
+	@echo "$(GREEN)PostgreSQL stopped and data removed$(RESET)"
+
+db-migrate:
+	@echo "$(CYAN)Running database migrations...$(RESET)"
+	@docker compose -f docker-compose.dev.yml up -d --wait 2>/dev/null || true
+	DATABASE_URL="$(LOCAL_DATABASE_URL)" npm run db:migrate -w prompt-service
+	@echo "$(GREEN)Migrations complete!$(RESET)"
+
+db-seed:
+	@echo "$(CYAN)Seeding database...$(RESET)"
+	@docker compose -f docker-compose.dev.yml up -d --wait 2>/dev/null || true
+	DATABASE_URL="$(LOCAL_DATABASE_URL)" npm run db:seed -w prompt-service
+	@echo "$(GREEN)Seeding complete!$(RESET)"
+
+db-seed-test:
+	@echo "$(CYAN)Seeding database with test data...$(RESET)"
+	@docker compose -f docker-compose.dev.yml up -d --wait 2>/dev/null || true
+	DATABASE_URL="$(LOCAL_DATABASE_URL)" npm run db:seed:test -w prompt-service
+	@echo "$(GREEN)Test seeding complete!$(RESET)"
+
+db-generate:
+	@echo "$(CYAN)Generating Prisma client...$(RESET)"
+	npm run db:generate -w prompt-service
+	@echo "$(GREEN)Prisma client generated!$(RESET)"
+
+db-studio:
+	@echo "$(CYAN)Opening Prisma Studio...$(RESET)"
+	@docker compose -f docker-compose.dev.yml up -d --wait 2>/dev/null || true
+	DATABASE_URL="$(LOCAL_DATABASE_URL)" npm run db:studio -w prompt-service
 
 # ============ Cleanup ============
 

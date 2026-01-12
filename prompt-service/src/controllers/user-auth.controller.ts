@@ -738,9 +738,9 @@ export class UserAuthController {
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id;
 
-    if (!id) {
+    if (!id || Array.isArray(id)) {
       res.status(StatusCodes.BAD_REQUEST).json({
         error: 'Assessment ID is required',
         code: 'VALIDATION_ERROR',
@@ -777,9 +777,9 @@ export class UserAuthController {
       return;
     }
 
-    const { id } = req.params;
+    const id = req.params.id;
 
-    if (!id) {
+    if (!id || Array.isArray(id)) {
       res.status(StatusCodes.BAD_REQUEST).json({
         error: 'Analysis ID is required',
         code: 'VALIDATION_ERROR',

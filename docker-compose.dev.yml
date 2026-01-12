@@ -1,0 +1,33 @@
+# Docker Compose for local development (PostgreSQL only)
+# Usage:
+#   make db-up       # Start PostgreSQL
+#   make db-down     # Stop PostgreSQL
+#   make db:migrate  # Run migrations (starts PostgreSQL if needed)
+#
+# Direct usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   DATABASE_URL="postgresql://votive:dev-password@localhost:5432/votive" npm run db:migrate
+
+name: votive-dev
+
+services:
+  postgresql:
+    image: postgres:16-alpine
+    container_name: votive-postgresql-dev
+    environment:
+      POSTGRES_USER: votive
+      POSTGRES_PASSWORD: dev-password
+      POSTGRES_DB: votive
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U votive -d votive"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  dev-postgres-data:

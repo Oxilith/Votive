@@ -23,11 +23,11 @@
     "verify:conventions": "./scripts/verify-conventions.sh",
     "verify:workspace": "./scripts/verify-workspace-setup.sh",
     "clear:packages": "find . -type d -name \"node_modules\" -prune -exec rm -rf {} + && find . -type f -name \"package-lock.json\" -delete",
-    "db:migrate": "npm run db:migrate -w prompt-service",
-    "db:generate": "npm run db:generate --workspaces --if-present",
-    "db:seed": "npm run db:seed -w prompt-service",
-    "db:seed:test": "npm run db:seed:test -w prompt-service",
-    "db:studio": "npm run db:studio -w prompt-service",
+    "db:migrate": "make db-migrate",
+    "db:generate": "make db-generate",
+    "db:seed": "make db-seed",
+    "db:seed:test": "make db-seed-test",
+    "db:studio": "make db-studio",
     "test:e2e": "npm run e2e -w e2e",
     "test:e2e:headed": "npm run e2e:headed -w e2e",
     "test:e2e:ui": "npm run e2e:ui -w e2e",
@@ -42,23 +42,23 @@
     "node": ">=20.0.0"
   },
   "dependencies": {
-    "zod": "^4.3.3"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@testcontainers/postgresql": "^11.11.0",
-    "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.51.0",
-    "@typescript-eslint/parser": "^8.51.0",
-    "@vitest/coverage-v8": "^4.0.16",
-    "@vitest/eslint-plugin": "^1.6.4",
+    "@types/node": "^25.0.6",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/eslint-plugin": "^1.6.6",
     "eslint": "^9.39.2",
-    "globals": "^16.5.0",
+    "globals": "^17.0.0",
     "testcontainers": "^11.11.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.51.0",
-    "vite": "^7.3.0",
-    "vitest": "^4.0.16"
+    "typescript-eslint": "^8.53.0",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.17"
   }
 }
