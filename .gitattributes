@@ -1,0 +1,14 @@
+# Line ending normalization
+* text=auto
+
+# Shell scripts must use LF (not CRLF) for Linux containers
+*.sh text eol=lf
+
+# Dockerfiles and Makefiles
+Dockerfile* text eol=lf
+**/Dockerfile* text eol=lf
+Makefile text eol=lf
+
+# Git configuration files
+.gitattributes text eol=lf
+.gitignore text eol=lf
